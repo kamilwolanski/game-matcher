@@ -11,3 +11,37 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model Game {
+  id          Int     @id @default(autoincrement())
+  rawgId      Int     @unique
+  name        String
+  slug        String  @unique
+  description String?
+  image       String?
+
+  tags GameTag[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Tag {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+  slug String @unique
+
+  games GameTag[]
+
+  createdAt DateTime @default(now())
+}
+
+model GameTag {
+  gameId Int
+  tagId  Int
+
+  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([gameId, tagId])
+}
