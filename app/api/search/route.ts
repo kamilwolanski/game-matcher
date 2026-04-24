@@ -2,6 +2,7 @@ export type SearchGameResult = {
   rawgId: number;
   name: string;
   image: string | null;
+  releasedYear: number | null;
 };
 
 export async function GET(req: Request) {
@@ -11,7 +12,7 @@ export async function GET(req: Request) {
   const externalApiUrl = new URL("https://api.rawg.io/api/games");
 
   externalApiUrl.searchParams.set("key", process.env.RAWG_API_KEY || "");
-  externalApiUrl.searchParams.set("page_size", "10");
+  externalApiUrl.searchParams.set("page_size", "5");
 
   if (q) {
     externalApiUrl.searchParams.set("search", q);
@@ -33,6 +34,9 @@ export async function GET(req: Request) {
       rawgId: (game as { id: number }).id,
       name: (game as { name: string }).name,
       image: (game as { background_image: string | null }).background_image,
+      releasedYear: game && typeof (game as { released: string | null }).released === "string"
+        ? new Date((game as { released: string }).released).getFullYear()
+        : null,
     }));
     return Response.json({ results });
     

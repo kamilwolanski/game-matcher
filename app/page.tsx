@@ -1,6 +1,24 @@
-import { Gamepad2, Sparkles } from "lucide-react";
+"use client";
+
+import { Sparkles } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useState } from "react";
+import { type SearchGameResult } from "./api/search/route";
+import { GameSearch } from "./components/GameSearch";
 
 export default function Home() {
+  const [selected, setSelected] = useState<SearchGameResult[]>([]);
+
+  const addGame = (g: SearchGameResult) => {
+    if (selected.length >= 5) return;
+    setSelected((prev) => [...prev, g]);
+  };
+
+  const removeGame = (id: number) => {
+    setSelected((prev) => prev.filter((g) => g.rawgId !== id));
+  };
+
   return (
     <main className="relative min-h-screen mx-auto">
       <div
@@ -16,12 +34,17 @@ export default function Home() {
 
       <header className="container flex items-center justify-between py-6">
         <div className="flex items-center gap-2.5">
-          <div className="h-10 w-10 rounded-xl gradient-primary flex items-center justify-center shadow-[0_4px_20px_-4px_hsl(var(--primary)/0.6)]">
-            <Gamepad2 className="h-5 w-5 text-primary-foreground" />
-          </div>
-          <span className="font-extrabold text-lg tracking-tight">
-            PlayMatch
-          </span>
+          <Link href="/" className="transition-opacity hover:opacity-80">
+            <Image
+              src="/logo-transparent.png"
+              alt="Game Matcher"
+              width={1027}
+              height={281}
+              className="w-44 h-auto"
+              quality={100}
+              priority
+            />
+          </Link>
         </div>
         <div className="hidden md:flex items-center gap-2 text-xs text-muted-foreground glass px-3 py-1.5 rounded-full">
           <Sparkles className="h-3.5 w-3.5 text-secondary" />
@@ -42,8 +65,9 @@ export default function Home() {
             </span>
           </h1>
           <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
-            Tell us what you&apos;ve enjoyed and what you&apos;re in the mood for. We
-            match you with games based on shared DNA — not generic charts.
+            Tell us what you&apos;ve enjoyed and what you&apos;re in the mood
+            for. We match you with games based on shared DNA - not generic
+            charts.
           </p>
         </div>
 
@@ -52,11 +76,11 @@ export default function Home() {
           className="max-w-3xl mx-auto mt-12 animate-fade-in-up"
           style={{ animationDelay: "120ms" }}
         >
-          {/* <GameSearch
+          <GameSearch
             selected={selected}
             onAdd={addGame}
             onRemove={removeGame}
-          /> */}
+          />
         </div>
       </section>
     </main>
