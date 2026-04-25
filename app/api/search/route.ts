@@ -20,7 +20,6 @@ export async function GET(req: Request) {
 
   try {
     const response = await fetch(externalApiUrl.toString());
-
     if (!response.ok) {
       return Response.json(
         { error: `Błąd RAWG API: ${response.statusText}` },
@@ -29,6 +28,7 @@ export async function GET(req: Request) {
     }
 
     const games = await response.json();
+    console.log('games', games);
 
     const results: SearchGameResult[] = games.results.map((game: unknown) => ({
       rawgId: (game as { id: number }).id,
