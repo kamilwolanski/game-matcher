@@ -33,9 +33,10 @@ model Game {
 }
 
 model Tag {
-  id   Int    @id @default(autoincrement())
-  name String
-  slug String @unique
+  id         Int    @id @default(autoincrement())
+  name       String
+  slug       String @unique
+  gamesCount Int    @default(0)
 
   games GameTag[]
 
