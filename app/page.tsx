@@ -1,23 +1,16 @@
-"use client";
-
 import { Sparkles } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
-import { type SearchGameResult } from "./api/search/route";
-import { GameSearch } from "./components/GameSearch";
+import { getRandomTags } from "@/lib/getRandomTags";
+import { HomeInteractiveSection } from "./components/HomeInteractiveSection";
+import { BASE_TAGS } from "@/consts/base-tags";
 
-export default function Home() {
-  const [selected, setSelected] = useState<SearchGameResult[]>([]);
-
-  const addGame = (g: SearchGameResult) => {
-    if (selected.length >= 5) return;
-    setSelected((prev) => [...prev, g]);
-  };
-
-  const removeGame = (id: number) => {
-    setSelected((prev) => prev.filter((g) => g.rawgId !== id));
-  };
+export default async function Home() {
+  const baseTags = Object.entries(BASE_TAGS).map(([slug, name]) => {
+    return { slug, name };
+  });
+  const randomTags = await getRandomTags(5);
+  const availableTags = [...baseTags, ...randomTags];
 
   return (
     <main className="relative min-h-screen mx-auto">
@@ -71,17 +64,7 @@ export default function Home() {
           </p>
         </div>
 
-        {/* Search */}
-        <div
-          className="max-w-3xl mx-auto mt-12 animate-fade-in-up"
-          style={{ animationDelay: "120ms" }}
-        >
-          <GameSearch
-            selected={selected}
-            onAdd={addGame}
-            onRemove={removeGame}
-          />
-        </div>
+        <HomeInteractiveSection availableTags={availableTags} />
       </section>
     </main>
   );
