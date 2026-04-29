@@ -1,9 +1,9 @@
 import { Sparkles } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { getRandomTags } from "@/lib/getRandomTags";
 import { HomeInteractiveSection } from "./components/HomeInteractiveSection";
 import { BASE_TAGS } from "@/consts/base-tags";
+import { getRandomTags } from "@/lib/services/tag.service";
 
 export default async function Home() {
   const baseTags = Object.entries(BASE_TAGS).map(([slug, name]) => {

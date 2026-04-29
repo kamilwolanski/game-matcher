@@ -41,3 +41,10 @@ yarn-error.log*
 next-env.d.ts
 
 /app/generated/prisma
+
+/scripts/
+/tags-from-db.json
+/tags.json
+/tags.txt
+/top-games-no-desc.json
+/top-games.json
