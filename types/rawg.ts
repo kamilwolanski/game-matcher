@@ -27,3 +27,10 @@ export type RawgGame = {
 
   tags: RawgTag[];
 };
+
+export type RawgSearchGame = {
+  id: number;
+  name: string;
+  background_image: string | null;
+  released: string | null;
+};
