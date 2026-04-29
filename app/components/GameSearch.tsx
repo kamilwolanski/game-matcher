@@ -2,9 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Search, X } from "lucide-react";
-import type { SearchGameResult } from "../api/search/route";
 import { cn } from "@/lib/utils";
 import useDebounce from "../hooks/useDebounce";
+import type { SearchGameResult } from "@/lib/dto/search-game.dto";
 
 type Props = {
   selected: SearchGameResult[];
@@ -67,7 +67,6 @@ export const GameSearch = ({ selected, onAdd, onRemove }: Props) => {
           open && results.length > 0 && "shadow-2xl",
         )}
       >
-        {/* INPUT */}
         <div className="flex items-center gap-3 px-5 py-4">
           <Search
             className={cn(
@@ -118,37 +117,45 @@ export const GameSearch = ({ selected, onAdd, onRemove }: Props) => {
         {open && results.length > 0 && (
           <div className="animate-slide-down">
             <ul className="max-h-80 overflow-y-auto">
-              {results.map((g) => (
-                <li key={g.rawgId}>
-                  <button
-                    onClick={() => {
-                      onAdd(g);
-                      setQuery("");
-                      setResults([]);
-                      setOpen(false);
-                    }}
-                    className="w-full flex items-center gap-4 px-5 py-3 text-left cursor-pointer transition-smooth hover:bg-primary/10"
-                  >
-                    {g.image ? (
-                      <img
-                        src={g.image}
-                        alt={g.name}
-                        className="w-12 h-16 object-cover rounded-md shrink-0"
-                        loading="lazy"
-                      />
-                    ) : (
-                      <div className="w-12 h-16 rounded-md shrink-0 bg-surface-elevated border border-border" />
-                    )}
+              {results.map((g) => {
+                const isSelected = selected.some((s) => s.rawgId === g.rawgId);
+                return (
+                  <li key={g.rawgId}>
+                    <button
+                      onClick={() => {
+                        onAdd(g);
+                        setQuery("");
+                        setResults([]);
+                        setOpen(false);
+                      }}
+                      disabled={isSelected}
+                      className={cn(
+                        "w-full flex items-center gap-4 px-5 py-3 text-left cursor-pointer transition-smooth hover:bg-primary/10",
+                        isSelected &&
+                          "cursor-default opacity-50 hover:bg-transparent",
+                      )}
+                    >
+                      {g.image ? (
+                        <img
+                          src={g.image}
+                          alt={g.name}
+                          className="w-12 h-16 object-cover rounded-md shrink-0"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="w-12 h-16 rounded-md shrink-0 bg-surface-elevated border border-border" />
+                      )}
 
-                    <div className="min-w-0 flex-1">
-                      <p className="font-semibold truncate">{g.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {g.releasedYear}
-                      </p>
-                    </div>
-                  </button>
-                </li>
-              ))}
+                      <div className="min-w-0 flex-1">
+                        <p className="font-semibold truncate">{g.name}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {g.releasedYear}
+                        </p>
+                      </div>
+                    </button>
+                  </li>
+                );
+              })}
             </ul>
           </div>
         )}

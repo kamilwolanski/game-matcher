@@ -1,32 +1,39 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { type SearchGameResult } from "../api/search/route";
+import { useMemo, useState, useTransition } from "react";
 import { GameSearch } from "./GameSearch";
-// import { TagSelector } from "./TagSelector";
-// import { findGames } from "../actions/findGames";
-import { Sparkles } from "lucide-react";
 import { selectGame } from "../actions/selectGame";
-import { Tag } from "../generated/prisma/client";
 import { TagSelector } from "./TagSelector";
-import { ShortTag } from "@/lib/getRandomTags";
+import { type GameDto } from "@/lib/dto/game.dto";
+import { type SearchGameResult } from "@/lib/dto/search-game.dto";
+import { type ShortTag } from "@/lib/dto/tag.dto";
 
 type Props = {
-  availableTags: ShortTag[]; // przychodzi z serwera (page.tsx)
+  availableTags: ShortTag[];
+};
+
+type TagWithCount = ShortTag & {
+  count: number;
 };
 
 export function HomeInteractiveSection({ availableTags }: Props) {
   const [selected, setSelected] = useState<SearchGameResult[]>([]);
+  const [selectedGames, setSelectedGames] = useState<GameDto[]>([]);
   const [activeTags, setActiveTags] = useState<ShortTag[]>([]);
-  const [results, setResults] = useState(null);
-  const [pending, startTransition] = useTransition();
+  const [randomSeed] = useState(Math.random);
+  const [, startTransition] = useTransition();
 
-  const addGame = (g: SearchGameResult) => {
-    if (selected.length >= 5) return;
-    setSelected((prev) => [...prev, g]);
+  const addGame = (game: SearchGameResult) => {
+    const isAlreadySelected = selected.some((g) => g.rawgId === game.rawgId);
+
+    if (selected.length >= 5 || isAlreadySelected) return;
+
+    setSelected((prev) => [...prev, game]);
+
     startTransition(async () => {
       try {
-        await selectGame(g.rawgId);
+        const selectedGame = await selectGame(game.rawgId);
+        setSelectedGames((prev) => [...prev, selectedGame]);
       } catch (error) {
         console.error("Error selecting game:", error);
       }
@@ -34,28 +41,48 @@ export function HomeInteractiveSection({ availableTags }: Props) {
   };
 
   const removeGame = (id: number) => {
-    setSelected((prev) => prev.filter((g) => g.rawgId !== id));
+    setSelected((prev) => prev.filter((game) => game.rawgId !== id));
+    setSelectedGames((prev) => prev.filter((game) => game.rawgId !== id));
   };
 
   const toggleTag = (tag: ShortTag) => {
-    setActiveTags((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag],
-    );
+    setActiveTags((prev) => {
+      const isActive = prev.some((activeTag) => activeTag.slug === tag.slug);
+
+      return isActive
+        ? prev.filter((activeTag) => activeTag.slug !== tag.slug)
+        : [...prev, tag];
+    });
   };
 
-  //   const handleFindGames = () => {
-  //     startTransition(async () => {
-  //       const data = await findGames({
-  //         gameIds: selected.map((g) => g.rawgId),
-  //         tags: activeTags,
-  //       });
-  //       setResults(data);
-  //     });
-  //   };
+  const suggestedTags = useMemo(() => {
+    const availableSlugs = new Set(availableTags.map((tag) => tag.slug));
+    const tagCounts = new Map<string, TagWithCount>();
 
-  const canSearch = selected.length > 0;
+    for (const tag of selectedGames.flatMap((game) => game.tags)) {
+      if (availableSlugs.has(tag.slug)) continue;
 
-  console.log('activeTags', activeTags);
+      const existingTag = tagCounts.get(tag.slug);
+
+      if (existingTag) {
+        existingTag.count += 1;
+      } else {
+        tagCounts.set(tag.slug, { ...tag, count: 1 });
+      }
+    }
+
+    const sortedTags = Array.from(tagCounts.values()).sort((a, b) => {
+      if (b.count !== a.count) return b.count - a.count;
+      return a.name.localeCompare(b.name);
+    });
+
+    const topTags = sortedTags.slice(0, 4);
+    const remainingTags = sortedTags.slice(4);
+    const randomIndex = Math.floor(randomSeed * remainingTags.length);
+    const randomTag = remainingTags[randomIndex];
+
+    return randomTag ? [...topTags, randomTag] : topTags;
+  }, [availableTags, randomSeed, selectedGames]);
 
   return (
     <div>
@@ -71,25 +98,11 @@ export function HomeInteractiveSection({ availableTags }: Props) {
           <TagSelector
             tags={availableTags}
             active={activeTags}
-            // suggested={[]} // tu możesz derivować z selected
+            suggested={suggestedTags}
             onToggle={toggleTag}
           />
         </div>
       </section>
-
-      {/* {canSearch && (
-        <div className="flex justify-center animate-fade-in-up">
-          <button
-            onClick={handleFindGames}
-            disabled={pending}
-            className="gradient-primary px-8 py-3 rounded-full font-semibold text-primary-foreground shadow-lg disabled:opacity-60 transition-smooth"
-          >
-            {pending ? "Finding..." : "Find Games"}
-          </button>
-        </div>
-      )} */}
-
-      {/* {results && <ResultsSection results={results} />} */}
     </div>
   );
 }
