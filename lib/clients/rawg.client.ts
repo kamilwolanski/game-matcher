@@ -33,7 +33,9 @@ function createRawgUrl(path: string) {
 }
 
 async function fetchRawg<T>(url: URL): Promise<T> {
-  const response = await fetch(url.toString());
+  const response = await fetch(url.toString(), {
+    next: { revalidate: 60 * 60 }, // 1 hour
+  });
 
   if (!response.ok) {
     throw new RawgApiError(response.status, response.statusText);

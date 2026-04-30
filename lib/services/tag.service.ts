@@ -9,7 +9,7 @@ export async function getRandomTags(count: number): Promise<ShortTag[]> {
   const baseTagSlugs = Object.keys(BASE_TAGS);
 
   return prisma.$queryRaw<ShortTag[]>`
-    SELECT slug, name
+    SELECT slug, name, "gamesCount"
     FROM "Tag"
     WHERE slug NOT IN (${Prisma.join(baseTagSlugs)})
     ORDER BY RANDOM()

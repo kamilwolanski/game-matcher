@@ -5,6 +5,8 @@ import { fetchRawgGameDetails } from "@/lib/clients/rawg.client";
 import { toGameDto } from "@/lib/mappers/game.mapper";
 import { normalizeTags } from "@/lib/tag-normalizer";
 import type { RawgGame } from "@/types/rawg";
+import { BASE_TAGS } from "@/consts/base-tags";
+import { ShortTag } from "../dto/tag.dto";
 
 const gameWithTagsInclude = {
   tags: {
@@ -23,6 +25,23 @@ export async function getGameByRawgId(rawgId: number) {
   if (!game) return null;
 
   return toGameDto(game);
+}
+
+export async function getBaseTags(): Promise<ShortTag[]> {
+  const baseTagSlugs = Object.keys(BASE_TAGS);
+
+  return prisma.tag.findMany({
+    where: {
+      slug: {
+        in: baseTagSlugs,
+      },
+    },
+    select: {
+      slug: true,
+      name: true,
+      gamesCount: true,
+    },
+  });
 }
 
 export async function saveRawgGame(rawgGame: RawgGame) {

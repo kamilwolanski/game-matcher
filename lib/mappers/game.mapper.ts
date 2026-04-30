@@ -17,6 +17,7 @@ export const toGameDto = (game: GameWithRelations): GameDto => {
     tags: game.tags.map((t) => ({
       name: t.tag.name,
       slug: t.tag.slug,
+      gamesCount: t.tag.gamesCount,
     })),
   };
 };
