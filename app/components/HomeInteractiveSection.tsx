@@ -1,88 +1,42 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useState } from "react";
 import { GameSearch } from "./GameSearch";
-import { selectGame } from "../actions/selectGame";
 import { TagSelector } from "./TagSelector";
-import { type GameDto } from "@/lib/dto/game.dto";
-import { type SearchGameResult } from "@/lib/dto/search-game.dto";
 import { type ShortTag } from "@/lib/dto/tag.dto";
+import { GameMatchDto } from "@/lib/dto/game-match.dto";
+import { GameDetailsModal } from "./GameDetailsModal";
+import useGameSelection from "../hooks/useGameSelection";
+import { useGameMatching } from "../hooks/useGameMatching";
+import { FindGamesButton } from "./FindGamesButton";
+import { GameMatchResults } from "./GameMatchResults";
 
 type Props = {
   availableTags: ShortTag[];
 };
 
-type TagWithCount = ShortTag & {
-  count: number;
-};
-
 export function HomeInteractiveSection({ availableTags }: Props) {
-  const [selected, setSelected] = useState<SearchGameResult[]>([]);
-  const [selectedGames, setSelectedGames] = useState<GameDto[]>([]);
-  const [activeTags, setActiveTags] = useState<ShortTag[]>([]);
-  const [randomSeed] = useState(Math.random);
-  const [, startTransition] = useTransition();
+  const {
+    selectedSearchResults,
+    selectedGames,
+    activeTags,
+    suggestedTags,
+    canSearch,
+    addGame,
+    removeGame,
+    toggleTag,
+  } = useGameSelection(availableTags);
 
-  const addGame = (game: SearchGameResult) => {
-    const isAlreadySelected = selected.some((g) => g.rawgId === game.rawgId);
+  const { matchedGames, isMatchingPending, resultsRef, findMatches } =
+    useGameMatching(selectedGames, activeTags);
 
-    if (selected.length >= 5 || isAlreadySelected) return;
-
-    setSelected((prev) => [...prev, game]);
-
-    startTransition(async () => {
-      try {
-        const selectedGame = await selectGame(game.rawgId);
-        setSelectedGames((prev) => [...prev, selectedGame]);
-      } catch (error) {
-        console.error("Error selecting game:", error);
-      }
-    });
-  };
-
-  const removeGame = (id: number) => {
-    setSelected((prev) => prev.filter((game) => game.rawgId !== id));
-    setSelectedGames((prev) => prev.filter((game) => game.rawgId !== id));
-  };
-
-  const toggleTag = (tag: ShortTag) => {
-    setActiveTags((prev) => {
-      const isActive = prev.some((activeTag) => activeTag.slug === tag.slug);
-
-      return isActive
-        ? prev.filter((activeTag) => activeTag.slug !== tag.slug)
-        : [...prev, tag];
-    });
-  };
-
-  const suggestedTags = useMemo(() => {
-    const availableSlugs = new Set(availableTags.map((tag) => tag.slug));
-    const tagCounts = new Map<string, TagWithCount>();
-
-    for (const tag of selectedGames.flatMap((game) => game.tags)) {
-      if (availableSlugs.has(tag.slug)) continue;
-
-      const existingTag = tagCounts.get(tag.slug);
-
-      if (existingTag) {
-        existingTag.count += 1;
-      } else {
-        tagCounts.set(tag.slug, { ...tag, count: 1 });
-      }
-    }
-
-    const sortedTags = Array.from(tagCounts.values()).sort((a, b) => {
-      if (b.count !== a.count) return b.count - a.count;
-      return a.name.localeCompare(b.name);
-    });
-
-    const topTags = sortedTags.slice(0, 4);
-    const remainingTags = sortedTags.slice(4);
-    const randomIndex = Math.floor(randomSeed * remainingTags.length);
-    const randomTag = remainingTags[randomIndex];
-
-    return randomTag ? [...topTags, randomTag] : topTags;
-  }, [availableTags, randomSeed, selectedGames]);
+  const [modal, setModal] = useState<{
+    open: boolean;
+    game: GameMatchDto | null;
+  }>({
+    open: false,
+    game: null,
+  });
 
   return (
     <div>
@@ -90,10 +44,14 @@ export function HomeInteractiveSection({ availableTags }: Props) {
         className="max-w-4xl mx-auto mt-12 animate-fade-in-up pb-20"
         style={{ animationDelay: "120ms" }}
       >
-        <GameSearch selected={selected} onAdd={addGame} onRemove={removeGame} />
+        <GameSearch
+          selected={selectedSearchResults}
+          onAdd={addGame}
+          onRemove={removeGame}
+        />
       </div>
 
-      <section className="container pb-12">
+      <section className="pb-12">
         <div className="max-w-4xl mx-auto">
           <TagSelector
             tags={availableTags}
@@ -103,6 +61,25 @@ export function HomeInteractiveSection({ availableTags }: Props) {
           />
         </div>
       </section>
+      <section className="pb-24">
+        <FindGamesButton
+          canSearch={canSearch}
+          isMatchingPending={isMatchingPending}
+          onFind={findMatches}
+        />
+      </section>
+      <GameMatchResults
+        matchedGames={matchedGames}
+        isMatchingPending={isMatchingPending}
+        resultsRef={resultsRef}
+        onGameClick={(game) => setModal({ open: true, game })}
+      />
+
+      <GameDetailsModal
+        open={modal.open}
+        onOpenChange={(v) => setModal((m) => ({ ...m, open: v }))}
+        game={modal.game}
+      />
     </div>
   );
 }
