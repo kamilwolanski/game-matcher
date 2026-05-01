@@ -67,10 +67,11 @@ function MatchGrid({ games, onGameClick }: MatchGridProps) {
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
-        {games.map((game) => (
+        {games.map((game, index) => (
           <GameCard
             key={game.id}
             game={game}
+            index={index}
             onClick={() => onGameClick(game)}
           />
         ))}

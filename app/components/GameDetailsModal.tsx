@@ -6,6 +6,7 @@ import {
 } from "@/app/components/ui/Dialog";
 import { GameMatchDto } from "@/lib/dto/game-match.dto";
 import { Sparkles, X } from "lucide-react";
+import Image from "next/image";
 
 type Props = {
   open: boolean;
@@ -22,24 +23,31 @@ export const GameDetailsModal = ({ open, onOpenChange, game }: Props) => {
   const platforms = game.platforms.slice(0, 3).join(" / ");
   const image = game.image ?? "/logo-transparent.png";
   const description =
-    game.description?.trim() || "No description is available for this game yet.";
+    game.description?.trim() ||
+    "No description is available for this game yet.";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[min(90vh,760px)] w-[calc(100vw-2rem)] max-w-3xl gap-0 overflow-hidden rounded-3xl border-border bg-card p-0 shadow-[var(--shadow-card-hover)]">
+      <DialogContent className="max-h-[min(90vh,760px)] w-[calc(100vw-2rem)] max-w-3xl gap-0 overflow-hidden rounded-3xl border-border bg-card p-0 shadow-(--shadow-card-hover)">
         <DialogTitle className="sr-only">{game.name}</DialogTitle>
         <DialogDescription className="sr-only">
           Match details and shared traits for {game.name}.
         </DialogDescription>
 
         <div className="relative h-64 md:h-80">
-          <img
-            src={image}
-            alt={game.name}
-            className="absolute inset-0 h-full w-full object-cover"
-          />
-          <div className="absolute inset-0 bg-linear-to-t from-card via-card/70 to-transparent" />
-          <div className="absolute inset-0 bg-linear-to-r from-card/60 via-transparent to-transparent" />
+          <div className="relative h-64 md:h-80">
+            <Image
+              src={image}
+              alt={game.name}
+              fill
+              priority
+              sizes="(max-width: 768px) 100vw, 800px"
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+
+            <div className="absolute inset-0 bg-linear-to-t from-card via-card/70 to-transparent" />
+            <div className="absolute inset-0 bg-linear-to-r from-card/60 via-transparent to-transparent" />
+          </div>
 
           <button
             onClick={() => onOpenChange(false)}

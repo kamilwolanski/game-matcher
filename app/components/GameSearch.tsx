@@ -5,6 +5,7 @@ import { Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import useDebounce from "../hooks/useDebounce";
 import type { SearchGameResult } from "@/lib/dto/search-game.dto";
+import Image from "next/image";
 
 type Props = {
   selected: SearchGameResult[];
@@ -110,7 +111,7 @@ export const GameSearch = ({ selected, onAdd, onRemove }: Props) => {
 
         {/* DIVIDER */}
         {open && results.length > 0 && (
-          <div className="h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+          <div className="h-px bg-linear-to-r from-transparent via-primary/30 to-transparent" />
         )}
 
         {/* DROPDOWN */}
@@ -136,12 +137,16 @@ export const GameSearch = ({ selected, onAdd, onRemove }: Props) => {
                       )}
                     >
                       {g.image ? (
-                        <img
-                          src={g.image}
-                          alt={g.name}
-                          className="w-12 h-16 object-cover rounded-md shrink-0"
-                          loading="lazy"
-                        />
+                        <div className="relative w-12 h-16 shrink-0 overflow-hidden rounded-md">
+                          <Image
+                            src={g.image}
+                            alt={g.name}
+                            fill
+                            sizes="300px"
+                            quality={100}
+                            className="object-cover"
+                          />
+                        </div>
                       ) : (
                         <div className="w-12 h-16 rounded-md shrink-0 bg-surface-elevated border border-border" />
                       )}
@@ -170,16 +175,20 @@ export const GameSearch = ({ selected, onAdd, onRemove }: Props) => {
               className="group flex items-center gap-3 pr-2 pl-2 py-2 rounded-2xl bg-surface-elevated border border-border hover:border-primary/40 transition-smooth"
             >
               {g.image ? (
-                <img
-                  src={g.image}
-                  alt={g.name}
-                  className="w-9 h-12 object-cover rounded-lg"
-                  loading="lazy"
-                />
+                <div className="relative w-9 h-12 shrink-0 overflow-hidden rounded-lg">
+                  <Image
+                    src={g.image}
+                    alt={g.name}
+                    fill
+                    sizes="300px"
+                    quality={90}
+                    className="object-cover"
+                  />
+                </div>
               ) : (
                 <div className="w-9 h-12 rounded-lg bg-background border border-border" />
               )}
-              <span className="text-sm font-medium pr-1 max-w-[160px] truncate">
+              <span className="text-sm font-medium pr-1 max-w-40 truncate">
                 {g.name}
               </span>
               <button
