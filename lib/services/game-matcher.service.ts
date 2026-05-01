@@ -310,6 +310,7 @@ export async function findMatchingGames(
 
       return (b.added ?? 0) - (a.added ?? 0);
     })
+    .filter((g) => g.similarity > 0)
     .slice(0, RESULTS_LIMIT)
     .map(toGameMatchDto);
 }
