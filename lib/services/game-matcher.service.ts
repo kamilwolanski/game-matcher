@@ -5,6 +5,7 @@ import type { GameMatchDto } from "@/lib/dto/game-match.dto";
 import type { ShortTag } from "@/lib/dto/tag.dto";
 import { toGameDto } from "@/lib/mappers/game.mapper";
 import prisma from "@/lib/prisma";
+import { CATEGORY_WEIGHTS, TAGS, type TagSlug } from "@/consts/tags";
 
 const SELECTED_GAME_TAG_WEIGHT = 1;
 const ACTIVE_TAG_WEIGHT = 5;
@@ -13,9 +14,9 @@ const ACTIVE_MATCH_SHARE = 0.35;
 const SPECIFIC_MATCH_SHARE = 0.15;
 const MIN_TAG_RARITY = 0.15;
 const MAX_TAG_RARITY = 4;
-const RARE_TAG_THRESHOLD = 1.8;
-const TAG_COUNT_SMOOTHING = 25;
-const REFERENCE_TAG_POPULARITY = 50_000;
+const RARE_TAG_MIN_THRESHOLD = 2;
+const TAG_COUNT_SMOOTHING = 2;
+const DEFAULT_CATEGORY_WEIGHT = 1;
 const TAG_MATCH_CANDIDATE_LIMIT = 500;
 const POPULAR_DISCOVERY_CANDIDATE_LIMIT = 300;
 const HIDDEN_GEM_CANDIDATE_LIMIT = 300;
@@ -25,6 +26,7 @@ const MATCH_REASON_TITLE = "It shares these traits with what you love:";
 
 type UserTagSignal = {
   tag: ShortTag;
+  rarity: number;
   score: number;
   activeScore: number;
 };
@@ -43,41 +45,67 @@ const gameWithTagsInclude = {
   },
 } as const;
 
-const getTagRarity = (count: number) => {
+const getTagCategoryWeight = (slug: string) => {
+  const tag = TAGS[slug as TagSlug];
+
+  if (!tag) return DEFAULT_CATEGORY_WEIGHT;
+
+  return CATEGORY_WEIGHTS[tag.category];
+};
+
+const getTagSignalWeight = (tag: ShortTag, totalGames: number) => {
+  return (
+    getTagRarity(tag.gamesCount, totalGames) * getTagCategoryWeight(tag.slug)
+  );
+};
+
+const getTagRarity = (count: number, totalGames: number) => {
+  if (totalGames <= 0) return MIN_TAG_RARITY;
+
+  const normalizedCount = Math.min(Math.max(count, 0), totalGames);
   const rarity = Math.log(
-    (REFERENCE_TAG_POPULARITY + TAG_COUNT_SMOOTHING) /
-      (count + TAG_COUNT_SMOOTHING),
+    (totalGames + TAG_COUNT_SMOOTHING) /
+      (normalizedCount + TAG_COUNT_SMOOTHING),
   );
 
   return Math.min(MAX_TAG_RARITY, Math.max(MIN_TAG_RARITY, rarity));
 };
 
-function getUserProfile(selectedGames: GameDto[], activeTags: ShortTag[]) {
+function getUserProfile(
+  selectedGames: GameDto[],
+  activeTags: ShortTag[],
+  totalGames: number,
+) {
   const profile = new Map<string, UserTagSignal>();
   const selectedTagOccurrences = new Map<string, number>();
 
   for (const tag of selectedGames.flatMap((game) => game.tags)) {
     const occurrence = (selectedTagOccurrences.get(tag.slug) ?? 0) + 1;
-    const rarity = getTagRarity(tag.gamesCount);
+    const rarity = getTagRarity(tag.gamesCount, totalGames);
+    const tagSignalWeight = rarity * getTagCategoryWeight(tag.slug);
     const repeatedTagWeight =
       SELECTED_GAME_TAG_WEIGHT / Math.pow(occurrence, REPEATED_TAG_DECAY);
-    const score = rarity * repeatedTagWeight;
+    const score = tagSignalWeight * repeatedTagWeight;
     const existing = profile.get(tag.slug);
 
     selectedTagOccurrences.set(tag.slug, occurrence);
     profile.set(tag.slug, {
       tag,
+      rarity,
       score: (existing?.score ?? 0) + score,
       activeScore: existing?.activeScore ?? 0,
     });
   }
 
   for (const tag of activeTags) {
-    const score = getTagRarity(tag.gamesCount) * ACTIVE_TAG_WEIGHT;
+    const rarity = getTagRarity(tag.gamesCount, totalGames);
+    const score =
+      rarity * getTagCategoryWeight(tag.slug) * ACTIVE_TAG_WEIGHT;
     const existing = profile.get(tag.slug);
 
     profile.set(tag.slug, {
       tag,
+      rarity,
       score: (existing?.score ?? 0) + score,
       activeScore: (existing?.activeScore ?? 0) + score,
     });
@@ -86,11 +114,27 @@ function getUserProfile(selectedGames: GameDto[], activeTags: ShortTag[]) {
   return profile;
 }
 
+function getProfileRareTagThreshold(userProfile: Map<string, UserTagSignal>) {
+  const rarities = Array.from(userProfile.values())
+    .map((signal) => signal.rarity)
+    .toSorted((a, b) => a - b);
+
+  if (rarities.length === 0) return MAX_TAG_RARITY;
+
+  const upperQuartileIndex = Math.floor(rarities.length * 0.75);
+
+  return Math.max(
+    RARE_TAG_MIN_THRESHOLD,
+    rarities[Math.min(upperQuartileIndex, rarities.length - 1)],
+  );
+}
+
 function getScoreBreakdown(
   game: GameDto,
   userProfile: Map<string, UserTagSignal>,
   activeTags: ShortTag[],
   hasSelectedGames: boolean,
+  rareTagThreshold: number,
 ) {
   let profileTotal = 0;
   let matchedProfileScore = 0;
@@ -103,12 +147,10 @@ function getScoreBreakdown(
   const gameTagSlugs = new Set(game.tags.map((tag) => tag.slug));
 
   for (const signal of userProfile.values()) {
-    const rarity = getTagRarity(signal.tag.gamesCount);
-
     profileTotal += signal.score;
     activeTotal += signal.activeScore;
 
-    if (rarity >= RARE_TAG_THRESHOLD) {
+    if (signal.rarity >= rareTagThreshold) {
       rareProfileTotal += signal.score;
     }
 
@@ -117,7 +159,7 @@ function getScoreBreakdown(
       matchedProfileScore += signal.score;
       matchedActiveScore += signal.activeScore;
 
-      if (rarity >= RARE_TAG_THRESHOLD) {
+      if (signal.rarity >= rareTagThreshold) {
         matchedRareProfileScore += signal.score;
       }
     }
@@ -173,7 +215,7 @@ function getActiveTagMatchCount(game: GameDto, activeTags: ShortTag[]) {
   return activeTags.filter((tag) => gameTagSlugs.has(tag.slug)).length;
 }
 
-function getSharedTraits(matchedSignals: UserTagSignal[]) {
+function getSharedTraits(matchedSignals: UserTagSignal[], totalGames: number) {
   return matchedSignals
     .toSorted((a, b) => {
       if (b.activeScore !== a.activeScore) {
@@ -184,7 +226,10 @@ function getSharedTraits(matchedSignals: UserTagSignal[]) {
         return b.score - a.score;
       }
 
-      return getTagRarity(b.tag.gamesCount) - getTagRarity(a.tag.gamesCount);
+      return (
+        getTagSignalWeight(b.tag, totalGames) -
+        getTagSignalWeight(a.tag, totalGames)
+      );
     })
     .slice(0, SHARED_TRAITS_LIMIT)
     .map((signal) => signal.tag);
@@ -275,9 +320,13 @@ export async function findMatchingGames(
     ...activeTags.map((tag) => tag.slug),
   ]);
   const tagSlugs = Array.from(tagSlugSet);
-  const userProfile = getUserProfile(selectedGames, activeTags);
   const hasSelectedGames = selectedGames.length > 0;
-  const games = await getCandidateGames(tagSlugs, selectedGames);
+  const [games, totalGames] = await Promise.all([
+    getCandidateGames(tagSlugs, selectedGames),
+    prisma.game.count(),
+  ]);
+  const userProfile = getUserProfile(selectedGames, activeTags, totalGames);
+  const rareTagThreshold = getProfileRareTagThreshold(userProfile);
 
   return games
     .map((game) => {
@@ -287,6 +336,7 @@ export async function findMatchingGames(
         userProfile,
         activeTags,
         hasSelectedGames,
+        rareTagThreshold,
       );
 
       return {
@@ -295,7 +345,7 @@ export async function findMatchingGames(
         similarity: breakdown.similarity,
         matchReason: {
           title: MATCH_REASON_TITLE,
-          tags: getSharedTraits(breakdown.matchedSignals),
+          tags: getSharedTraits(breakdown.matchedSignals, totalGames),
         },
       };
     })

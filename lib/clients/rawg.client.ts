@@ -1,4 +1,4 @@
-import "server-only";
+// import "server-only";
 
 import type { SearchGameResult } from "@/lib/dto/search-game.dto";
 import type { RawgGame, RawgSearchGame } from "@/types/rawg";

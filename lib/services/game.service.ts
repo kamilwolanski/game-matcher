@@ -1,12 +1,13 @@
-import "server-only";
+// import "server-only";
 
 import prisma from "@/lib/prisma";
 import { fetchRawgGameDetails } from "@/lib/clients/rawg.client";
 import { toGameDto } from "@/lib/mappers/game.mapper";
 import { normalizeTags } from "@/lib/tag-normalizer";
 import type { RawgGame } from "@/types/rawg";
-import { BASE_TAGS } from "@/consts/base-tags";
+import { BASE_TAG_SLUGS } from "@/consts/base-tags";
 import { ShortTag } from "../dto/tag.dto";
+import { Prisma } from "@/app/generated/prisma/client";
 
 const gameWithTagsInclude = {
   tags: {
@@ -15,6 +16,12 @@ const gameWithTagsInclude = {
     },
   },
 } as const;
+
+function isDuplicateError(e: unknown) {
+  return (
+    e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002"
+  );
+}
 
 export async function getGameByRawgId(rawgId: number) {
   const game = await prisma.game.findUnique({
@@ -28,12 +35,10 @@ export async function getGameByRawgId(rawgId: number) {
 }
 
 export async function getBaseTags(): Promise<ShortTag[]> {
-  const baseTagSlugs = Object.keys(BASE_TAGS);
-
   return prisma.tag.findMany({
     where: {
       slug: {
-        in: baseTagSlugs,
+        in: BASE_TAG_SLUGS,
       },
     },
     select: {
@@ -45,7 +50,7 @@ export async function getBaseTags(): Promise<ShortTag[]> {
 }
 
 export async function saveRawgGame(rawgGame: RawgGame) {
-  const tags = normalizeTags(rawgGame.tags);
+  const tags = normalizeTags([...rawgGame.tags, ...rawgGame.genres]);
 
   return prisma.$transaction(async (tx) => {
     const game = await tx.game.upsert({
@@ -65,36 +70,40 @@ export async function saveRawgGame(rawgGame: RawgGame) {
     });
 
     const dbTags = await Promise.all(
-      tags.map(async (tag) => {
-        const dbTag = await tx.tag.upsert({
+      tags.map((tag) =>
+        tx.tag.upsert({
           where: { slug: tag.slug },
-          update: { name: tag.name },
+          update: {
+            name: tag.name, 
+          },
           create: {
             slug: tag.slug,
             name: tag.name,
-            gamesCount: tag.gamesCount,
+          },
+        }),
+      ),
+    );
+
+    for (const tag of dbTags) {
+      try {
+        await tx.gameTag.create({
+          data: {
+            gameId: game.id,
+            tagId: tag.id,
           },
         });
 
-        if (tag.gamesCount > dbTag.gamesCount) {
-          return tx.tag.update({
-            where: { id: dbTag.id },
-            data: { gamesCount: tag.gamesCount },
-          });
-        }
-
-        return dbTag;
-      }),
-    );
-
-    if (dbTags.length > 0) {
-      await tx.gameTag.createMany({
-        data: dbTags.map((tag) => ({
-          gameId: game.id,
-          tagId: tag.id,
-        })),
-        skipDuplicates: true,
-      });
+        await tx.tag.update({
+          where: { id: tag.id },
+          data: {
+            gamesCount: {
+              increment: 1,
+            },
+          },
+        });
+      } catch (e) {
+        if (!isDuplicateError(e)) throw e;
+      }
     }
 
     const fullGame = await tx.game.findUnique({
