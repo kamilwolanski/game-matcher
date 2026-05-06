@@ -1,7 +1,6 @@
+import { RawgTagLike } from "@/types/rawg";
+import { TAGS, TagSlug } from "@/consts/tags";
 import { TAG_ALIASES } from "@/consts/tag-aliases";
-import { TAG_BLACKLIST } from "@/consts/tag-blacklist";
-import { TAG_DISPLAY_NAMES } from "@/consts/tag-display-names";
-import { RawgTag } from "@/types/rawg";
 
 export const MIN_TAG_GAMES_COUNT = 40;
 
@@ -11,49 +10,37 @@ export type NormalizedTag = {
   gamesCount: number;
 };
 
-function formatTagName(name: string) {
-  return name.replace(/\b[a-z]/g, (letter) => letter.toUpperCase());
+export function normalizeTagNew(rawTag: RawgTagLike): TagSlug[] | undefined {
+  const alias = TAG_ALIASES[rawTag.slug as keyof typeof TAG_ALIASES];
+
+  if (alias) return alias;
+
+  if (rawTag.slug in TAGS) {
+    return [rawTag.slug as TagSlug];
+  }
 }
 
-export function normalizeTag(rawTag: RawgTag) {
-  // 1. tylko angielski
-  if (rawTag.language !== "eng") return null;
-
-  // 2. minimalna liczba gier w RAWG
-  if (rawTag.games_count < MIN_TAG_GAMES_COUNT) return null;
-
-  // 3. blacklist oryginalnego sluga
-  if (TAG_BLACKLIST.has(rawTag.slug)) return null;
-
-  // 4. alias
-  const slug = TAG_ALIASES[rawTag.slug] ?? rawTag.slug;
-
-  // 5. blacklist sluga po aliasie
-  if (TAG_BLACKLIST.has(slug)) return null;
-
-  // 6. display name
-  const name = TAG_DISPLAY_NAMES[slug] ?? formatTagName(rawTag.name);
-
-  return { slug, name, gamesCount: rawTag.games_count };
+function getTagWithName(tagSlugs: TagSlug[]) {
+  return tagSlugs.map((tag) => ({
+    slug: tag,
+    name: TAGS[tag].name,
+  }));
 }
 
-export function normalizeTags(rawTags: RawgTag[]) {
+function deduplicate(tagSlugs: TagSlug[]): TagSlug[] {
+  return [...new Set(tagSlugs)];
+}
+
+export function normalizeTags(rawTags: RawgTagLike[]) {
   const normalized = rawTags
-    .map(normalizeTag)
-    .filter((tag): tag is NormalizedTag => tag !== null);
+    .map(normalizeTagNew)
+    .filter(Boolean)
+    .flat() as TagSlug[];
 
-  // deduplikacja po slug, z zachowaniem najwyzszego gamesCount po aliasach
-  const unique = Object.values(
-    normalized.reduce<Record<string, NormalizedTag>>((acc, tag) => {
-      const existing = acc[tag.slug];
-
-      if (!existing || tag.gamesCount > existing.gamesCount) {
-        acc[tag.slug] = tag;
-      }
-
-      return acc;
-    }, {}),
+  const unique = deduplicate(normalized);
+  console.log(
+    "getTagWithName(unique);",
+    getTagWithName(unique).map((el) => el.slug),
   );
-
-  return unique;
+  return getTagWithName(unique);
 }
