@@ -2,19 +2,13 @@ import { Sparkles } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { HomeInteractiveSection } from "./components/HomeInteractiveSection";
-import { getRandomTags } from "@/lib/services/tag.service";
 import { getBaseTags } from "@/lib/services/game.service";
 
 export default async function Home() {
-  const [baseTags, randomTags] = await Promise.all([
-    getBaseTags(),
-    getRandomTags(5),
-  ]);
-
-  const availableTags = [...baseTags, ...randomTags];
+  const baseTags = await getBaseTags();
 
   return (
-    <main className="relative min-h-screen mx-auto">
+    <main className="relative min-h-screen mx-auto flex flex-col">
       <div
         aria-hidden
         className="pointer-events-none fixed inset-0 overflow-hidden -z-10"
@@ -46,7 +40,7 @@ export default async function Home() {
         </div>
       </header>
 
-      <section className="pt-8 md:pt-16 pb-20">
+      <section className="grow pt-8 md:pt-16 pb-20">
         <div className="max-w-3xl mx-auto text-center space-y-6 animate-fade-in-up">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full glass text-xs font-medium text-muted-foreground">
             <span className="h-1.5 w-1.5 rounded-full bg-secondary animate-pulse" />
@@ -65,7 +59,7 @@ export default async function Home() {
           </p>
         </div>
 
-        <HomeInteractiveSection availableTags={availableTags} />
+        <HomeInteractiveSection availableTags={baseTags} />
       </section>
 
       <footer className="container py-8 text-center text-xs text-muted-foreground border-t border-border/50">

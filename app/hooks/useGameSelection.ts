@@ -3,6 +3,10 @@ import { SearchGameResult } from "@/lib/dto/search-game.dto";
 import { selectGame } from "../actions/selectGame";
 import { useMemo, useState, useTransition } from "react";
 import { ShortTag } from "@/lib/dto/tag.dto";
+import {
+  DEFAULT_BASE_TAG_SECTION,
+  type BaseTagSection,
+} from "@/consts/base-tags";
 
 type TagWithCount = ShortTag & {
   count: number;
@@ -13,12 +17,9 @@ function getSuggestedTags(
   availableTags: ShortTag[],
   randomSeed: number,
 ) {
-  const availableSlugs = new Set(availableTags.map((tag) => tag.slug));
   const tagCounts = new Map<string, TagWithCount>();
 
   for (const tag of selectedGames.flatMap((game) => game.tags)) {
-    if (availableSlugs.has(tag.slug)) continue;
-
     const existingTag = tagCounts.get(tag.slug);
 
     if (existingTag) {
@@ -44,9 +45,11 @@ function getSuggestedTags(
 export interface GameSelectionState {
   selectedSearchResults: SearchGameResult[];
   selectedGames: GameDto[];
+  activeTagSection: BaseTagSection;
   activeTags: ShortTag[];
   suggestedTags: ShortTag[];
   canSearch: boolean;
+  selectTagSection: (section: BaseTagSection) => void;
   addGame: (game: SearchGameResult) => void;
   removeGame: (id: number) => void;
   toggleTag: (tag: ShortTag) => void;
@@ -57,7 +60,10 @@ function useGameSelection(availableTags: ShortTag[]): GameSelectionState {
     SearchGameResult[]
   >([]);
   const [selectedGames, setSelectedGames] = useState<GameDto[]>([]);
-  const [activeTags, setActiveTags] = useState<ShortTag[]>([]);
+  const [activeTagSection, setActiveTagSection] = useState<BaseTagSection>(
+    DEFAULT_BASE_TAG_SECTION,
+  );
+  const [selectedTags, setSelectedTags] = useState<ShortTag[]>([]);
   const [randomSeed] = useState(Math.random);
   const [, startSelectTransition] = useTransition();
 
@@ -65,7 +71,23 @@ function useGameSelection(availableTags: ShortTag[]): GameSelectionState {
     () => getSuggestedTags(selectedGames, availableTags, randomSeed),
     [selectedGames, availableTags, randomSeed],
   );
+  const visibleTagSlugs = useMemo(
+    () =>
+      new Set([
+        ...availableTags.map((tag) => tag.slug),
+        ...suggestedTags.map((tag) => tag.slug),
+      ]),
+    [availableTags, suggestedTags],
+  );
+  const activeTags = useMemo(
+    () => selectedTags.filter((tag) => visibleTagSlugs.has(tag.slug)),
+    [selectedTags, visibleTagSlugs],
+  );
   const canSearch = selectedGames.length > 0 || activeTags.length > 0;
+
+  const selectTagSection = (section: BaseTagSection) => {
+    setActiveTagSection(section);
+  };
 
   const addGame = (game: SearchGameResult) => {
     const alreadySelected = selectedSearchResults.some(
@@ -99,13 +121,13 @@ function useGameSelection(availableTags: ShortTag[]): GameSelectionState {
         availableTags,
         randomSeed,
       );
-      const visibleSlugs = new Set([
+      const nextVisibleTagSlugs = new Set([
         ...availableTags.map((tag) => tag.slug),
         ...nextSuggestedTags.map((tag) => tag.slug),
       ]);
 
-      setActiveTags((prevActiveTags) =>
-        prevActiveTags.filter((tag) => visibleSlugs.has(tag.slug)),
+      setSelectedTags((prevTags) =>
+        prevTags.filter((tag) => nextVisibleTagSlugs.has(tag.slug)),
       );
 
       return nextSelectedGames;
@@ -113,7 +135,7 @@ function useGameSelection(availableTags: ShortTag[]): GameSelectionState {
   };
 
   const toggleTag = (tag: ShortTag) => {
-    setActiveTags((prev) => {
+    setSelectedTags((prev) => {
       const isActive = prev.some((activeTag) => activeTag.slug === tag.slug);
 
       return isActive
@@ -125,9 +147,11 @@ function useGameSelection(availableTags: ShortTag[]): GameSelectionState {
   return {
     selectedSearchResults,
     selectedGames,
+    activeTagSection,
     activeTags,
     suggestedTags,
     canSearch,
+    selectTagSection,
     addGame,
     removeGame,
     toggleTag,

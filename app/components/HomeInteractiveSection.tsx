@@ -19,9 +19,11 @@ export function HomeInteractiveSection({ availableTags }: Props) {
   const {
     selectedSearchResults,
     selectedGames,
+    activeTagSection,
     activeTags,
     suggestedTags,
     canSearch,
+    selectTagSection,
     addGame,
     removeGame,
     toggleTag,
@@ -41,7 +43,7 @@ export function HomeInteractiveSection({ availableTags }: Props) {
   return (
     <div>
       <div
-        className="max-w-4xl mx-auto mt-12 animate-fade-in-up pb-20"
+        className="max-w-4xl mx-auto mt-12 animate-fade-in-up pb-12"
         style={{ animationDelay: "120ms" }}
       >
         <GameSearch
@@ -55,8 +57,10 @@ export function HomeInteractiveSection({ availableTags }: Props) {
         <div className="max-w-4xl mx-auto">
           <TagSelector
             tags={availableTags}
+            activeSection={activeTagSection}
             active={activeTags}
             suggested={suggestedTags}
+            onSectionChange={selectTagSection}
             onToggle={toggleTag}
           />
         </div>
