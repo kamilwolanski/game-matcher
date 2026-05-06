@@ -6,6 +6,17 @@ export type RawgTag = {
   games_count: number;
 };
 
+export type RawgGenre = {
+  id: number;
+  name: string;
+  slug: string;
+};
+
+export type RawgTagLike = {
+  slug: string;
+  name: string;
+};
+
 export type RawgGame = {
   id: number;
   name: string;
@@ -26,6 +37,7 @@ export type RawgGame = {
   }[];
 
   tags: RawgTag[];
+  genres: RawgGenre[];
 };
 
 export type RawgSearchGame = {
