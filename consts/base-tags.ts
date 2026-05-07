@@ -2,166 +2,377 @@ import type { ShortTag } from "@/lib/dto/tag.dto";
 
 export const BASE_TAG_SECTIONS = [
   {
-    name: "Genres",
-    label: "Genres",
+    name: "Gameplay",
+    label: "Gameplay",
   },
   {
-    name: "Ways to Play",
-    label: "Ways to Play",
+    name: "Style & Theme",
+    label: "Style & Theme",
   },
   {
-    name: "Themes",
-    label: "Themes",
+    name: "Experience",
+    label: "Experience",
   },
   {
-    name: "Playstyle",
-    label: "Playstyle",
+    name: "Perspective & Modes",
+    label: "Perspective & Modes",
   },
 ] as const;
 
 export type BaseTagSection = (typeof BASE_TAG_SECTIONS)[number]["name"];
 
-export const BASE_TAGS = [
+export const BASE_TAGS: {
+  slug: string;
+  section: BaseTagSection;
+}[] = [
+  // =========================================================
+  // GAMEPLAY
+  // =========================================================
+
   // Genres
   {
     slug: "rpg",
-    section: "Genres",
-  },
-  {
-    slug: "shooter",
-    section: "Genres",
-  },
-  {
-    slug: "simulation",
-    section: "Genres",
-  },
-{
-    slug: "adventure",
-    section: "Genres",
-  },
-  {
-    slug: 'strategy',
-    section: "Genres",
+    section: "Gameplay",
   },
   {
     slug: "action",
-    section: "Genres",
+    section: "Gameplay",
+  },
+  {
+    slug: "adventure",
+    section: "Gameplay",
+  },
+  {
+    slug: "strategy",
+    section: "Gameplay",
+  },
+  {
+    slug: "shooter",
+    section: "Gameplay",
+  },
+  {
+    slug: "simulation",
+    section: "Gameplay",
   },
   {
     slug: "platformer",
-    section: "Genres",
+    section: "Gameplay",
   },
   {
     slug: "racing",
-    section: "Genres",
-  },
-  {
-    slug: "roguelike",
-    section: "Genres",
+    section: "Gameplay",
   },
   {
     slug: "sports",
-    section: "Genres",
-  },
-
-  // Ways to Play
-  {
-    slug: "atmospheric",
-    section: "Ways to Play",
+    section: "Gameplay",
   },
   {
-    slug: "arpg",
-    section: "Ways to Play",
-  },
-  {
-    slug: "battle-royale",
-    section: "Ways to Play",
-  },
-  {
-    slug: "souls-like",
-    section: "Ways to Play",
-  },
-  {
-    slug: "fps",
-    section: "Ways to Play",
-  },
-  {
-    slug: "survival-horror",
-    section: "Ways to Play",
-  },
-  {
-    slug: "city-builder",
-    section: "Ways to Play",
-  },
-  {
-    slug: "hack-and-slash",
-    section: "Ways to Play",
-  },
-  {
-    slug: "rts",
-    section: "Ways to Play",
-  },
-  {
-    slug: "point-and-click",
-    section: "Ways to Play",
-  },
-  {
-    slug: "action-adventure",
-    section: "Ways to Play",
-  },
-
-  // Themes
-  {
-    slug: "fantasy",
-    section: "Themes",
-  },
-  {
-    slug: "cyberpunk",
-    section: "Themes",
-  },
-  {
-    slug: "sci-fi",
-    section: "Themes",
-  },
-  {
-    slug: "post-apocalyptic",
-    section: "Themes",
-  },
-  {
-    slug: "zombies",
-    section: "Themes",
-  },
-  {
-    slug: "pirates",
-    section: "Themes",
+    slug: "survival",
+    section: "Gameplay",
   },
   {
     slug: "horror",
-    section: "Themes",
-  },
-  {
-    slug: "romance",
-    section: "Themes",
-  },
-  {
-    slug: "crime",
-    section: "Themes",
+    section: "Gameplay",
   },
 
-  // Playstyle
+  // Popular subgenres
   {
-    slug: "singleplayer",
-    section: "Playstyle",
+    slug: "fps",
+    section: "Gameplay",
   },
   {
-    slug: "multiplayer",
-    section: "Playstyle",
+    slug: "arpg",
+    section: "Gameplay",
+  },
+  {
+    slug: "jrpg",
+    section: "Gameplay",
+  },
+  {
+    slug: "crpg",
+    section: "Gameplay",
+  },
+  {
+    slug: "srpg",
+    section: "Gameplay",
+  },
+  {
+    slug: "moba",
+    section: "Gameplay",
+  },
+  {
+    slug: "metroidvania",
+    section: "Gameplay",
+  },
+  {
+    slug: "city-builder",
+    section: "Gameplay",
+  },
+  {
+    slug: "battle-royale",
+    section: "Gameplay",
+  },
+  {
+    slug: "survival-horror",
+    section: "Gameplay",
+  },
+
+  // Structure
+  {
+    slug: "open-world",
+    section: "Gameplay",
+  },
+  {
+    slug: "souls-like",
+    section: "Gameplay",
+  },
+  {
+    slug: "roguelike",
+    section: "Gameplay",
+  },
+  {
+    slug: "roguelite",
+    section: "Gameplay",
+  },
+  {
+    slug: "immersive-sim",
+    section: "Gameplay",
+  },
+  {
+    slug: "sandbox",
+    section: "Gameplay",
+  },
+
+  // Mechanics
+  {
+    slug: "exploration",
+    section: "Gameplay",
+  },
+  {
+    slug: "stealth",
+    section: "Gameplay",
+  },
+  {
+    slug: "crafting",
+    section: "Gameplay",
+  },
+  {
+    slug: "building",
+    section: "Gameplay",
+  },
+  {
+    slug: "loot",
+    section: "Gameplay",
+  },
+  {
+    slug: "turn-based",
+    section: "Gameplay",
+  },
+  {
+    slug: "deckbuilder",
+    section: "Gameplay",
+  },
+  {
+    slug: "choices-matter",
+    section: "Gameplay",
+  },
+  {
+    slug: "character-builds",
+    section: "Gameplay",
+  },
+  {
+    slug: "management",
+    section: "Gameplay",
+  },
+
+  // =========================================================
+  // STYLE & THEME
+  // =========================================================
+
+  {
+    slug: "fantasy",
+    section: "Style & Theme",
+  },
+  {
+    slug: "dark-fantasy",
+    section: "Style & Theme",
+  },
+  {
+    slug: "sci-fi",
+    section: "Style & Theme",
+  },
+  {
+    slug: "cyberpunk",
+    section: "Style & Theme",
+  },
+  {
+    slug: "post-apocalyptic",
+    section: "Style & Theme",
+  },
+  {
+    slug: "medieval",
+    section: "Style & Theme",
+  },
+  {
+    slug: "magic",
+    section: "Style & Theme",
+  },
+  {
+    slug: "space",
+    section: "Style & Theme",
+  },
+  {
+    slug: "zombies",
+    section: "Style & Theme",
+  },
+  {
+    slug: "detective",
+    section: "Style & Theme",
+  },
+  {
+    slug: "mystery",
+    section: "Style & Theme",
+  },
+  {
+    slug: "historical",
+    section: "Style & Theme",
+  },
+
+  // Aesthetic
+  {
+    slug: "realistic",
+    section: "Style & Theme",
+  },
+  {
+    slug: "stylized",
+    section: "Style & Theme",
+  },
+  {
+    slug: "retro",
+    section: "Style & Theme",
+  },
+  {
+    slug: "pixel-art",
+    section: "Style & Theme",
+  },
+  {
+    slug: "anime",
+    section: "Style & Theme",
+  },
+  {
+    slug: "gothic",
+    section: "Style & Theme",
+  },
+  {
+    slug: "cinematic",
+    section: "Style & Theme",
+  },
+
+  // =========================================================
+  // EXPERIENCE
+  // =========================================================
+
+  {
+    slug: "relaxing",
+    section: "Experience",
+  },
+  {
+    slug: "cozy",
+    section: "Experience",
+  },
+  {
+    slug: "competitive",
+    section: "Experience",
+  },
+  {
+    slug: "atmospheric",
+    section: "Experience",
+  },
+  {
+    slug: "dark",
+    section: "Experience",
+  },
+  {
+    slug: "emotional",
+    section: "Experience",
+  },
+  {
+    slug: "addictive",
+    section: "Experience",
+  },
+  {
+    slug: "funny",
+    section: "Experience",
+  },
+
+  // Pace
+  {
+    slug: "fast-paced",
+    section: "Experience",
+  },
+  {
+    slug: "slow-paced",
+    section: "Experience",
+  },
+  {
+    slug: "tactical",
+    section: "Experience",
+  },
+  {
+    slug: "methodical",
+    section: "Experience",
+  },
+  {
+    slug: "hardcore",
+    section: "Experience",
   },
   {
     slug: "casual",
-    section: "Playstyle",
+    section: "Experience",
   },
-] as const;
+  {
+    slug: "arcade",
+    section: "Experience",
+  },
+
+  // =========================================================
+  // PERSPECTIVE & MODES
+  // =========================================================
+
+  {
+    slug: "first-person",
+    section: "Perspective & Modes",
+  },
+  {
+    slug: "third-person",
+    section: "Perspective & Modes",
+  },
+  {
+    slug: "isometric",
+    section: "Perspective & Modes",
+  },
+  {
+    slug: "top-down",
+    section: "Perspective & Modes",
+  },
+
+  {
+    slug: "singleplayer",
+    section: "Perspective & Modes",
+  },
+  {
+    slug: "multiplayer",
+    section: "Perspective & Modes",
+  },
+  {
+    slug: "coop",
+    section: "Perspective & Modes",
+  },
+  {
+    slug: "online-pvp",
+    section: "Perspective & Modes",
+  },
+];
 
 export type BaseTag = (typeof BASE_TAGS)[number];
 
