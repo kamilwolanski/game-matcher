@@ -14,8 +14,10 @@ const ACTIVE_MATCH_SHARE = 0.35;
 const SPECIFIC_MATCH_SHARE = 0.15;
 const MIN_TAG_RARITY = 0.15;
 const MAX_TAG_RARITY = 4;
+const MIN_GAMES_FOR_RARITY = 30;
 const RARE_TAG_MIN_THRESHOLD = 2;
 const TAG_COUNT_SMOOTHING = 2;
+const SELECTED_GAME_SCORE_CURVE = 0.65;
 const DEFAULT_CATEGORY_WEIGHT = 1;
 const TAG_MATCH_CANDIDATE_LIMIT = 500;
 const POPULAR_DISCOVERY_CANDIDATE_LIMIT = 300;
@@ -61,6 +63,7 @@ const getTagSignalWeight = (tag: ShortTag, totalGames: number) => {
 
 const getTagRarity = (count: number, totalGames: number) => {
   if (totalGames <= 0) return MIN_TAG_RARITY;
+  if (totalGames < MIN_GAMES_FOR_RARITY) return 1;
 
   const normalizedCount = Math.min(Math.max(count, 0), totalGames);
   const rarity = Math.log(
@@ -70,6 +73,10 @@ const getTagRarity = (count: number, totalGames: number) => {
 
   return Math.min(MAX_TAG_RARITY, Math.max(MIN_TAG_RARITY, rarity));
 };
+
+function curveSimilarity(score: number) {
+  return Math.pow(Math.min(Math.max(score, 0), 1), SELECTED_GAME_SCORE_CURVE);
+}
 
 function getUserProfile(
   selectedGames: GameDto[],
@@ -99,8 +106,7 @@ function getUserProfile(
 
   for (const tag of activeTags) {
     const rarity = getTagRarity(tag.gamesCount, totalGames);
-    const score =
-      rarity * getTagCategoryWeight(tag.slug) * ACTIVE_TAG_WEIGHT;
+    const score = rarity * getTagCategoryWeight(tag.slug) * ACTIVE_TAG_WEIGHT;
     const existing = profile.get(tag.slug);
 
     profile.set(tag.slug, {
@@ -175,16 +181,22 @@ function getScoreBreakdown(
 
   const profileCoverage = matchedProfileScore / profileTotal;
   const activeCoverage = activeTotal > 0 ? matchedActiveScore / activeTotal : 0;
-  const rareTagCoverage =
-    rareProfileTotal > 0 ? matchedRareProfileScore / rareProfileTotal : 0;
+  const hasRareProfileSignals = rareProfileTotal > 0;
+  const rareTagCoverage = hasRareProfileSignals
+    ? matchedRareProfileScore / rareProfileTotal
+    : 0;
 
   if (!hasSelectedGames && activeTags.length > 0) {
     const activeTagMatches = getActiveTagMatchCount(game, activeTags);
     const activeCountCoverage = activeTagMatches / activeTags.length;
     const fullActiveMatch = activeTagMatches === activeTags.length;
+    const activeBoostShare = hasRareProfileSignals ? 0.07 : 0.1;
+    const rareBoostShare = hasRareProfileSignals ? 0.03 : 0;
     const similarity =
       activeCountCoverage * 0.9 +
-      (fullActiveMatch ? activeCoverage * 0.07 + rareTagCoverage * 0.03 : 0);
+      (fullActiveMatch
+        ? activeCoverage * activeBoostShare + rareTagCoverage * rareBoostShare
+        : 0);
 
     return {
       activeTagMatches,
@@ -193,17 +205,18 @@ function getScoreBreakdown(
     };
   }
 
+  const specificMatchShare = hasRareProfileSignals ? SPECIFIC_MATCH_SHARE : 0;
   const baseShare =
-    1 - SPECIFIC_MATCH_SHARE - (activeTags.length > 0 ? ACTIVE_MATCH_SHARE : 0);
+    1 - specificMatchShare - (activeTags.length > 0 ? ACTIVE_MATCH_SHARE : 0);
   const similarity =
     profileCoverage * baseShare +
     activeCoverage * ACTIVE_MATCH_SHARE +
-    rareTagCoverage * SPECIFIC_MATCH_SHARE;
+    rareTagCoverage * specificMatchShare;
 
   return {
     activeTagMatches: getActiveTagMatchCount(game, activeTags),
     matchedSignals,
-    similarity,
+    similarity: curveSimilarity(similarity),
   };
 }
 
