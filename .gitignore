@@ -44,7 +44,3 @@ next-env.d.ts
 
 /scripts/
 /tags-from-db.json
-/tags.json
-/tags.txt
-/top-games-no-desc.json
-/top-games.json
