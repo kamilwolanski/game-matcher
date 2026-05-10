@@ -1,4 +1,4 @@
-import { Sparkles } from "lucide-react";
+import { Orbit } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { HomeInteractiveSection } from "./components/HomeInteractiveSection";
@@ -35,17 +35,13 @@ export default async function Home() {
           </Link>
         </div>
         <div className="hidden md:flex items-center gap-2 text-xs text-muted-foreground glass px-3 py-1.5 rounded-full">
-          <Sparkles className="h-3.5 w-3.5 text-secondary" />
-          AI-powered recommendations
+          <Orbit className="h-3.5 w-3.5 text-secondary" />
+          Semantic game matching
         </div>
       </header>
 
       <section className="grow pt-8 md:pt-16 pb-20">
         <div className="max-w-3xl mx-auto text-center space-y-6 animate-fade-in-up">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full glass text-xs font-medium text-muted-foreground">
-            <span className="h-1.5 w-1.5 rounded-full bg-secondary animate-pulse" />
-            Discover your next obsession
-          </div>
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.05]">
             Find games you&apos;ll{" "}
             <span className="gradient-text bg-size-[200%_auto] animate-gradient-shift">
@@ -53,17 +49,41 @@ export default async function Home() {
             </span>
           </h1>
           <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
-            Tell us what you&apos;ve enjoyed and what you&apos;re in the mood
-            for. We match you with games based on shared DNA - not generic
-            charts.
+            Discover games that share the same vibe and gameplay traits.
           </p>
         </div>
 
         <HomeInteractiveSection availableTags={baseTags} />
       </section>
 
-      <footer className="container py-8 text-center text-xs text-muted-foreground border-t border-border/50">
-        PlayMatch · Built for explorers
+      <footer className="border-t border-border/50 mt-8">
+        <div className="container py-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4 text-xs text-muted-foreground">
+          <div className="space-y-0.5">
+            <div className="font-semibold text-foreground/90 tracking-tight">
+              GameMatcher
+            </div>
+            <p>Semantic game discovery platform</p>
+          </div>
+          <div className="flex flex-col md:items-end gap-1">
+            <p>
+              Game data &amp; images provided by{" "}
+              <a
+                href="https://rawg.io"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-foreground/80 hover:text-primary transition-smooth underline-offset-4 hover:underline"
+              >
+                RAWG
+              </a>
+            </p>
+            <a
+              href="mailto:contact@gamematcher.gg"
+              className="hover:text-primary transition-smooth"
+            >
+              hello@gamematcher.app
+            </a>
+          </div>
+        </div>
       </footer>
     </main>
   );
