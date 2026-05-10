@@ -79,11 +79,20 @@ export const TagSelector = ({
               className={cn(
                 "flex items-center justify-center gap-2 rounded-lg border px-3 py-3 text-sm font-medium transition-bounce",
                 isActive
-                  ? "gradient-primary border text-primary-foreground shadow-[0_4px_20px_-4px_hsl(var(--primary)/0.6)]"
+                  ? "gradient-primary border-0 text-primary-foreground shadow-[0_4px_20px_-4px_var(--color-primary)]"
                   : "border-border bg-transparent text-foreground/75 hover:border-primary/50 hover:text-foreground",
               )}
             >
-              <Icon className="h-4 w-4 shrink-0" />
+              <span
+                className={cn(
+                  "flex h-9 w-9 items-center justify-center rounded-full transition-smooth",
+                  isActive
+                    ? "bg-primary-foreground/15 text-primary-foreground"
+                    : "bg-primary/10 text-primary",
+                )}
+              >
+                <Icon className="h-4 w-4 shrink-0" />
+              </span>
               <span>{config.label}</span>
               {activeCount > 0 && (
                 <span
