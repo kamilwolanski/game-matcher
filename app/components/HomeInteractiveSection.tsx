@@ -2,14 +2,14 @@
 
 import { useState } from "react";
 import { GameSearch } from "./GameSearch";
-import { TagSelector } from "./TagSelector";
 import { type ShortTag } from "@/lib/dto/tag.dto";
 import { GameMatchDto } from "@/lib/dto/game-match.dto";
 import { GameDetailsModal } from "./GameDetailsModal";
-import useGameSelection from "../hooks/useGameSelection";
+import useGameSelection from "../hooks/useGameSelection/useGameSelection";
 import { useGameMatching } from "../hooks/useGameMatching";
 import { FindGamesButton } from "./FindGamesButton";
 import { GameMatchResults } from "./GameMatchResults";
+import { TagSelector } from "./TagSelector";
 
 type Props = {
   availableTags: ShortTag[];
@@ -17,20 +17,25 @@ type Props = {
 
 export function HomeInteractiveSection({ availableTags }: Props) {
   const {
-    selectedSearchResults,
-    selectedGames,
     activeTagSection,
     activeTags,
     suggestedTags,
     canSearch,
+    isAnalyzing,
+    pickedGames,
+    atLimit,
     selectTagSection,
     addGame,
     removeGame,
     toggleTag,
+    retry,
   } = useGameSelection(availableTags);
 
+  const pickedReadyGames = pickedGames
+    .filter((pg) => pg.status === "ready")
+    .map((g) => g.data);
   const { matchedGames, isMatchingPending, resultsRef, findMatches } =
-    useGameMatching(selectedGames, activeTags);
+    useGameMatching(pickedReadyGames, activeTags);
 
   const [modal, setModal] = useState<{
     open: boolean;
@@ -47,9 +52,11 @@ export function HomeInteractiveSection({ availableTags }: Props) {
         style={{ animationDelay: "120ms" }}
       >
         <GameSearch
-          selected={selectedSearchResults}
+          pickedGames={pickedGames}
+          atLimit={atLimit}
           onAdd={addGame}
           onRemove={removeGame}
+          onRetry={retry}
         />
       </div>
 
@@ -59,7 +66,7 @@ export function HomeInteractiveSection({ availableTags }: Props) {
             tags={availableTags}
             activeSection={activeTagSection}
             active={activeTags}
-            suggested={suggestedTags}
+            suggestedTags={suggestedTags}
             onSectionChange={selectTagSection}
             onToggle={toggleTag}
           />
@@ -68,6 +75,7 @@ export function HomeInteractiveSection({ availableTags }: Props) {
       <section className="pb-24">
         <FindGamesButton
           canSearch={canSearch}
+          isAnalyzing={isAnalyzing}
           isMatchingPending={isMatchingPending}
           onFind={findMatches}
         />

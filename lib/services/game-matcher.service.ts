@@ -22,7 +22,7 @@ const DEFAULT_CATEGORY_WEIGHT = 1;
 const TAG_MATCH_CANDIDATE_LIMIT = 500;
 const POPULAR_DISCOVERY_CANDIDATE_LIMIT = 300;
 const HIDDEN_GEM_CANDIDATE_LIMIT = 300;
-const RESULTS_LIMIT = 15;
+const RESULTS_LIMIT = 60;
 const SHARED_TRAITS_LIMIT = 6;
 const MATCH_REASON_TITLE = "It shares these traits with what you love:";
 
@@ -373,7 +373,7 @@ export async function findMatchingGames(
 
       return (b.added ?? 0) - (a.added ?? 0);
     })
-    .filter((g) => g.similarity > 0)
+    .filter((g) => g.similarity > 0.1)
     .slice(0, RESULTS_LIMIT)
     .map(toGameMatchDto);
 }
