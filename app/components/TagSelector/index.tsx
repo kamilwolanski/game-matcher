@@ -79,7 +79,7 @@ export const TagSelector = ({
               className={cn(
                 "flex items-center justify-center gap-2 rounded-lg border px-3 py-3 text-sm font-medium transition-bounce",
                 isActive
-                  ? "gradient-primary border-transparent text-primary-foreground shadow-[0_4px_20px_-4px_hsl(var(--primary)/0.6)]"
+                  ? "gradient-primary border text-primary-foreground shadow-[0_4px_20px_-4px_hsl(var(--primary)/0.6)]"
                   : "border-border bg-transparent text-foreground/75 hover:border-primary/50 hover:text-foreground",
               )}
             >

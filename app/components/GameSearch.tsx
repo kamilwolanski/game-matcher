@@ -1,16 +1,17 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { AlertCircle, Check, Loader2, Search, X } from "lucide-react";
+import { AlertCircle, Check, Info, Loader2, Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import useDebounce from "../hooks/useDebounce";
 import type { SearchGameResult } from "@/lib/dto/search-game.dto";
 import Image from "next/image";
 import { GameState } from "../hooks/useGameSelection/useGameSelection.types";
-
+import { MAX_GAMES } from "../hooks/useGameSelection/useGameSelection";
 
 type Props = {
   pickedGames: GameState[];
+  atLimit: boolean;
   onAdd: (g: SearchGameResult) => void;
   onRetry: (g: SearchGameResult) => void;
   onRemove: (id: number) => void;
@@ -44,9 +45,10 @@ const AnalyzingPhrase = ({ seed }: { seed: number }) => {
 
 export const GameSearch = ({
   pickedGames,
+  atLimit,
   onAdd,
   onRemove,
-  onRetry
+  onRetry,
 }: Props) => {
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -135,6 +137,7 @@ export const GameSearch = ({
 
           <input
             type="text"
+            disabled={atLimit}
             value={query}
             onFocus={() => setOpen(query.trim().length > 0)}
             onChange={(e) => {
@@ -147,8 +150,12 @@ export const GameSearch = ({
                 setResults([]);
               }
             }}
-            placeholder="Search for games you like..."
-            className="flex-1 bg-transparent text-base md:text-lg outline-none placeholder:text-muted-foreground"
+            placeholder={
+              atLimit
+                ? `You've picked the max of ${MAX_GAMES} games`
+                : "Search for games you like..."
+            }
+            className="flex-1 bg-transparent text-base md:text-lg outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed"
           />
 
           {query && (
@@ -197,7 +204,9 @@ export const GameSearch = ({
             ) : (
               <ul className="max-h-80 overflow-y-auto">
                 {results.map((g) => {
-                  const isSelected = pickedGames.some(pg => pg.rawgId === g.rawgId)
+                  const isSelected = pickedGames.some(
+                    (pg) => pg.rawgId === g.rawgId,
+                  );
                   return (
                     <li key={g.rawgId}>
                       <button
@@ -245,6 +254,14 @@ export const GameSearch = ({
         )}
       </div>
 
+      {atLimit && (
+        <div className="mt-2 flex items-center gap-2 text-xs text-secondary animate-fade-in">
+          <Info className="h-3.5 w-3.5" />
+          You&apos;ve reached the max of {MAX_GAMES} games. Remove one to add
+          another.
+        </div>
+      )}
+
       {/* SELECTED */}
       {pickedGames.length > 0 && (
         <div className="mt-5 flex flex-wrap gap-3 animate-fade-in">
@@ -260,7 +277,7 @@ export const GameSearch = ({
                     "bg-surface-elevated border-primary/30 shadow-[0_0_0_1px_hsl(var(--primary)/0.15)]",
                   status === "ready" &&
                     "bg-surface-elevated border-border hover:border-primary/40",
-                  status === 'failed' &&
+                  status === "failed" &&
                     "bg-surface-elevated border-destructive/40",
                 )}
               >

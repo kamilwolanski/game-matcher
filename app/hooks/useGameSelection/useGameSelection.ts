@@ -45,12 +45,16 @@ export interface GameSelectionState {
   activeTags: ShortTag[];
   suggestedTags: ShortTag[];
   canSearch: boolean;
+  isAnalyzing: boolean;
+  atLimit: boolean;
   selectTagSection: (section: BaseTagSection) => void;
   addGame: (game: SearchGameResult) => void;
   removeGame: (id: number) => void;
   toggleTag: (tag: ShortTag) => void;
   retry: (game: SearchGameResult) => void;
 }
+
+export const MAX_GAMES = 5;
 
 function useGameSelection(availableTags: ShortTag[]): GameSelectionState {
   const [pickedGames, setPickedGames] = useState<GameState[]>([]);
@@ -88,18 +92,24 @@ function useGameSelection(availableTags: ShortTag[]): GameSelectionState {
     () => selectedTags.filter((tag) => visibleTagSlugs.has(tag.slug)),
     [selectedTags, visibleTagSlugs],
   );
+
   const canSearch =
     (pickedGames.length > 0 &&
       pickedGames.every((pc) => pc.status !== "analyzing")) ||
-    activeTags.length > 0;
+    (activeTags.length > 0 &&
+      pickedGames.every((pc) => pc.status !== "analyzing"));
+
+  const isAnalyzing = pickedGames.some((pg) => pg.status === "analyzing");
 
   const selectTagSection = (section: BaseTagSection) => {
     setActiveTagSection(section);
   };
 
+  const atLimit = pickedGames.length >= MAX_GAMES;
+
   const addGame = (game: SearchGameResult) => {
     const alreadySelected = pickedGames.some((g) => g.rawgId === game.rawgId);
-    if (pickedGames.length >= 5 || alreadySelected) return;
+    if (atLimit || alreadySelected) return;
     setPickedGames((prev) => [
       ...prev,
       { rawgId: game.rawgId, status: "analyzing", data: game },
@@ -193,7 +203,9 @@ function useGameSelection(availableTags: ShortTag[]): GameSelectionState {
     activeTags,
     suggestedTags: stableSuggestedTags,
     canSearch,
+    isAnalyzing,
     pickedGames,
+    atLimit,
     selectTagSection,
     addGame,
     removeGame,

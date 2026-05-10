@@ -12,7 +12,7 @@ export type SectionConfig = {
   icon: LucideIcon;
 };
 
-export const INITIAL_VISIBLE_COUNT = 17;
+export const INITIAL_VISIBLE_COUNT = 20;
 
 export const TAG_SECTION_CONFIG: Record<BaseTagSection, SectionConfig> = {
   Gameplay: {
