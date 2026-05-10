@@ -136,6 +136,10 @@ function useGameSelection(availableTags: ShortTag[]): GameSelectionState {
     startSelectTransition(async () => {
       try {
         const fullGame = await getOrCreateGame(game.rawgId);
+
+        if (!fullGame) {
+          throw new Error("Failed to load game");
+        }
         setPickedGames((prev) => {
           const filtered = prev.filter((g) => g.rawgId !== fullGame.rawgId);
           const newState: GameState[] = [

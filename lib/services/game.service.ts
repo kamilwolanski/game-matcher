@@ -3,11 +3,11 @@
 import prisma from "@/lib/prisma";
 import { fetchRawgGameDetails } from "@/lib/clients/rawg.client";
 import { toGameDto } from "@/lib/mappers/game.mapper";
-import { normalizeTags } from "@/lib/tag-normalizer";
 import type { RawgGame } from "@/types/rawg";
 import { BASE_TAG_SLUGS } from "@/consts/base-tags";
 import { ShortTag } from "../dto/tag.dto";
 import { Prisma } from "@/app/generated/prisma/client";
+import { generateGameTags } from "@/lib/services/game-ai-tagging.service";
 
 const gameWithTagsInclude = {
   tags: {
@@ -50,74 +50,120 @@ export async function getBaseTags(): Promise<ShortTag[]> {
 }
 
 export async function saveRawgGame(rawgGame: RawgGame) {
-  const tags = normalizeTags([...rawgGame.tags, ...rawgGame.genres]);
+  // =========================================================
+  // AI tagging
+  // =========================================================
+  try {
+    const tags = await generateGameTags(rawgGame);
+    // =========================================================
+    // Transaction
+    // =========================================================
+    return prisma.$transaction(async (tx) => {
+      // =========================================================
+      // Create game
+      // =========================================================
 
-  return prisma.$transaction(async (tx) => {
-    const game = await tx.game.upsert({
-      where: { rawgId: rawgGame.id },
-      update: {},
-      create: {
-        rawgId: rawgGame.id,
-        name: rawgGame.name,
-        slug: rawgGame.slug,
-        description: rawgGame.description_raw,
-        image: rawgGame.background_image,
-        rating: rawgGame.rating,
-        added: rawgGame.added,
-        released: rawgGame.released ? new Date(rawgGame.released) : null,
-        platforms: rawgGame.platforms?.map((p) => p.platform.name) ?? [],
-      },
-    });
+      const game = await tx.game.create({
+        data: {
+          rawgId: rawgGame.id,
+          name: rawgGame.name,
+          slug: rawgGame.slug,
+          description: rawgGame.description_raw,
+          image: rawgGame.background_image,
+          rating: rawgGame.rating,
+          added: rawgGame.added,
+          released: rawgGame.released ? new Date(rawgGame.released) : null,
+          platforms: rawgGame.platforms?.map((p) => p.platform.name) ?? [],
+        },
+      });
 
-    const dbTags = await Promise.all(
-      tags.map((tag) =>
-        tx.tag.upsert({
-          where: { slug: tag.slug },
-          update: {
-            name: tag.name, 
-          },
-          create: {
-            slug: tag.slug,
-            name: tag.name,
-          },
-        }),
-      ),
-    );
+      // =========================================================
+      // Upsert tags
+      // =========================================================
 
-    for (const tag of dbTags) {
-      try {
-        await tx.gameTag.create({
-          data: {
-            gameId: game.id,
-            tagId: tag.id,
-          },
-        });
-
-        await tx.tag.update({
-          where: { id: tag.id },
-          data: {
-            gamesCount: {
-              increment: 1,
+      const dbTags = await Promise.all(
+        tags.map((tag) =>
+          tx.tag.upsert({
+            where: {
+              slug: tag.slug,
             },
-          },
-        });
-      } catch (e) {
-        if (!isDuplicateError(e)) throw e;
+            update: {
+              name: tag.name,
+            },
+            create: {
+              slug: tag.slug,
+              name: tag.name,
+            },
+          }),
+        ),
+      );
+
+      // =========================================================
+      // Create relations safely
+      // =========================================================
+
+      await Promise.all(
+        dbTags.map(async (tag) => {
+          const existingRelation = await tx.gameTag.findUnique({
+            where: {
+              gameId_tagId: {
+                gameId: game.id,
+                tagId: tag.id,
+              },
+            },
+          });
+
+          if (existingRelation) {
+            return;
+          }
+
+          await tx.gameTag.create({
+            data: {
+              gameId: game.id,
+              tagId: tag.id,
+            },
+          });
+
+          await tx.tag.update({
+            where: {
+              id: tag.id,
+            },
+            data: {
+              gamesCount: {
+                increment: 1,
+              },
+            },
+          });
+        }),
+      );
+
+      // =========================================================
+      // Return full game
+      // =========================================================
+
+      const fullGame = await tx.game.findUnique({
+        where: {
+          id: game.id,
+        },
+        include: gameWithTagsInclude,
+      });
+
+      if (!fullGame) {
+        throw new Error("Game not found after save");
       }
+
+      return toGameDto(fullGame);
+    });
+  } catch (error) {
+    if (isDuplicateError(error)) {
+      return getGameByRawgId(rawgGame.id);
     }
 
-    const fullGame = await tx.game.findUnique({
-      where: { id: game.id },
-      include: gameWithTagsInclude,
-    });
-
-    if (!fullGame) throw new Error("Game not found after save");
-
-    return toGameDto(fullGame);
-  });
+    throw error;
+  }
 }
 
-export async function selectGameByRawgId(rawgId: number) {
+export async function getOrCreateGameByRawgId(rawgId: number) {
   const existingGame = await getGameByRawgId(rawgId);
 
   if (existingGame) {
