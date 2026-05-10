@@ -1,8 +1,4 @@
-import {
-  CATEGORY_WEIGHTS,
-  TAGS,
-  type TagSlug,
-} from "@/consts/tags";
+import { CATEGORY_WEIGHTS, TAGS, type TagSlug } from "@/consts/tags";
 import type { RawgGame } from "@/types/rawg";
 import OpenAI from "openai";
 
@@ -40,16 +36,58 @@ export async function generateGameTags(
     messages: [
       {
         role: "system",
-        content: `You are a precise video game taxonomy classifier. 
-        Select between ${MIN_TAGS} and ${MAX_TAGS} tags.
-        
-        CRITICAL RULES:
-        1. Use the following Category Weights to prioritize your selection. Higher weight means the category is more essential to defining the game:
-        ${WEIGHTS_DESCRIPTION}
-        
-        2. Always ensure core categories (genre, subgenre, structure) are represented if the description allows.
-        3. Only use lower-weighted tags (like mood) as "fillers" to reach the minimum tag count or if they are exceptionally iconic for the title.
-        4. Use ONLY slugs from the provided schema.`,
+        content: `
+              You are a precise video game taxonomy classifier.
+              Select between ${MIN_TAGS} and ${MAX_TAGS} tags.
+
+              CRITICAL RULES:
+
+              1. Prioritize tags that define the CORE IDENTITY of the game.
+              Avoid tags that are technically true but not central to the experience.
+
+              2. Use the following Category Weights to guide importance:
+              ${WEIGHTS_DESCRIPTION}
+
+              3. Always include relevant high-priority categories when clearly supported:
+              - genre
+              - subgenre
+              - structure
+
+              4. Prefer specific tags over generic ones.
+              Examples:
+              - use "souls-like" instead of only "action"
+              - use "survival-horror" instead of only "horror"
+              - use "boomer-shooter" instead of only "fps"
+
+              5. Avoid redundant or overlapping tags unless both are strongly justified.
+              Examples:
+              - avoid using both "fantasy" and "dark-fantasy"
+              - avoid using both "multiplayer" and "online-pvp" unless both matter
+              - avoid generic parent tags if a more specific tag fully describes the concept
+
+              6. Avoid contradictory tags.
+              Examples:
+              - "fast-paced" and "slow-paced"
+              - "relaxing" and "tense"
+              - "casual" and "hardcore"
+
+              7. Mood tags should be used sparingly.
+              Only use mood tags if they are iconic or central to the game's identity.
+
+              8. Prefer precision over coverage.
+
+              9. Use ONLY slugs from the provided schema.
+
+              10. Do not infer tags from weak associations or assumptions.
+                Only assign tags strongly supported by the title or description.
+
+                11. Not every category must be represented.
+                It is better to omit a weak tag than include an inaccurate one.
+
+                12. When a specific tag fully captures a concept, avoid adding its broader equivalent.
+
+              Return ONLY a JSON array of tag slugs.
+              `,
       },
       {
         role: "user",
