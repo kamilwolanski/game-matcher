@@ -28,7 +28,7 @@ export const GameCard = ({ game, onClick, index = 0 }: Props) => {
       onClick={onClick}
       style={{ animationDelay: `${index * 60}ms` }}
       className={cn(
-        "group relative overflow-hidden rounded-2xl border border-border gradient-card text-left",
+        "group relative flex flex-col overflow-hidden rounded-2xl border border-border gradient-card text-left",
         "transition-bounce hover:-translate-y-2 hover:border-secondary/50",
         "shadow-(--shadow-card) hover:shadow-(--shadow-card-hover)",
         "animate-fade-in-up opacity-0 fill-mode-forwards",
