@@ -124,8 +124,17 @@ export async function generateGameTags(
     throw new Error(`OpenAI error for: ${rawgGame.name}`);
   }
 
-  return slugs.map((slug) => ({
-    slug,
-    name: TAGS[slug].name,
-  }));
+  const uniqueTags = Array.from(
+    new Map(
+      slugs.map((slug) => [
+        slug,
+        {
+          slug,
+          name: TAGS[slug].name,
+        },
+      ]),
+    ).values(),
+  );
+
+  return uniqueTags;
 }

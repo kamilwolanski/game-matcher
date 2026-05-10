@@ -539,6 +539,11 @@ export const TAGS = {
     name: "Greek Mythology",
   },
 
+  "ancient-egypt": {
+    category: "theme",
+    name: "Ancient Egypt",
+  },
+
   "ancient-greece": {
     category: "theme",
     name: "Ancient Greece",
