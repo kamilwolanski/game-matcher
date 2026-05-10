@@ -77,9 +77,23 @@ export const TAGS = {
     name: "Extraction Shooter",
   },
 
+  "tactical-shooter": {
+    category: "subgenre",
+    name: "Tactical Shooter",
+  },
+  "bullet-hell": {
+    category: "subgenre",
+    name: "Bullet Hell",
+  },
+
   metroidvania: {
     category: "subgenre",
     name: "Metroidvania",
+  },
+
+  soulsvania: {
+    category: "subgenre",
+    name: "Soulsvania",
   },
 
   "battle-royale": {
@@ -111,10 +125,18 @@ export const TAGS = {
     category: "subgenre",
     name: "Grand Strategy",
   },
-
+  "tower-defense": {
+    category: "subgenre",
+    name: "Tower Defense",
+  },
   rts: {
     category: "subgenre",
     name: "RTS",
+  },
+
+  "auto-battler": {
+    category: "subgenre",
+    name: "Auto Battler",
   },
 
   moba: {
@@ -135,6 +157,26 @@ export const TAGS = {
   football: {
     category: "subgenre",
     name: "Football",
+  },
+
+  "party-game": {
+    category: "subgenre",
+    name: "Party Game",
+  },
+
+  "point-and-click": {
+    category: "subgenre",
+    name: "Point & Click",
+  },
+
+  "farming-sim": {
+    category: "subgenre",
+    name: "Farming Sim",
+  },
+
+  "survival-crafting": {
+    category: "subgenre",
+    name: "Survival Crafting",
   },
 
   // =========================================================
@@ -334,6 +376,21 @@ export const TAGS = {
     category: "mechanic",
     name: "Army Management",
   },
+
+  automation: {
+    category: "mechanic",
+    name: "Automation",
+  },
+
+  "dialogue-heavy": {
+    category: "mechanic",
+    name: "Dialogue Heavy",
+  },
+
+  tactical: {
+    category: "mechanic",
+    name: "Tactical",
+  },
   // =========================================================
   // PROGRESSION
   // =========================================================
@@ -527,6 +584,45 @@ export const TAGS = {
     name: "Real World",
   },
 
+  "organized-crime": {
+    category: "theme",
+    name: "Organized Crime",
+  },
+
+  dystopian: {
+    category: "theme",
+    name: "Dystopian",
+  },
+  modern: {
+    category: "theme",
+    name: "Modern",
+  },
+
+  underwater: {
+    category: "theme",
+    name: "Underwater",
+  },
+
+  samurai: {
+    category: "theme",
+    name: "Samurai",
+  },
+
+  "urban-fantasy": {
+    category: "theme",
+    name: "Urban Fantasy",
+  },
+
+  steampunk: {
+    category: "theme",
+    name: "Steampunk",
+  },
+
+  vampires: {
+    category: "theme",
+    name: "Vampires",
+  },
+
   // =========================================================
   // AESTHETIC
   // =========================================================
@@ -608,6 +704,11 @@ export const TAGS = {
   emotional: {
     category: "mood",
     name: "Emotional",
+  },
+
+  immersive: {
+    category: "mood",
+    name: "Immersive",
   },
 
   tense: {
@@ -716,6 +817,21 @@ export const TAGS = {
     name: "Ranked",
   },
 
+  "shared-world": {
+    category: "mode",
+    name: "Shared World",
+  },
+
+  "drop-in-drop-out": {
+    category: "mode",
+    name: "Drop-In / Drop-Out",
+  },
+
+  "online-pve": {
+    category: "mode",
+    name: "Online PvE",
+  },
+
   // =========================================================
   // PACE
   // =========================================================
@@ -730,11 +846,6 @@ export const TAGS = {
     name: "Slow Paced",
   },
 
-  tactical: {
-    category: "pace",
-    name: "Tactical",
-  },
-
   methodical: {
     category: "pace",
     name: "Methodical",
@@ -745,9 +856,9 @@ export const TAGS = {
     name: "High Reflex",
   },
 
-  hardcore: {
+  challenging: {
     category: "pace",
-    name: "Hardcore",
+    name: "Challenging",
   },
 
   casual: {
