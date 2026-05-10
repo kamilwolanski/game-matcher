@@ -5,15 +5,23 @@ import { cn } from "@/lib/utils";
 
 type Props = {
   canSearch: boolean;
+  isAnalyzing: boolean;
   isMatchingPending: boolean;
   onFind: () => void;
 };
 
 export function FindGamesButton({
   canSearch,
+  isAnalyzing,
   isMatchingPending,
   onFind,
 }: Props) {
+  const getButtonText = () => {
+    if (isMatchingPending) return "Finding matches...";
+    if (isAnalyzing) return "Getting your picks ready...";
+    return "Find Games";
+  };
+
   return (
     <div className="flex flex-col items-center gap-3">
       <button
@@ -39,18 +47,16 @@ export function FindGamesButton({
             isMatchingPending && "animate-pulse",
           )}
         />
-        <span className="relative">
-          {isMatchingPending ? "Finding matches..." : "Find Games"}
-        </span>
+        <span className="relative">{getButtonText()}</span>
       </button>
 
       {isMatchingPending && <MatchLoading />}
 
-      {!canSearch && (
-        <p className="text-xs text-muted-foreground">
-          Pick a game or a tag to get started
-        </p>
-      )}
+      <p
+        className={`text-xs text-muted-foreground ${!canSearch ? "visible" : "invisible"}`}
+      >
+        Pick a game or a tag to get started
+      </p>
     </div>
   );
 }
