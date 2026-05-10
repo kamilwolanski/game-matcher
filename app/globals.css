@@ -54,8 +54,7 @@
     0 10px 40px -10px hsl(270 91% 65% / 0.4);
   --shadow-card: 0 8px 32px -8px hsl(222 47% 2% / 0.6);
   --shadow-card-hover:
-    0 20px 50px -10px hsl(270 91% 65% / 0.35),
-    0 0 0 1px hsl(270 91% 65% / 0.3);
+    0 20px 50px -10px hsl(270 91% 65% / 0.35), 0 0 0 1px hsl(270 91% 65% / 0.3);
 
   --animate-fade-in: fade-in 0.4s ease-out;
   --animate-fade-in-up: fade-in-up 0.5s ease-out;
@@ -65,10 +64,11 @@
   --animate-float: float 4s ease-in-out infinite;
   --animate-pulse-glow: pulse-glow 2.5s ease-in-out infinite;
   --animate-gradient-shift: gradient-shift 6s ease infinite;
-
+  --animate-shimmer-sweep: shimmer-sweep 1.6s ease-out forwards;
+  --animate-new-glow: new-glow 1.8s ease-in-out;
+  --animate-tag-in: tag-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
   --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-bounce: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-
 
   --radius: 1.25rem;
 }
@@ -76,7 +76,11 @@
 @layer base {
   html {
     color-scheme: dark;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family:
+      "Inter",
+      system-ui,
+      -apple-system,
+      sans-serif;
     scrollbar-gutter: stable;
   }
 
@@ -84,13 +88,17 @@
     @apply bg-background text-foreground antialiased;
     background-image:
       radial-gradient(ellipse at top, hsl(270 91% 65% / 0.18), transparent 60%),
-      radial-gradient(ellipse at bottom left, hsl(217 100% 62% / 0.15), transparent 50%),
+      radial-gradient(
+        ellipse at bottom left,
+        hsl(217 100% 62% / 0.15),
+        transparent 50%
+      ),
       linear-gradient(180deg, hsl(222 47% 6%), hsl(222 47% 4%));
     background-attachment: fixed;
     min-height: 100vh;
   }
 
-    body[data-scroll-locked] {
+  body[data-scroll-locked] {
     margin-right: auto !important;
   }
 
@@ -139,8 +147,12 @@ button:disabled {
 }
 
 @keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 @keyframes fade-in {
@@ -188,17 +200,28 @@ button:disabled {
 }
 
 @keyframes gradient-shift {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
 }
 
 @keyframes pulse-glow {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow:
       0 0 20px hsl(217 100% 62% / 0.4),
       0 0 40px hsl(270 91% 65% / 0.3);
@@ -210,15 +233,57 @@ button:disabled {
   }
 }
 
+@keyframes shimmer-sweep {
+  0% {
+    transform: translateX(-120%);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+}
+
+@keyframes new-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 hsl(var(--color-secondary) / 0);
+  }
+  50% {
+    box-shadow:
+      0 0 18px hsl(var(--color-secondary) / 0.55),
+      0 0 4px hsl(var(--color-secondary) / 0.4);
+  }
+}
+
 @keyframes match-button-sheen {
-  0% { transform: translateX(-120%); }
-  100% { transform: translateX(120%); }
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(120%);
+  }
 }
 
 @keyframes match-scan-line {
-  0% { transform: translateX(-100%); opacity: 0; }
-  15%, 85% { opacity: 1; }
-  100% { transform: translateX(100%); opacity: 0; }
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  15%,
+  85% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
 }
 
 @keyframes match-orbit {
@@ -233,6 +298,17 @@ button:disabled {
   100% {
     opacity: 0.4;
     transform: rotate(360deg) scale(0.92);
+  }
+}
+
+@keyframes tag-in {
+  0% {
+    opacity: 0;
+    transform: translateY(6px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
 
@@ -265,6 +341,7 @@ button:disabled {
     hsl(230 35% 12% / 0.7),
     hsl(222 45% 8% / 0.6)
   );
+  
 
   -webkit-backdrop-filter: blur(24px) saturate(140%);
   backdrop-filter: blur(24px) saturate(140%);
