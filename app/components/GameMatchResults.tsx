@@ -15,8 +15,8 @@ type Props = {
   onGameClick: (game: GameMatchDto) => void;
 };
 
-const PAGE_SIZE = 15;
-const STRONG_THRESHOLD = 0.4;
+const PAGE_SIZE = 20;
+const STRONG_THRESHOLD = 0.45;
 
 export function GameMatchResults({
   matchedGames,
@@ -96,13 +96,8 @@ export function GameMatchResults({
             {hasMoreStrong && (
               <div
                 ref={setSentinelEl}
-                className="flex items-center justify-center py-6"
-              >
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <span className="h-1.5 w-1.5 rounded-full bg-secondary animate-pulse" />
-                  Loading more matches…
-                </div>
-              </div>
+                className="mt-30 flex items-center justify-center py-6"
+              ></div>
             )}
             {broader.length > 0 && !hasMoreStrong && (
               <div className="space-y-6">
@@ -147,13 +142,8 @@ export function GameMatchResults({
                     {hasMoreBroader && (
                       <div
                         ref={setSentinelBroaderEl}
-                        className="flex items-center justify-center py-6"
-                      >
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <span className="h-1.5 w-1.5 rounded-full bg-secondary animate-pulse" />
-                          Loading more discoveries…
-                        </div>
-                      </div>
+                        className="mt-30 flex items-center justify-center py-6"
+                      ></div>
                     )}
                   </>
                 )}
@@ -203,7 +193,7 @@ function MatchGrid({ title, description, games, onGameClick }: MatchGridProps) {
           <GameCard
             key={game.id}
             game={game}
-            index={index}
+            index={index % PAGE_SIZE}
             onClick={() => onGameClick(game)}
           />
         ))}

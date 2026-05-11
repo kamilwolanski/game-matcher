@@ -19,7 +19,6 @@ export function useInfiniteScroll(totalLength: number, pageSize: number) {
           setVisible((v) => Math.min(v + pageSize, totalLength));
         }
       },
-      { rootMargin: "300px 0px" },
     );
     io.observe(sentinelEl);
     return () => io.disconnect();
