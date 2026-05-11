@@ -14,6 +14,42 @@ type Props = {
   game: GameMatchDto | null;
 };
 
+const MIN_WORDS_FOR_SINGLE_PARAGRAPH = 40;
+
+function compactDescription(description: string | null): string {
+  if (!description) {
+    return "No description is available for this game yet.";
+  }
+
+  const paragraphs = description
+    .split(/\n+/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+
+
+  const usefulParagraphs = paragraphs.filter(
+    (paragraph) => !paragraph.startsWith("###"),
+  );
+
+  if (usefulParagraphs.length === 0) {
+    return "No description is available for this game yet.";
+  }
+
+  const firstParagraph = usefulParagraphs[0];
+  const secondParagraph = usefulParagraphs[1];
+
+  const firstParagraphWordCount = firstParagraph
+    .split(/\s+/)
+    .filter(Boolean).length;
+
+  // show second paragraph only if first one is short
+  if (firstParagraphWordCount < MIN_WORDS_FOR_SINGLE_PARAGRAPH && secondParagraph) {
+    return `${firstParagraph}\n\n${secondParagraph}`;
+  }
+
+  return firstParagraph;
+}
+
 export const GameDetailsModal = ({ open, onOpenChange, game }: Props) => {
   if (!game) return null;
 
@@ -22,13 +58,11 @@ export const GameDetailsModal = ({ open, onOpenChange, game }: Props) => {
     : null;
   const platforms = game.platforms.slice(0, 3).join(" / ");
   const image = game.image ?? "/logo-transparent.png";
-  const description =
-    game.description?.trim() ||
-    "No description is available for this game yet.";
+  const description = compactDescription(game.description);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[min(90vh,760px)] w-[calc(100vw-2rem)] max-w-3xl gap-0 overflow-hidden rounded-3xl border-border bg-card p-0 shadow-(--shadow-card-hover)">
+      <DialogContent className="max-h-[min(90vh,760px)] w-[calc(100vw-2rem)] max-w-3xl gap-0 overflow-hidden rounded-3xl border-border bg-card p-0 ">
         <DialogTitle className="sr-only">{game.name}</DialogTitle>
         <DialogDescription className="sr-only">
           Match details and shared traits for {game.name}.
@@ -82,12 +116,12 @@ export const GameDetailsModal = ({ open, onOpenChange, game }: Props) => {
         </div>
 
         <div className="max-h-[calc(min(90vh,760px)-16rem)] space-y-6 overflow-y-auto p-6 md:max-h-[calc(min(90vh,760px)-20rem)] md:p-8">
-          <p className="text-base leading-relaxed text-foreground/90">
+          <p className="text-base whitespace-pre-line leading-relaxed text-foreground/90">
             {description}
           </p>
 
           {game.matchReason.tags.length > 0 && (
-            <div className="rounded-2xl border border-secondary/30 bg-linear-to-br from-primary/5 to-secondary/5 p-5">
+            <div className="rounded-2xl border border-secondary/40 bg-linear-to-br from-primary/10 via-card to-secondary/10 p-5 shadow-[0_8px_30px_-12px_color-mix(in_srgb,var(--color-primary)_35%,transparent)]">
               <div className="mb-3 flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-secondary" />
                 <h3 className="font-semibold">Why this game?</h3>
