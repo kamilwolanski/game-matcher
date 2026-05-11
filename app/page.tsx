@@ -6,7 +6,7 @@ import { getBaseTags } from "@/lib/services/game.service";
 
 export default async function Home() {
   const baseTags = await getBaseTags();
-
+  
   return (
     <main className="relative min-h-screen mx-auto flex flex-col">
       <div
