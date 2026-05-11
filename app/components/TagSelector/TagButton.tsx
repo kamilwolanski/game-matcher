@@ -19,7 +19,7 @@ export const TagButton = ({
     <button
       onClick={() => onToggle(tag)}
       className={cn(
-        "relative px-4 py-2 rounded-full text-sm font-medium transition-bounce border animate-tag-in",
+        "relative px-4 py-2 rounded-full text-xs md:text-sm font-medium transition-bounce border animate-tag-in",
         isActive
           ? "gradient-primary border-border/40 text-primary-foreground shadow-[0_4px_20px_-4px_var(--color-primary)]"
           : "bg-transparent border-border text-foreground/80 hover:border-primary/50 hover:text-foreground hover:-translate-y-0.5",

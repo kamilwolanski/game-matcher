@@ -28,7 +28,7 @@ export const TagSection = ({
 
   return (
     <div className="space-y-2.5">
-      <div className="flex flex-wrap gap-2.5">
+      <div className="flex flex-wrap gap-1.5 md:gap-2">
         {baseTags.map((tag, idx) => (
           <TagButton
             key={tag.slug}

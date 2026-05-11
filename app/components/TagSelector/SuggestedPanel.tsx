@@ -80,7 +80,7 @@ export const SuggestedPanel = ({
           </span>
         )}
       </div>
-      <div className="flex flex-wrap gap-2.5">
+      <div className="flex flex-wrap gap-1.5 md:gap-2">
         {suggestedTags.map((tag, idx) => (
           <TagButton
             key={tag.slug}
