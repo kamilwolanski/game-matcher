@@ -153,7 +153,7 @@ export const GameSearch = ({
             placeholder={
               atLimit
                 ? `You've picked the max of ${MAX_GAMES} games`
-                : "Search for games you like..."
+                : "Add games you like..."
             }
             className="flex-1 bg-transparent text-base md:text-lg outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed"
           />
@@ -230,7 +230,6 @@ export const GameSearch = ({
                               alt={g.name}
                               fill
                               sizes="300px"
-                              quality={100}
                               className="object-cover"
                             />
                           </div>
@@ -240,9 +239,11 @@ export const GameSearch = ({
 
                         <div className="min-w-0 flex-1">
                           <p className="font-semibold truncate">{g.name}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {g.releasedYear}
-                          </p>
+                          {g.released && (
+                            <p className="text-sm text-muted-foreground">
+                              {new Date(g.released).getFullYear()}
+                            </p>
+                          )}
                         </div>
                       </button>
                     </li>

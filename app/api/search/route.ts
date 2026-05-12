@@ -1,4 +1,8 @@
+import { shouldHideGame } from "@/lib/clients/rawg-filters";
 import { RawgApiError, searchRawgGames } from "@/lib/clients/rawg.client";
+
+
+const FINAL_RESULTS_LIMIT = 15;
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -6,8 +10,10 @@ export async function GET(req: Request) {
 
   try {
     const results = await searchRawgGames(query);
-
-    return Response.json({ results });
+    const filteredResults = results
+      .filter((r) => !shouldHideGame(r))
+      .slice(0, FINAL_RESULTS_LIMIT);
+    return Response.json({ results: filteredResults });
   } catch (error) {
     console.error("Fetch error:", error);
 

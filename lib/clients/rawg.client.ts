@@ -4,7 +4,7 @@ import type { SearchGameResult } from "@/lib/dto/search-game.dto";
 import type { RawgGame, RawgSearchGame } from "@/types/rawg";
 
 const RAWG_BASE_URL = "https://api.rawg.io/api";
-const DEFAULT_SEARCH_PAGE_SIZE = 5;
+const RAWG_SEARCH_PAGE_SIZE = 35;
 
 export class RawgApiError extends Error {
   constructor(
@@ -47,9 +47,12 @@ async function fetchRawg<T>(url: URL): Promise<T> {
 function toSearchGameResult(game: RawgSearchGame): SearchGameResult {
   return {
     rawgId: game.id,
+    slug: game.slug,
     name: game.name,
     image: game.background_image,
-    releasedYear: game.released ? new Date(game.released).getFullYear() : null,
+    released: game.released ? game.released : null,
+    tba: game.tba,
+    added: game.added,
   };
 }
 
@@ -59,7 +62,8 @@ export async function fetchRawgGameDetails(rawgId: number) {
 
 export async function searchRawgGames(query: string) {
   const url = createRawgUrl("/games");
-  url.searchParams.set("page_size", String(DEFAULT_SEARCH_PAGE_SIZE));
+  url.searchParams.set("page_size", String(RAWG_SEARCH_PAGE_SIZE));
+  url.searchParams.set("exclude_additions", "true");
 
   if (query) {
     url.searchParams.set("search", query);
