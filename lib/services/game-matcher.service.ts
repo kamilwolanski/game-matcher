@@ -5,7 +5,8 @@ import type { GameMatchDto } from "@/lib/dto/game-match.dto";
 import type { ShortTag } from "@/lib/dto/tag.dto";
 import { toGameDto } from "@/lib/mappers/game.mapper";
 import prisma from "@/lib/prisma";
-import { CATEGORY_WEIGHTS, TAGS, type TagSlug } from "@/consts/tags";
+import { CATEGORY_WEIGHTS, TAGS_AS_OBJECT } from "@/consts/tags";
+
 
 const SELECTED_GAME_TAG_WEIGHT = 1;
 const ACTIVE_TAG_WEIGHT = 5;
@@ -19,12 +20,12 @@ const RARE_TAG_MIN_THRESHOLD = 2;
 const TAG_COUNT_SMOOTHING = 2;
 const SELECTED_GAME_SCORE_CURVE = 0.65;
 const DEFAULT_CATEGORY_WEIGHT = 1;
-const TAG_MATCH_CANDIDATE_LIMIT = 500;
+const TAG_MATCH_CANDIDATE_LIMIT = 2500;
 const POPULAR_DISCOVERY_CANDIDATE_LIMIT = 300;
 const HIDDEN_GEM_CANDIDATE_LIMIT = 300;
-const RESULTS_LIMIT = 60;
+const RESULTS_LIMIT = 80;
 const SHARED_TRAITS_LIMIT = 6;
-const MATCH_REASON_TITLE = "It shares these traits with what you love:";
+const MATCH_REASON_TITLE = "Matched on shared gameplay and atmosphere traits from your picks.";
 
 type UserTagSignal = {
   tag: ShortTag;
@@ -48,7 +49,7 @@ const gameWithTagsInclude = {
 } as const;
 
 const getTagCategoryWeight = (slug: string) => {
-  const tag = TAGS[slug as TagSlug];
+  const tag = TAGS_AS_OBJECT[slug];
 
   if (!tag) return DEFAULT_CATEGORY_WEIGHT;
 
@@ -297,7 +298,7 @@ async function getCandidateGames(tagSlugs: string[], selectedGames: GameDto[]) {
 
   return Array.from(
     new Map(
-      [...tagMatchGames, ...popularDiscoveryGames, ...hiddenGemGames].map(
+      [...tagMatchGames].map(
         (game) => [game.slug, game],
       ),
     ).values(),
@@ -363,13 +364,13 @@ export async function findMatchingGames(
       };
     })
     .sort((a, b) => {
+      if (b.similarity !== a.similarity) {
+        return b.similarity - a.similarity;
+      }
       if (b.activeTagMatches !== a.activeTagMatches) {
         return b.activeTagMatches - a.activeTagMatches;
       }
 
-      if (b.similarity !== a.similarity) {
-        return b.similarity - a.similarity;
-      }
 
       return (b.added ?? 0) - (a.added ?? 0);
     })

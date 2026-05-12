@@ -1,4 +1,4 @@
-import { CATEGORY_WEIGHTS, TAGS, type TagSlug } from "@/consts/tags";
+import { CATEGORY_WEIGHTS, TAG_SLUGS, TAGS_AS_OBJECT } from "@/consts/tags";
 import type { RawgGame } from "@/types/rawg";
 import OpenAI from "openai";
 
@@ -10,11 +10,10 @@ const MIN_TAGS = 8;
 const MAX_TAGS = 14;
 
 type GameAiTag = {
-  slug: TagSlug;
+  slug: string;
   name: string;
 };
 
-const TAG_SLUGS = Object.keys(TAGS) as TagSlug[];
 
 function compactDescription(description?: string) {
   if (!description) return "";
@@ -116,7 +115,7 @@ export async function generateGameTags(
   });
 
   const parsed = response.choices[0].message.parsed as {
-    tags: TagSlug[];
+    tags: string[];
   } | null;
   const slugs = parsed?.tags;
 
@@ -130,7 +129,7 @@ export async function generateGameTags(
         slug,
         {
           slug,
-          name: TAGS[slug].name,
+          name: TAGS_AS_OBJECT[slug].name,
         },
       ]),
     ).values(),

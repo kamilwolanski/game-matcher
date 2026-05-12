@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 import { fetchRawgGameDetails } from "@/lib/clients/rawg.client";
 import { toGameDto } from "@/lib/mappers/game.mapper";
 import type { RawgGame } from "@/types/rawg";
-import { BASE_TAG_SLUGS } from "@/consts/base-tags";
+import { TAG_SLUGS } from "@/consts/tags";
 import { ShortTag } from "../dto/tag.dto";
 import { Prisma } from "@/app/generated/prisma/client";
 import { generateGameTags } from "@/lib/services/game-ai-tagging.service";
@@ -38,7 +38,7 @@ export async function getBaseTags(): Promise<ShortTag[]> {
   return prisma.tag.findMany({
     where: {
       slug: {
-        in: BASE_TAG_SLUGS,
+        in: TAG_SLUGS,
       },
     },
     select: {
