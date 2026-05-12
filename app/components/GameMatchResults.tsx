@@ -16,7 +16,7 @@ type Props = {
 };
 
 const PAGE_SIZE = 20;
-const STRONG_THRESHOLD = 0.45;
+const STRONG_THRESHOLD = 0.5;
 
 export function GameMatchResults({
   matchedGames,
