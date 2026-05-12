@@ -28,6 +28,7 @@ export function HomeInteractiveSection({ availableTags }: Props) {
     addGame,
     removeGame,
     toggleTag,
+    clearAllTags,
     retry,
   } = useGameSelection(availableTags);
 
@@ -65,10 +66,11 @@ export function HomeInteractiveSection({ availableTags }: Props) {
           <TagSelector
             tags={availableTags}
             activeSection={activeTagSection}
-            active={activeTags}
+            activeTags={activeTags}
             suggestedTags={suggestedTags}
             onSectionChange={selectTagSection}
             onToggle={toggleTag}
+            clearAllTags={clearAllTags}
           />
         </div>
       </section>

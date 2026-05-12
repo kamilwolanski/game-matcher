@@ -5,14 +5,15 @@ import {
   Swords,
   type LucideIcon,
 } from "lucide-react";
-import { type BaseTagSection } from "@/consts/base-tags";
+import { type BaseTagSection } from "@/consts/tags";
 
 export type SectionConfig = {
   label: string;
   icon: LucideIcon;
 };
 
-export const INITIAL_VISIBLE_COUNT = 20;
+export const INITIAL_VISIBLE_COUNT_DESKTOP = 18;
+export const INITIAL_VISIBLE_COUNT_MOBILE = 10;
 
 export const TAG_SECTION_CONFIG: Record<BaseTagSection, SectionConfig> = {
   Gameplay: {
@@ -27,8 +28,8 @@ export const TAG_SECTION_CONFIG: Record<BaseTagSection, SectionConfig> = {
     label: "Experience",
     icon: Gamepad2,
   },
-  "Perspective & Modes": {
-    label: "Perspective & Modes",
+  "Perspective": {
+    label: "Perspective",
     icon: Layers3,
   },
 };

@@ -1,46 +1,98 @@
+import { useWindowSize } from "react-use";
 import { cn } from "@/lib/utils";
 import { type ShortTag } from "@/lib/dto/tag.dto";
 import {
   BASE_TAG_SECTIONS,
+  getDefaultVisibleTags,
   groupBaseTagsBySection,
+  TAGS_AS_OBJECT,
   type BaseTagSection,
-} from "@/consts/base-tags";
-import { useState } from "react";
+} from "@/consts/tags";
+import { useMemo, useState } from "react";
 import { TagSection } from "./TagSection";
 import { SuggestedPanel } from "./SuggestedPanel";
-import { INITIAL_VISIBLE_COUNT, TAG_SECTION_CONFIG } from "./constants";
+import {
+  INITIAL_VISIBLE_COUNT_DESKTOP,
+  INITIAL_VISIBLE_COUNT_MOBILE,
+  TAG_SECTION_CONFIG,
+} from "./constants";
+import TagSearch from "./TagSearch";
+import { X } from "lucide-react";
 
 type Props = {
   tags: ShortTag[];
   activeSection: BaseTagSection;
-  active: ShortTag[];
+  activeTags: ShortTag[];
   suggestedTags: ShortTag[];
   onSectionChange: (section: BaseTagSection) => void;
   onToggle: (tag: ShortTag) => void;
+  clearAllTags: () => void;
 };
 
 export const TagSelector = ({
   tags,
   activeSection,
-  active,
+  activeTags,
   suggestedTags,
   onSectionChange,
   onToggle,
+  clearAllTags
 }: Props) => {
+  const { width } = useWindowSize();
+  const isMobile = width < 768;
   const [expanded, setExpanded] = useState<Record<BaseTagSection, boolean>>({
     Gameplay: false,
     "Style & Theme": false,
     Experience: false,
-    "Perspective & Modes": false,
+    Perspective: false,
   });
 
-  const groupedTags = groupBaseTagsBySection(tags);
-  const activeSlugs = new Set(active.map((tag) => tag.slug));
+  const groupedTags = useMemo(() => {
+    const defaultTags = getDefaultVisibleTags(tags);
+
+    if (activeTags.length === 0) {
+      return groupBaseTagsBySection(defaultTags, false);
+    }
+
+    const activeNonDefaultTags = activeTags.filter(
+      (tag) => !TAGS_AS_OBJECT[tag.slug].defaultVisible,
+    );
+
+    return groupBaseTagsBySection(
+      [...defaultTags, ...activeNonDefaultTags],
+      false,
+    );
+  }, [activeTags, tags]);
+
+  const activeSlugs = new Set(activeTags.map((tag) => tag.slug));
   const activeSectionConfig = TAG_SECTION_CONFIG[activeSection];
   const activeSectionTags = groupedTags[activeSection] ?? [];
 
-  const baseTags = activeSectionTags.slice(0, INITIAL_VISIBLE_COUNT);
-  const extraTags = activeSectionTags.slice(INITIAL_VISIBLE_COUNT);
+  const limit = isMobile
+    ? INITIAL_VISIBLE_COUNT_MOBILE
+    : INITIAL_VISIBLE_COUNT_DESKTOP;
+
+  const defaultSectionTags = activeSectionTags.filter(
+    (tag) => TAGS_AS_OBJECT[tag.slug].defaultVisible,
+  );
+  const visibleDefaultTags = defaultSectionTags.slice(0, limit);
+  const selectedHiddenTags = activeSectionTags.filter(
+    (tag) =>
+      activeSlugs.has(tag.slug) && !TAGS_AS_OBJECT[tag.slug].defaultVisible,
+  );
+
+  const extraTags = defaultSectionTags
+    .slice(limit)
+    .filter((at) => selectedHiddenTags.every((sht) => sht.slug !== at.slug));
+
+  const sectionExpanded = expanded[activeSection];
+
+  const visibleTags = sectionExpanded
+    ? visibleDefaultTags
+    : [...visibleDefaultTags, ...selectedHiddenTags];
+  const visibleExtraTags = sectionExpanded
+    ? [...extraTags, ...selectedHiddenTags]
+    : extraTags;
 
   const toggleExpanded = () => {
     setExpanded((prev) => ({ ...prev, [activeSection]: !prev[activeSection] }));
@@ -52,7 +104,22 @@ export const TagSelector = ({
         <h2 className="text-2xl md:text-4xl font-bold">
           Refine your <span className="gradient-text">taste</span>
         </h2>
+        {activeTags.length > 0 && (
+          <button
+            onClick={clearAllTags}
+            className="w-30 inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-full border border-border/60 hover:border-primary/40 bg-card/40 transition-smooth"
+          >
+            <X className="h-3.5 w-3.5" />
+            Clear all
+            <span>·</span>
+            <span className="text-[11px] text-muted-foreground/80">
+                {activeTags.length}
+            </span>
+          </button>
+        )}
       </div>
+
+      <TagSearch tags={tags} onToggle={onToggle} activeSlugs={activeSlugs} />
 
       <SuggestedPanel
         suggestedTags={suggestedTags}
@@ -94,18 +161,17 @@ export const TagSelector = ({
                 <Icon className="h-4 w-4 shrink-0" />
               </span>
               <span>{config.label}</span>
-              {activeCount > 0 && (
-                <span
-                  className={cn(
-                    "flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[11px]",
-                    isActive
-                      ? "bg-background/20 text-primary-foreground"
-                      : "bg-primary/10 text-primary",
-                  )}
-                >
-                  {activeCount}
-                </span>
-              )}
+              <span
+                className={cn(
+                  "flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[11px] transition-opacity",
+                  activeCount > 0 ? "opacity-100" : "opacity-0",
+                  isActive
+                    ? "bg-background/20 text-primary-foreground"
+                    : "bg-primary/10 text-primary",
+                )}
+              >
+                {activeCount}
+              </span>
             </button>
           );
         })}
@@ -113,8 +179,8 @@ export const TagSelector = ({
 
       {activeSectionConfig && (
         <TagSection
-          baseTags={baseTags}
-          extraTags={extraTags}
+          baseTags={visibleTags}
+          extraTags={visibleExtraTags}
           expanded={expanded[activeSection]}
           toggleExpanded={toggleExpanded}
           tags={activeSectionTags}

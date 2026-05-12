@@ -6,7 +6,7 @@ import { ShortTag } from "@/lib/dto/tag.dto";
 import {
   DEFAULT_BASE_TAG_SECTION,
   type BaseTagSection,
-} from "@/consts/base-tags";
+} from "@/consts/tags";
 import { GameState, TagWithCount } from "./useGameSelection.types";
 
 function getSuggestedTags(
@@ -51,6 +51,7 @@ export interface GameSelectionState {
   addGame: (game: SearchGameResult) => void;
   removeGame: (id: number) => void;
   toggleTag: (tag: ShortTag) => void;
+  clearAllTags: () => void;
   retry: (game: SearchGameResult) => void;
 }
 
@@ -202,6 +203,10 @@ function useGameSelection(availableTags: ShortTag[]): GameSelectionState {
     });
   };
 
+  const clearAllTags = () => {
+    setSelectedTags([])
+  }
+
   return {
     activeTagSection,
     activeTags,
@@ -214,6 +219,7 @@ function useGameSelection(availableTags: ShortTag[]): GameSelectionState {
     addGame,
     removeGame,
     toggleTag,
+    clearAllTags,
     retry,
   };
 }
