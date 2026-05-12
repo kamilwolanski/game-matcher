@@ -20,8 +20,9 @@ model Game {
   description String?
   image       String?
 
-  rating Float?
-  added  Int?
+  metacritic Int?
+  rating     Float?
+  added      Int?
 
   platforms String[]
 

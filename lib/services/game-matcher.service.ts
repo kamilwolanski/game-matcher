@@ -313,6 +313,7 @@ function toGameMatchDto(game: ScoredGame): GameMatchDto {
     slug: game.slug,
     description: game.description,
     image: game.image,
+    metacritic: game.metacritic,
     rating: game.rating,
     added: game.added,
     platforms: game.platforms,

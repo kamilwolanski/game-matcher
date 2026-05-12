@@ -38,11 +38,16 @@ export type RawgGame = {
 
   tags: RawgTag[];
   genres: RawgGenre[];
+  tba: boolean;
+  metacritic: number | null
 };
 
 export type RawgSearchGame = {
   id: number;
   name: string;
+  slug: string;
   background_image: string | null;
   released: string | null;
+  tba: boolean;
+  added: number;
 };

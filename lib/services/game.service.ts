@@ -74,6 +74,7 @@ export async function saveRawgGame(rawgGame: RawgGame) {
           added: rawgGame.added,
           released: rawgGame.released ? new Date(rawgGame.released) : null,
           platforms: rawgGame.platforms?.map((p) => p.platform.name) ?? [],
+          metacritic: rawgGame.metacritic,
         },
       });
 

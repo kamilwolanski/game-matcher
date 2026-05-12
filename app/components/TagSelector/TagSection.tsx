@@ -55,7 +55,7 @@ export const TagSection = ({
         <div className="pt-1">
           <button
             onClick={toggleExpanded}
-            className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-smooth group"
+            className="p-1.5 ps-0 inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-smooth group"
           >
             <span>
               {expanded

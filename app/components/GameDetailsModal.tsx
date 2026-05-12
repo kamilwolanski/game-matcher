@@ -5,6 +5,7 @@ import {
   DialogTitle,
 } from "@/app/components/ui/Dialog";
 import { GameMatchDto } from "@/lib/dto/game-match.dto";
+import { cn } from "@/lib/utils";
 import { Sparkles, X } from "lucide-react";
 import Image from "next/image";
 
@@ -13,6 +14,39 @@ type Props = {
   onOpenChange: (v: boolean) => void;
   game: GameMatchDto | null;
 };
+
+export const PLATFORM_SHORT_NAMES: Record<string, string> = {
+  // PlayStation
+  "PlayStation 5": "PS5",
+  "PlayStation 4": "PS4",
+  "PlayStation 3": "PS3",
+  "PS Vita": "Vita",
+
+  // Xbox
+  "Xbox Series S/X": "XSX",
+  "Xbox One": "XONE",
+  "Xbox 360": "X360",
+
+  // Nintendo
+  "Nintendo Switch": "Switch",
+  "Nintendo 3DS": "3DS",
+  "Wii U": "Wii U",
+
+  // Desktop
+  PC: "PC",
+  macOS: "Mac",
+  Linux: "Linux",
+
+  // Mobile
+  iOS: "iOS",
+  Android: "Android",
+};
+
+export function formatPlatforms(platforms: string[]) {
+  return platforms
+    .map((platform) => PLATFORM_SHORT_NAMES[platform] ?? platform)
+    .join(" · ");
+}
 
 const MIN_WORDS_FOR_SINGLE_PARAGRAPH = 40;
 
@@ -25,7 +59,6 @@ function compactDescription(description: string | null): string {
     .split(/\n+/)
     .map((p) => p.trim())
     .filter(Boolean);
-
 
   const usefulParagraphs = paragraphs.filter(
     (paragraph) => !paragraph.startsWith("###"),
@@ -43,7 +76,10 @@ function compactDescription(description: string | null): string {
     .filter(Boolean).length;
 
   // show second paragraph only if first one is short
-  if (firstParagraphWordCount < MIN_WORDS_FOR_SINGLE_PARAGRAPH && secondParagraph) {
+  if (
+    firstParagraphWordCount < MIN_WORDS_FOR_SINGLE_PARAGRAPH &&
+    secondParagraph
+  ) {
     return `${firstParagraph}\n\n${secondParagraph}`;
   }
 
@@ -56,9 +92,18 @@ export const GameDetailsModal = ({ open, onOpenChange, game }: Props) => {
   const releasedYear = game.released
     ? new Date(game.released).getFullYear()
     : null;
-  const platforms = game.platforms.slice(0, 3).join(" / ");
+
   const image = game.image ?? "/logo-transparent.png";
   const description = compactDescription(game.description);
+
+  const metacritic = game.metacritic;
+  const metaColor = !metacritic
+    ? ""
+    : metacritic >= 85
+      ? "text-emerald-400"
+      : metacritic >= 70
+        ? "text-amber-400"
+        : "text-red-400";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -93,21 +138,37 @@ export const GameDetailsModal = ({ open, onOpenChange, game }: Props) => {
 
           <div className="absolute bottom-5 left-6 right-6">
             <div className="flex flex-wrap items-end justify-between gap-4">
-              <div>
-                <h2 className="text-3xl font-extrabold leading-tight md:text-4xl">
+              <div className="min-w-0">
+                <h2 className="text-2xl md:text-3xl font-extrabold leading-tight">
                   {game.name}
                 </h2>
-                {(releasedYear || platforms) && (
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {[releasedYear, platforms].filter(Boolean).join(" / ")}
+                <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs md:text-sm text-muted-foreground">
+                  {releasedYear && (
+                    <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-xs font-medium text-foreground/90">
+                      {releasedYear}
+                    </span>
+                  )}
+
+                  <span>{formatPlatforms(game.platforms)}</span>
+                </p>
+                {metacritic && (
+                  <p className="text-xs md:text-sm text-muted-foreground mt-1.5 inline-flex items-baseline gap-1.5">
+                    <span className="uppercase tracking-wider text-[10px] text-muted-foreground/80">
+                      Metacritic
+                    </span>
+                    <span
+                      className={cn("font-semibold tabular-nums", metaColor)}
+                    >
+                      {metacritic}
+                    </span>
                   </p>
                 )}
               </div>
-              <div className="glass flex items-center gap-2 rounded-full px-4 py-2">
-                <span className="gradient-text text-2xl font-bold">
+              <div className="flex items-center gap-2 px-3.5 py-2 rounded-full glass">
+                <span className="gradient-text text-xl font-bold leading-none">
                   {(game.similarity * 100).toFixed()}%
                 </span>
-                <span className="text-xs uppercase tracking-wider text-muted-foreground">
+                <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
                   match
                 </span>
               </div>
