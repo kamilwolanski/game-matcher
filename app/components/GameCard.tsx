@@ -14,8 +14,18 @@ export const GameCard = ({ game, onClick, index = 0 }: Props) => {
     ? new Date(game.released).getFullYear()
     : null;
   const platforms = game.platforms.slice(0, 2).join(" / ");
-  const description =
+  const rawDescription =
     game.description?.trim() || "No description is available yet.";
+
+  const descriptionParagraphs = rawDescription
+    .split(/\n+/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean);
+
+  const visibleDescription = descriptionParagraphs
+    .filter((paragraph) => !paragraph.startsWith("###"))
+    .join(" ");
+
   const scoreColor =
     game.similarity >= 0.85
       ? "from-neon-blue to-neon-purple"
@@ -62,7 +72,7 @@ export const GameCard = ({ game, onClick, index = 0 }: Props) => {
 
         <div className="absolute -bottom-3.75 inset-0 flex flex-col justify-end bg-linear-to-t from-card via-card/95 to-transparent p-4 opacity-0 transition-smooth group-hover:opacity-100">
           <p className="mb-3 line-clamp-3 translate-y-2 text-sm text-foreground/90 transition-smooth group-hover:translate-y-0">
-            {description}
+            {visibleDescription}
           </p>
           <div className="gradient-primary inline-flex translate-y-2 items-center justify-center self-start rounded-full px-3 py-1.5 text-xs font-semibold text-primary-foreground transition-smooth group-hover:translate-y-0">
             View details
