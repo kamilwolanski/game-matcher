@@ -37,6 +37,7 @@ export type BaseTag = {
   category: TagCategory;
   name: string;
   section: BaseTagSection;
+  aliases?: string[];
 };
 
 export const CATEGORY_WEIGHTS: Record<TagCategory, number> = {
@@ -123,6 +124,7 @@ const BASE_TAGS: BaseTag[] = [
     category: "subgenre",
     name: "Dungeon RPG",
     section: "Gameplay",
+    aliases: ["Blobber"],
   },
 
   { slug: "fps", category: "subgenre", name: "FPS", section: "Gameplay" },
@@ -181,6 +183,7 @@ const BASE_TAGS: BaseTag[] = [
     category: "subgenre",
     name: "Soulsvania",
     section: "Gameplay",
+    aliases: ["Souls Metroidvania"],
   },
 
   {
@@ -389,6 +392,13 @@ const BASE_TAGS: BaseTag[] = [
     category: "mechanic",
     name: "Deckbuilder",
     section: "Gameplay",
+    aliases: [
+      "Deck Builder",
+      "Deckbuilding",
+      "Cards",
+      "Card Game",
+      "Card Battler",
+    ],
   },
   {
     slug: "permadeath",
@@ -413,6 +423,7 @@ const BASE_TAGS: BaseTag[] = [
     category: "mechanic",
     name: "Hack & Slash",
     section: "Gameplay",
+    aliases: ["Hack and Slash"],
   },
   { slug: "combos", category: "mechanic", name: "Combos", section: "Gameplay" },
   { slug: "parry", category: "mechanic", name: "Parry", section: "Gameplay" },
@@ -570,6 +581,7 @@ const BASE_TAGS: BaseTag[] = [
     category: "progression",
     name: "Buildcraft Heavy",
     section: "Experience",
+    aliases: ["Theorycrafting", "Buildcrafting"],
   },
   {
     slug: "loot-driven",
@@ -594,6 +606,7 @@ const BASE_TAGS: BaseTag[] = [
     category: "progression",
     name: "Gear Progression",
     section: "Experience",
+    aliases: ["Equipment Progression"],
   },
 
   // Mood
@@ -702,6 +715,7 @@ const BASE_TAGS: BaseTag[] = [
     category: "theme",
     name: "Sci-Fi",
     section: "Style & Theme",
+    aliases: ["Science Fiction", "Sci Fi"],
   },
   {
     slug: "cyberpunk",
@@ -741,6 +755,13 @@ const BASE_TAGS: BaseTag[] = [
     section: "Style & Theme",
   },
   { slug: "war", category: "theme", name: "War", section: "Style & Theme" },
+  {
+    slug: "ww2",
+    category: "theme",
+    name: "WW2",
+    section: "Style & Theme",
+    aliases: ["World War II", "World War 2", "Second World War"],
+  },
   {
     slug: "detective",
     category: "theme",
@@ -844,6 +865,7 @@ const BASE_TAGS: BaseTag[] = [
     category: "theme",
     name: "Organized Crime",
     section: "Style & Theme",
+    aliases: ["Mafia", "Gangsters"],
   },
   {
     slug: "dystopian",
@@ -901,6 +923,7 @@ const BASE_TAGS: BaseTag[] = [
     category: "aesthetic",
     name: "Pixel Art",
     section: "Style & Theme",
+    aliases: ["Pixel Graphics"],
   },
   {
     slug: "stylized",
@@ -993,6 +1016,7 @@ const BASE_TAGS: BaseTag[] = [
     category: "mode",
     name: "Multiplayer",
     section: "Perspective",
+    aliases: ["Multi-player"],
   },
   { slug: "coop", category: "mode", name: "Co-op", section: "Perspective" },
   {
@@ -1012,6 +1036,7 @@ const BASE_TAGS: BaseTag[] = [
     category: "mode",
     name: "Local Multiplayer",
     section: "Perspective",
+    aliases: ["Couch Co-op", "Couch Coop", "Local Co-op"],
   },
   { slug: "ranked", category: "mode", name: "Ranked", section: "Perspective" },
   {
@@ -1031,6 +1056,7 @@ const BASE_TAGS: BaseTag[] = [
     category: "mode",
     name: "Online PvE",
     section: "Perspective",
+    aliases: ["PvE", "Player vs Environment"],
   },
 ];
 
@@ -1104,6 +1130,7 @@ export const DEFAULT_VISIBLE_TAG_SLUGS = [
   "western",
   "crime",
   "war",
+  "ww2",
   "organized-crime",
   "detective",
   "noir",

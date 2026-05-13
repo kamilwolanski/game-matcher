@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 import { fetchRawgGameDetails } from "@/lib/clients/rawg.client";
 import { toGameDto } from "@/lib/mappers/game.mapper";
 import type { RawgGame } from "@/types/rawg";
-import { TAG_SLUGS } from "@/consts/tags";
+import { TAGS, TAG_SLUGS } from "@/consts/tags";
 import { ShortTag } from "../dto/tag.dto";
 import { Prisma } from "@/app/generated/prisma/client";
 import { generateGameTags } from "@/lib/services/game-ai-tagging.service";
@@ -35,7 +35,7 @@ export async function getGameByRawgId(rawgId: number) {
 }
 
 export async function getBaseTags(): Promise<ShortTag[]> {
-  return prisma.tag.findMany({
+  const dbTags = await prisma.tag.findMany({
     where: {
       slug: {
         in: TAG_SLUGS,
@@ -47,6 +47,14 @@ export async function getBaseTags(): Promise<ShortTag[]> {
       gamesCount: true,
     },
   });
+
+  const dbTagMap = new Map(dbTags.map((tag) => [tag.slug, tag]));
+
+  return TAGS.map((tag) => ({
+    slug: tag.slug,
+    name: tag.name,
+    gamesCount: dbTagMap.get(tag.slug)?.gamesCount ?? 0,
+  }));
 }
 
 export async function saveRawgGame(rawgGame: RawgGame) {

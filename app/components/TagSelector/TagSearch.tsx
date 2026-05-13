@@ -20,21 +20,28 @@ function scoreTag(tag: ShortTag, query: string) {
 
   const name = normalize(tag.name);
   const slug = normalize(tag.slug);
+  const aliases = TAGS_AS_OBJECT[tag.slug]?.aliases?.map(normalize) ?? [];
 
   // exact
   if (name === q) return 1000;
   if (slug === q) return 950;
+  if (aliases.some((alias) => alias === q)) return 900;
 
   // starts with
   if (name.startsWith(q)) return 800;
   if (slug.startsWith(q)) return 750;
+  if (aliases.some((alias) => alias.startsWith(q))) return 700;
 
   // word starts with
   if (name.split(" ").some((w) => w.startsWith(q))) return 600;
+  if (aliases.some((alias) => alias.split(" ").some((w) => w.startsWith(q)))) {
+    return 550;
+  }
 
   // contains
   if (name.includes(q)) return 400;
   if (slug.includes(q)) return 350;
+  if (aliases.some((alias) => alias.includes(q))) return 300;
 
   // fuzzy subsequence match
   let qi = 0;
@@ -58,10 +65,14 @@ const TagSearch = ({ tags, activeSlugs, onToggle }: Props) => {
   const [highlightIdx, setHighlightIdx] = useState(0);
   const searchWrapRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const inputRef = useRef<HTMLInputElement>(null);
+
   const results = useMemo<ShortTag[]>(() => {
     const q = normalize(query);
 
-    if (!q) return [];
+    if (!q) {
+      return [...tags].slice(0, 30);
+    }
 
     return tags
       .map((tag) => ({
@@ -70,12 +81,10 @@ const TagSearch = ({ tags, activeSlugs, onToggle }: Props) => {
       }))
       .filter((x) => x.score > 0)
       .sort((a, b) => {
-        // najpierw score
         if (b.score !== a.score) {
           return b.score - a.score;
         }
 
-        // potem popularność
         return b.tag.gamesCount - a.tag.gamesCount;
       })
       .slice(0, 30)
@@ -125,7 +134,7 @@ const TagSearch = ({ tags, activeSlugs, onToggle }: Props) => {
       <div
         className={cn(
           "flex items-center gap-2 px-4 py-2.5 rounded-xl border bg-card/40 transition-smooth",
-          searchOpen && query
+          searchOpen
             ? "border-primary/50 shadow-[0_0_0_3px_hsl(var(--primary)/0.08)]"
             : "border-border hover:border-primary/40",
         )}
@@ -134,6 +143,7 @@ const TagSearch = ({ tags, activeSlugs, onToggle }: Props) => {
         <input
           type="text"
           value={query}
+          ref={inputRef}
           onChange={(e) => {
             setQuery(e.target.value);
             setSearchOpen(true);
@@ -170,7 +180,7 @@ const TagSearch = ({ tags, activeSlugs, onToggle }: Props) => {
           </button>
         )}
       </div>
-      {searchOpen && query && (
+      {searchOpen && (
         <div className="absolute z-30 left-0 right-0 mt-2 rounded-xl border border-border bg-popover/95 backdrop-blur-sm shadow-[0_20px_50px_-20px_hsl(var(--primary)/0.4)] overflow-hidden animate-fade-in">
           {results.length === 0 ? (
             <div className="px-4 py-6 text-sm text-muted-foreground text-center">
@@ -189,7 +199,13 @@ const TagSearch = ({ tags, activeSlugs, onToggle }: Props) => {
                         itemRefs.current[i] = el;
                       }}
                       onMouseEnter={() => setHighlightIdx(i)}
-                      onClick={() => onToggle(r)}
+                      onClick={() => {
+                        onToggle(r);
+
+                        requestAnimationFrame(() => {
+                          inputRef.current?.focus();
+                        });
+                      }}
                       className={cn(
                         "w-full flex items-center gap-3 px-4 py-2.5 text-left transition-smooth",
                         isHi ? "bg-primary/10" : "hover:bg-primary/5",
