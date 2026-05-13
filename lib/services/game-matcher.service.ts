@@ -23,7 +23,14 @@ const RESULTS_LIMIT = 80;
 const SHARED_TRAITS_LIMIT = 6;
 const CONFLICT_PENALTY_SHARE = 0.22;
 const MISSING_ACTIVE_TAG_PENALTY_SHARE = 0.25;
+const ACTIVE_ONLY_MISSING_ACTIVE_TAG_PENALTY_SHARE = 0.08;
 const CANDIDATE_NOISE_PENALTY_SHARE = 0.10;
+const ACTIVE_ONLY_CANDIDATE_NOISE_PENALTY_SHARE = 0.025;
+const ACTIVE_ONLY_PRIMARY_MATCH_SHARE = 0.45;
+const ACTIVE_ONLY_WEIGHTED_COVERAGE_SHARE = 0.25;
+const ACTIVE_ONLY_MATCH_STRENGTH_SHARE = 0.15;
+const ACTIVE_ONLY_COUNT_COVERAGE_SHARE = 0.10;
+const ACTIVE_ONLY_FULL_MATCH_BONUS_SHARE = 0.05;
 const MATCH_REASON_TITLE =
   "Matched on shared gameplay and atmosphere traits from your picks.";
 
@@ -248,6 +255,25 @@ function getCandidateNoisePenalty(
   return (weights.unmatched / weights.total) * CANDIDATE_NOISE_PENALTY_SHARE;
 }
 
+function getStrongestActiveTagCoverage(
+  userProfile: Map<string, UserTagSignal>,
+  matchedSignals: UserTagSignal[],
+) {
+  const strongestActiveScore = Array.from(userProfile.values()).reduce(
+    (max, signal) => Math.max(max, signal.activeScore),
+    0,
+  );
+
+  if (strongestActiveScore === 0) return 0;
+
+  const strongestMatchedActiveScore = matchedSignals.reduce(
+    (max, signal) => Math.max(max, signal.activeScore),
+    0,
+  );
+
+  return strongestMatchedActiveScore / strongestActiveScore;
+}
+
 function getScoreBreakdown(
   game: GameDto,
   userProfile: Map<string, UserTagSignal>,
@@ -260,6 +286,7 @@ function getScoreBreakdown(
   let matchedProfileScore = 0;
   let activeTotal = 0;
   let matchedActiveScore = 0;
+  let matchedActiveStrengthScore = 0;
   let rareProfileTotal = 0; /// rpg rarity nie trafia
   let matchedRareProfileScore = 0;
 
@@ -284,6 +311,8 @@ function getScoreBreakdown(
 
       matchedProfileScore += weightedMatchScore;
       matchedActiveScore += signal.activeScore;
+      matchedActiveStrengthScore +=
+        signal.activeScore * candidateStrengthWeight;
 
       if (signal.rarity >= rareTagThreshold) {
         matchedRareProfileScore += signal.score;
@@ -301,6 +330,10 @@ function getScoreBreakdown(
 
   const profileCoverage = Math.min(1, matchedProfileScore / profileTotal);
   const activeCoverage = activeTotal > 0 ? matchedActiveScore / activeTotal : 0;
+  const activeStrengthCoverage =
+    activeTotal > 0
+      ? matchedActiveStrengthScore / (activeTotal * STRENGTH_WEIGHTS[3])
+      : 0;
   const hasRareProfileSignals = rareProfileTotal > 0;
   const rareTagCoverage = hasRareProfileSignals
     ? matchedRareProfileScore / rareProfileTotal
@@ -327,19 +360,34 @@ function getScoreBreakdown(
   if (!hasSelectedGames && activeTags.length > 0) {
     const activeCountCoverage = activeTagMatches / activeTags.length;
     const fullActiveMatch = activeTagMatches === activeTags.length;
-    const activeBoostShare = hasRareProfileSignals ? 0.07 : 0.1;
-    const rareBoostShare = hasRareProfileSignals ? 0.03 : 0;
+    const strongestActiveTagCoverage = getStrongestActiveTagCoverage(
+      userProfile,
+      matchedSignals,
+    );
+    const activeOnlyMissingPenalty = getMissingActiveTagPenalty(
+      activeTags,
+      activeTagMatches,
+    ) *
+      (ACTIVE_ONLY_MISSING_ACTIVE_TAG_PENALTY_SHARE /
+        MISSING_ACTIVE_TAG_PENALTY_SHARE);
+    const activeOnlyNoisePenalty =
+      candidateNoisePenalty *
+      (ACTIVE_ONLY_CANDIDATE_NOISE_PENALTY_SHARE /
+        CANDIDATE_NOISE_PENALTY_SHARE);
     const similarity =
-      activeCountCoverage * 0.9 +
-      (fullActiveMatch
-        ? activeCoverage * activeBoostShare + rareTagCoverage * rareBoostShare
-        : 0) -
-      totalPenalty;
+      strongestActiveTagCoverage * ACTIVE_ONLY_PRIMARY_MATCH_SHARE +
+      activeCoverage * ACTIVE_ONLY_WEIGHTED_COVERAGE_SHARE +
+      activeStrengthCoverage * ACTIVE_ONLY_MATCH_STRENGTH_SHARE +
+      activeCountCoverage * ACTIVE_ONLY_COUNT_COVERAGE_SHARE +
+      (fullActiveMatch ? ACTIVE_ONLY_FULL_MATCH_BONUS_SHARE : 0) -
+      conflictPenalty -
+      activeOnlyNoisePenalty -
+      activeOnlyMissingPenalty;
 
     return {
       activeTagMatches,
       matchedSignals,
-      similarity: clampSimilarity(similarity),
+      similarity: curveSimilarity(similarity),
     };
   }
   const specificMatchShare = hasRareProfileSignals ? SPECIFIC_MATCH_SHARE : 0;
