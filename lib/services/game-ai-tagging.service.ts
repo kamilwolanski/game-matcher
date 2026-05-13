@@ -222,7 +222,16 @@ export async function generateGameTags(
           - "third-person" in an action RPG is often strength 1
           - "singleplayer" is usually strength 1
 
-          13. Order tags from most defining to least defining.
+          13. When a highly specific theme tag exists,
+              prefer it over combining multiple broader tags.
+
+              Examples:
+              - prefer "ww2" over using only:
+                "war" + "military" + "historical"
+              - prefer "cyberpunk" over:
+                "sci-fi" + "dystopian"
+
+          14. Order tags from most defining to least defining.
 
           EXAMPLES:
 
