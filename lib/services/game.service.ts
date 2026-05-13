@@ -55,6 +55,7 @@ export async function saveRawgGame(rawgGame: RawgGame) {
   // =========================================================
   try {
     const tags = await generateGameTags(rawgGame);
+    const strengthMap = new Map(tags.map((tag) => [tag.slug, tag.strength]));
     // =========================================================
     // Transaction
     // =========================================================
@@ -122,6 +123,7 @@ export async function saveRawgGame(rawgGame: RawgGame) {
             data: {
               gameId: game.id,
               tagId: tag.id,
+              strength: strengthMap.get(tag.slug) ?? 2,
             },
           });
 

@@ -18,6 +18,7 @@ export const toGameDto = (game: GameWithRelations): GameDto => {
       name: t.tag.name,
       slug: t.tag.slug,
       gamesCount: t.tag.gamesCount,
+      strength: t.strength as 1 | 2 | 3,
     })),
   };
 };
