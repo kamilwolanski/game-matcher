@@ -139,6 +139,7 @@ const BLOCKED_POSITIONS = new Set<string>([
   "kingdom-hearts-hd-1525-remix",
   "tales-of-vesperia-definitive-edition",
   "another-world-20th",
+  "day-of-defeat-source",
 ] as const);
 
 function isFutureRelease(released: string | null) {
