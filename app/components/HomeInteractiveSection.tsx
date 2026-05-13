@@ -71,6 +71,7 @@ export function HomeInteractiveSection({ availableTags }: Props) {
             onSectionChange={selectTagSection}
             onToggle={toggleTag}
             clearAllTags={clearAllTags}
+            isAnalyzing={isAnalyzing}
           />
         </div>
       </section>

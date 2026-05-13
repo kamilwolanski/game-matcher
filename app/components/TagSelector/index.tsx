@@ -24,6 +24,7 @@ type Props = {
   activeSection: BaseTagSection;
   activeTags: ShortTag[];
   suggestedTags: ShortTag[];
+  isAnalyzing: boolean;
   onSectionChange: (section: BaseTagSection) => void;
   onToggle: (tag: ShortTag) => void;
   clearAllTags: () => void;
@@ -34,6 +35,7 @@ export const TagSelector = ({
   activeSection,
   activeTags,
   suggestedTags,
+  isAnalyzing,
   onSectionChange,
   onToggle,
   clearAllTags
@@ -125,6 +127,7 @@ export const TagSelector = ({
         suggestedTags={suggestedTags}
         activeSlugs={activeSlugs}
         onToggle={onToggle}
+        isAnalyzing={isAnalyzing}
       />
 
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
