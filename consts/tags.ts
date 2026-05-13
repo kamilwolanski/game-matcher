@@ -384,13 +384,6 @@ const BASE_TAGS: BaseTag[] = [
     name: "Exploration",
     section: "Gameplay",
   },
-  { slug: "loot", category: "mechanic", name: "Loot", section: "Gameplay" },
-  {
-    slug: "character-builds",
-    category: "mechanic",
-    name: "Character Builds",
-    section: "Gameplay",
-  },
   {
     slug: "deckbuilder",
     category: "mechanic",
@@ -430,9 +423,15 @@ const BASE_TAGS: BaseTag[] = [
     section: "Gameplay",
   },
   {
-    slug: "management",
+    slug: "colony-management",
     category: "mechanic",
-    name: "Management",
+    name: "Colony Management",
+    section: "Gameplay",
+  },
+  {
+    slug: "factory-management",
+    category: "mechanic",
+    name: "Factory Management",
     section: "Gameplay",
   },
   {
@@ -445,6 +444,18 @@ const BASE_TAGS: BaseTag[] = [
     slug: "driving",
     category: "mechanic",
     name: "Driving",
+    section: "Gameplay",
+  },
+  {
+    slug: "fishing",
+    category: "mechanic",
+    name: "Fishing",
+    section: "Gameplay",
+  },
+  {
+    slug: "hunting",
+    category: "mechanic",
+    name: "Hunting",
     section: "Gameplay",
   },
   {
@@ -519,7 +530,24 @@ const BASE_TAGS: BaseTag[] = [
     name: "Tactical",
     section: "Gameplay",
   },
-
+  {
+    slug: "precision-combat",
+    category: "mechanic",
+    name: "Precision Combat",
+    section: "Gameplay",
+  },
+  {
+    slug: "backtracking",
+    category: "structure",
+    name: "Backtracking",
+    section: "Gameplay",
+  },
+  {
+    slug: "party-based",
+    category: "mechanic",
+    name: "Party Based",
+    section: "Gameplay",
+  },
   // =========================================================
   // EXPERIENCE
   // =========================================================
@@ -569,7 +597,6 @@ const BASE_TAGS: BaseTag[] = [
   },
 
   // Mood
-  { slug: "dark", category: "mood", name: "Dark", section: "Experience" },
   {
     slug: "atmospheric",
     category: "mood",
@@ -589,21 +616,9 @@ const BASE_TAGS: BaseTag[] = [
     name: "Emotional",
     section: "Experience",
   },
-  {
-    slug: "immersive",
-    category: "mood",
-    name: "Immersive",
-    section: "Experience",
-  },
   { slug: "tense", category: "mood", name: "Tense", section: "Experience" },
   { slug: "scary", category: "mood", name: "Scary", section: "Experience" },
   { slug: "funny", category: "mood", name: "Funny", section: "Experience" },
-  {
-    slug: "addictive",
-    category: "mood",
-    name: "Addictive",
-    section: "Experience",
-  },
   {
     slug: "philosophical",
     category: "mood",
@@ -872,6 +887,7 @@ const BASE_TAGS: BaseTag[] = [
     name: "Vampires",
     section: "Style & Theme",
   },
+  { slug: "dark", category: "theme", name: "Dark", section: "Style & Theme" },
 
   // Aesthetic
   {
@@ -890,12 +906,6 @@ const BASE_TAGS: BaseTag[] = [
     slug: "stylized",
     category: "aesthetic",
     name: "Stylized",
-    section: "Style & Theme",
-  },
-  {
-    slug: "realistic",
-    category: "aesthetic",
-    name: "Realistic",
     section: "Style & Theme",
   },
   {
@@ -1058,7 +1068,6 @@ export const DEFAULT_VISIBLE_TAG_SLUGS = [
   // Experience
 
   "atmospheric",
-  "immersive",
   "challenging",
   "relaxing",
   "emotional",
@@ -1069,7 +1078,6 @@ export const DEFAULT_VISIBLE_TAG_SLUGS = [
   "scary",
   "tense",
   "competitive",
-  "dark",
   "family-friendly",
   "chill",
   "fast-paced",
@@ -1088,7 +1096,6 @@ export const DEFAULT_VISIBLE_TAG_SLUGS = [
   "dystopian",
   "space",
   "military",
-  "realistic",
   "stylized",
   "cinematic",
   "vampires",
@@ -1105,7 +1112,7 @@ export const DEFAULT_VISIBLE_TAG_SLUGS = [
   "pixel-art",
   "gothic",
   "anime",
-  
+
   // Perspective & Mode
   "singleplayer",
   "multiplayer",
