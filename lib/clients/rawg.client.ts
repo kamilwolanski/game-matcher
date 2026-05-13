@@ -63,7 +63,6 @@ export async function fetchRawgGameDetails(rawgId: number) {
 export async function searchRawgGames(query: string) {
   const url = createRawgUrl("/games");
   url.searchParams.set("page_size", String(RAWG_SEARCH_PAGE_SIZE));
-  url.searchParams.set("exclude_additions", "true");
 
   if (query) {
     url.searchParams.set("search", query);

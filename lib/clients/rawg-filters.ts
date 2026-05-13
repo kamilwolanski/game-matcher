@@ -1,25 +1,14 @@
 import { SearchGameResult } from "../dto/search-game.dto";
 
-const BLOCKED_KEYWORDS = [
-  "special-edition",
-  "complete-edition",
-  "goty",
-  "game-of-the-year",
-  "gold-edition",
-  "ultimate-edition",
-  "definitive-edition",
-  "enhanced-edition",
-  "directors-cut",
-  "director-s-cut",
-  "bundle",
-  "demo",
-  "soundtrack",
-  "expansion",
-  "dlc",
-  "collection",
-  "trilogy",
-  "anthology",
-  "remastered-collection",
+const BLOCKED_PATTERNS = [
+  /\bDemo\b/i,
+  /\bSoundtrack\b/i,
+  /\bBundle\b/i,
+  /\bExpansion\b/i,
+  /\bDLC\b/i,
+  /\bCollection\b/i,
+  /\bTrilogy\b/i,
+  /\bAnthology\b/i,
 ];
 
 function isFutureRelease(released: string | null) {
@@ -30,7 +19,9 @@ function isFutureRelease(released: string | null) {
   return new Date(released) > new Date();
 }
 
-export function shouldHideGame(game: Omit<SearchGameResult, 'image' | 'rawgId'>) {
+export function shouldHideGame(
+  game: Omit<SearchGameResult, "image" | "rawgId">,
+) {
   if (game.tba) {
     return true;
   }
@@ -42,6 +33,5 @@ export function shouldHideGame(game: Omit<SearchGameResult, 'image' | 'rawgId'>)
   if (game.added < 10) {
     return true;
   }
-
-  return BLOCKED_KEYWORDS.some((keyword) => game.slug.includes(keyword));
+  return BLOCKED_PATTERNS.some((pattern) => pattern.test(game.name));
 }
