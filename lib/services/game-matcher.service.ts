@@ -7,11 +7,10 @@ import { toGameDto } from "@/lib/mappers/game.mapper";
 import prisma from "@/lib/prisma";
 import { CATEGORY_WEIGHTS, TAGS_AS_OBJECT } from "@/consts/tags";
 
-
 const SELECTED_GAME_TAG_WEIGHT = 1;
-const ACTIVE_TAG_WEIGHT = 5;
+const ACTIVE_TAG_WEIGHT = 2;
+const ACTIVE_MATCH_SHARE = 0.25;
 const REPEATED_TAG_DECAY = 0.65;
-const ACTIVE_MATCH_SHARE = 0.35;
 const SPECIFIC_MATCH_SHARE = 0.15;
 const MIN_TAG_RARITY = 0.15;
 const MAX_TAG_RARITY = 4;
@@ -20,12 +19,19 @@ const RARE_TAG_MIN_THRESHOLD = 2;
 const TAG_COUNT_SMOOTHING = 2;
 const SELECTED_GAME_SCORE_CURVE = 0.65;
 const DEFAULT_CATEGORY_WEIGHT = 1;
-const TAG_MATCH_CANDIDATE_LIMIT = 2500;
+const TAG_MATCH_CANDIDATE_LIMIT = 1;
 const POPULAR_DISCOVERY_CANDIDATE_LIMIT = 300;
 const HIDDEN_GEM_CANDIDATE_LIMIT = 300;
 const RESULTS_LIMIT = 80;
 const SHARED_TRAITS_LIMIT = 6;
-const MATCH_REASON_TITLE = "Matched on shared gameplay and atmosphere traits from your picks.";
+const MATCH_REASON_TITLE =
+  "Matched on shared gameplay and atmosphere traits from your picks.";
+
+const STRENGTH_WEIGHTS = {
+  1: 0.45,
+  2: 1,
+  3: 1.8,
+} as const;
 
 type UserTagSignal = {
   tag: ShortTag;
@@ -48,8 +54,15 @@ const gameWithTagsInclude = {
   },
 } as const;
 
+function getTagStrengthWeight(strength?: 1 | 2 | 3) {
+  if (!strength) return 1;
+
+  return STRENGTH_WEIGHTS[strength];
+}
+
 const getTagCategoryWeight = (slug: string) => {
-  const tag = TAGS_AS_OBJECT[slug];
+  // rpg
+  const tag = TAGS_AS_OBJECT[slug]; // tag { slug: 'rpg',category: 'genre', name: 'RPG', section: 'Gameplay', defaultVisible: true }
 
   if (!tag) return DEFAULT_CATEGORY_WEIGHT;
 
@@ -58,7 +71,9 @@ const getTagCategoryWeight = (slug: string) => {
 
 const getTagSignalWeight = (tag: ShortTag, totalGames: number) => {
   return (
-    getTagRarity(tag.gamesCount, totalGames) * getTagCategoryWeight(tag.slug)
+    getTagRarity(tag.gamesCount, totalGames) *
+    getTagCategoryWeight(tag.slug) *
+    getTagStrengthWeight(tag.strength)
   );
 };
 
@@ -66,13 +81,13 @@ const getTagRarity = (count: number, totalGames: number) => {
   if (totalGames <= 0) return MIN_TAG_RARITY;
   if (totalGames < MIN_GAMES_FOR_RARITY) return 1;
 
-  const normalizedCount = Math.min(Math.max(count, 0), totalGames);
+  const normalizedCount = Math.min(Math.max(count, 0), totalGames); // Math.min(Math.max(251, 0), 1389) = 251
   const rarity = Math.log(
     (totalGames + TAG_COUNT_SMOOTHING) /
       (normalizedCount + TAG_COUNT_SMOOTHING),
-  );
+  ); // Math.log((1389, + 2) / (251 + 2))
 
-  return Math.min(MAX_TAG_RARITY, Math.max(MIN_TAG_RARITY, rarity));
+  return Math.min(MAX_TAG_RARITY, Math.max(MIN_TAG_RARITY, rarity)); /// 1.7043887031959226
 };
 
 function curveSimilarity(score: number) {
@@ -82,18 +97,32 @@ function curveSimilarity(score: number) {
 function getUserProfile(
   selectedGames: GameDto[],
   activeTags: ShortTag[],
-  totalGames: number,
+  totalGames: number, // 1389
 ) {
+  // console.log("selectedGames: ", selectedGames);
+  // console.log("activeTags: ", activeTags);
+  // console.log("totalGames: ", totalGames);
+  // console.log('selectedGames tags: ', selectedGames.flatMap((game) => game.tags))
   const profile = new Map<string, UserTagSignal>();
   const selectedTagOccurrences = new Map<string, number>();
 
   for (const tag of selectedGames.flatMap((game) => game.tags)) {
-    const occurrence = (selectedTagOccurrences.get(tag.slug) ?? 0) + 1;
-    const rarity = getTagRarity(tag.gamesCount, totalGames);
-    const tagSignalWeight = rarity * getTagCategoryWeight(tag.slug);
+    // { name: 'RPG', slug: 'rpg', gamesCount: 251, strength: 3 },
+    const occurrence = (selectedTagOccurrences.get(tag.slug) ?? 0) + 1; // 1
+    // console.log('occurence', occurrence)
+    const rarity = getTagRarity(tag.gamesCount, totalGames); // getTagRarity(251, 1389) = 1.7043887031959226;
+    // console.log('rarity', rarity)
+    const tagSignalWeight =
+      rarity *
+      getTagCategoryWeight(tag.slug) *
+      getTagStrengthWeight(tag.strength); // 1.7043887031959226 * 5 * 1.8 = 15.339498328763304
+
+    // console.log(`tagSignalWeight ${tag.name}`, tagSignalWeight)
     const repeatedTagWeight =
-      SELECTED_GAME_TAG_WEIGHT / Math.pow(occurrence, REPEATED_TAG_DECAY);
-    const score = tagSignalWeight * repeatedTagWeight;
+      SELECTED_GAME_TAG_WEIGHT / Math.pow(occurrence, REPEATED_TAG_DECAY); // 1 / Math.pow(1, 0.65) = 1
+    // console.log(`repeatedTagWeight ${tag.name}`, repeatedTagWeight)
+    const score = tagSignalWeight * repeatedTagWeight; // 15.339498328763304
+    // console.log(`score ${tag.name}`, score)
     const existing = profile.get(tag.slug);
 
     selectedTagOccurrences.set(tag.slug, occurrence);
@@ -122,9 +151,12 @@ function getUserProfile(
 }
 
 function getProfileRareTagThreshold(userProfile: Map<string, UserTagSignal>) {
+  console.log('Array.from(userProfile.values())', Array.from(userProfile.values()))
   const rarities = Array.from(userProfile.values())
     .map((signal) => signal.rarity)
     .toSorted((a, b) => a - b);
+
+    console.log('rarities', rarities)
 
   if (rarities.length === 0) return MAX_TAG_RARITY;
 
@@ -143,15 +175,17 @@ function getScoreBreakdown(
   hasSelectedGames: boolean,
   rareTagThreshold: number,
 ) {
-  let profileTotal = 0;
+  let profileTotal = 0; // 15.339498328763304 + ...
   let matchedProfileScore = 0;
   let activeTotal = 0;
   let matchedActiveScore = 0;
-  let rareProfileTotal = 0;
+  let rareProfileTotal = 0; /// rpg rarity nie trafia
   let matchedRareProfileScore = 0;
 
   const matchedSignals: UserTagSignal[] = [];
   const gameTagSlugs = new Set(game.tags.map((tag) => tag.slug));
+  console.log('userProfile.values(): ', userProfile.values())
+  console.log('gameTagSlugs', gameTagSlugs)
 
   for (const signal of userProfile.values()) {
     profileTotal += signal.score;
@@ -172,6 +206,8 @@ function getScoreBreakdown(
     }
   }
 
+  console.log('profileTotal', profileTotal)
+  console.log('matchedProfileScore', matchedProfileScore)
   if (profileTotal === 0) {
     return {
       activeTagMatches: 0,
@@ -205,10 +241,11 @@ function getScoreBreakdown(
       similarity,
     };
   }
-
+  console.log('profileCoverage', profileCoverage)
   const specificMatchShare = hasRareProfileSignals ? SPECIFIC_MATCH_SHARE : 0;
   const baseShare =
     1 - specificMatchShare - (activeTags.length > 0 ? ACTIVE_MATCH_SHARE : 0);
+    console.log('baseShare', baseShare)
   const similarity =
     profileCoverage * baseShare +
     activeCoverage * ACTIVE_MATCH_SHARE +
@@ -297,11 +334,7 @@ async function getCandidateGames(tagSlugs: string[], selectedGames: GameDto[]) {
     ]);
 
   return Array.from(
-    new Map(
-      [...tagMatchGames].map(
-        (game) => [game.slug, game],
-      ),
-    ).values(),
+    new Map([...tagMatchGames].map((game) => [game.slug, game])).values(),
   );
 }
 
@@ -341,7 +374,8 @@ export async function findMatchingGames(
     prisma.game.count(),
   ]);
   const userProfile = getUserProfile(selectedGames, activeTags, totalGames);
-  const rareTagThreshold = getProfileRareTagThreshold(userProfile);
+  const rareTagThreshold = getProfileRareTagThreshold(userProfile);  // 2.7269186854065928
+  console.log('rareTagThreshold', rareTagThreshold)
 
   return games
     .map((game) => {
@@ -371,7 +405,6 @@ export async function findMatchingGames(
       if (b.activeTagMatches !== a.activeTagMatches) {
         return b.activeTagMatches - a.activeTagMatches;
       }
-
 
       return (b.added ?? 0) - (a.added ?? 0);
     })
