@@ -45,7 +45,7 @@ export default async function Home() {
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.05]">
             Find games you&apos;ll{" "}
             <span className="gradient-text bg-size-[200%_auto] animate-gradient-shift">
-              actually love
+              love
             </span>
           </h1>
           <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">

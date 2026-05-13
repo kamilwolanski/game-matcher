@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Game Matcher — Find Similar Games Based on Your Taste",
     description:
-      "Find games you'll actually love using AI-powered semantic game matching and gameplay trait analysis.",
+      "Find games you'll love using AI-powered semantic game matching and gameplay trait analysis.",
     url: "https://gamematcher.app",
     siteName: "Game Matcher",
     type: "website",
