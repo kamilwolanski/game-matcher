@@ -9,7 +9,7 @@ import { CATEGORY_WEIGHTS, TAGS_AS_OBJECT } from "@/consts/tags";
 
 const SELECTED_GAME_TAG_WEIGHT = 1;
 const ACTIVE_TAG_WEIGHT = 2;
-const ACTIVE_MATCH_SHARE = 0.25;
+const ACTIVE_MATCH_SHARE = 0.20;
 const REPEATED_TAG_DECAY = 0.65;
 const SPECIFIC_MATCH_SHARE = 0.15;
 const MIN_TAG_RARITY = 0.15;
@@ -19,11 +19,11 @@ const RARE_TAG_MIN_THRESHOLD = 2;
 const TAG_COUNT_SMOOTHING = 2;
 const SELECTED_GAME_SCORE_CURVE = 0.65;
 const DEFAULT_CATEGORY_WEIGHT = 1;
-const TAG_MATCH_CANDIDATE_LIMIT = 1;
-const POPULAR_DISCOVERY_CANDIDATE_LIMIT = 300;
-const HIDDEN_GEM_CANDIDATE_LIMIT = 300;
 const RESULTS_LIMIT = 80;
 const SHARED_TRAITS_LIMIT = 6;
+const CONFLICT_PENALTY_SHARE = 0.22;
+const MISSING_ACTIVE_TAG_PENALTY_SHARE = 0.25;
+const CANDIDATE_NOISE_PENALTY_SHARE = 0.10;
 const MATCH_REASON_TITLE =
   "Matched on shared gameplay and atmosphere traits from your picks.";
 
@@ -32,6 +32,27 @@ const STRENGTH_WEIGHTS = {
   2: 1,
   3: 1.8,
 } as const;
+
+const TAG_CONFLICTS: Record<string, readonly string[]> = {
+  "fast-paced": ["slow-paced", "methodical"],
+  "slow-paced": ["fast-paced", "high-reflex", "arcade"],
+  methodical: ["fast-paced", "arcade"],
+  "high-reflex": ["slow-paced", "relaxing", "cozy"],
+  relaxing: ["tense", "scary", "competitive", "high-reflex"],
+  chill: ["tense", "scary", "competitive"],
+  cozy: ["tense", "scary", "competitive"],
+  tense: ["relaxing", "chill", "cozy"],
+  scary: ["relaxing", "chill", "cozy", "family-friendly"],
+  casual: ["challenging", "competitive", "high-reflex"],
+  challenging: ["casual", "relaxing"],
+  competitive: ["relaxing", "chill", "cozy", "family-friendly"],
+  "family-friendly": ["scary", "dark", "gothic"],
+  linear: ["open-world", "sandbox"],
+  "open-world": ["linear"],
+  sandbox: ["linear"],
+  singleplayer: ["online-pvp", "ranked", "moba", "battle-royale"],
+  multiplayer: ["walking-simulator", "visual-novel"],
+};
 
 type UserTagSignal = {
   tag: ShortTag;
@@ -61,8 +82,7 @@ function getTagStrengthWeight(strength?: 1 | 2 | 3) {
 }
 
 const getTagCategoryWeight = (slug: string) => {
-  // rpg
-  const tag = TAGS_AS_OBJECT[slug]; // tag { slug: 'rpg',category: 'genre', name: 'RPG', section: 'Gameplay', defaultVisible: true }
+  const tag = TAGS_AS_OBJECT[slug];
 
   if (!tag) return DEFAULT_CATEGORY_WEIGHT;
 
@@ -81,17 +101,21 @@ const getTagRarity = (count: number, totalGames: number) => {
   if (totalGames <= 0) return MIN_TAG_RARITY;
   if (totalGames < MIN_GAMES_FOR_RARITY) return 1;
 
-  const normalizedCount = Math.min(Math.max(count, 0), totalGames); // Math.min(Math.max(251, 0), 1389) = 251
+  const normalizedCount = Math.min(Math.max(count, 0), totalGames); 
   const rarity = Math.log(
     (totalGames + TAG_COUNT_SMOOTHING) /
       (normalizedCount + TAG_COUNT_SMOOTHING),
-  ); // Math.log((1389, + 2) / (251 + 2))
+  ); 
 
-  return Math.min(MAX_TAG_RARITY, Math.max(MIN_TAG_RARITY, rarity)); /// 1.7043887031959226
+  return Math.min(MAX_TAG_RARITY, Math.max(MIN_TAG_RARITY, rarity)); 
 };
 
 function curveSimilarity(score: number) {
   return Math.pow(Math.min(Math.max(score, 0), 1), SELECTED_GAME_SCORE_CURVE);
+}
+
+function clampSimilarity(score: number) {
+  return Math.min(Math.max(score, 0), 1);
 }
 
 function getUserProfile(
@@ -99,30 +123,24 @@ function getUserProfile(
   activeTags: ShortTag[],
   totalGames: number, // 1389
 ) {
-  // console.log("selectedGames: ", selectedGames);
-  // console.log("activeTags: ", activeTags);
-  // console.log("totalGames: ", totalGames);
-  // console.log('selectedGames tags: ', selectedGames.flatMap((game) => game.tags))
   const profile = new Map<string, UserTagSignal>();
   const selectedTagOccurrences = new Map<string, number>();
 
   for (const tag of selectedGames.flatMap((game) => game.tags)) {
-    // { name: 'RPG', slug: 'rpg', gamesCount: 251, strength: 3 },
     const occurrence = (selectedTagOccurrences.get(tag.slug) ?? 0) + 1; // 1
-    // console.log('occurence', occurrence)
-    const rarity = getTagRarity(tag.gamesCount, totalGames); // getTagRarity(251, 1389) = 1.7043887031959226;
-    // console.log('rarity', rarity)
+
+    const rarity = getTagRarity(tag.gamesCount, totalGames);
+
     const tagSignalWeight =
       rarity *
       getTagCategoryWeight(tag.slug) *
-      getTagStrengthWeight(tag.strength); // 1.7043887031959226 * 5 * 1.8 = 15.339498328763304
+      getTagStrengthWeight(tag.strength); 
 
-    // console.log(`tagSignalWeight ${tag.name}`, tagSignalWeight)
     const repeatedTagWeight =
-      SELECTED_GAME_TAG_WEIGHT / Math.pow(occurrence, REPEATED_TAG_DECAY); // 1 / Math.pow(1, 0.65) = 1
-    // console.log(`repeatedTagWeight ${tag.name}`, repeatedTagWeight)
-    const score = tagSignalWeight * repeatedTagWeight; // 15.339498328763304
-    // console.log(`score ${tag.name}`, score)
+      SELECTED_GAME_TAG_WEIGHT / Math.pow(occurrence, REPEATED_TAG_DECAY); 
+
+    const score = tagSignalWeight * repeatedTagWeight; 
+
     const existing = profile.get(tag.slug);
 
     selectedTagOccurrences.set(tag.slug, occurrence);
@@ -151,12 +169,9 @@ function getUserProfile(
 }
 
 function getProfileRareTagThreshold(userProfile: Map<string, UserTagSignal>) {
-  console.log('Array.from(userProfile.values())', Array.from(userProfile.values()))
   const rarities = Array.from(userProfile.values())
     .map((signal) => signal.rarity)
     .toSorted((a, b) => a - b);
-
-    console.log('rarities', rarities)
 
   if (rarities.length === 0) return MAX_TAG_RARITY;
 
@@ -168,12 +183,78 @@ function getProfileRareTagThreshold(userProfile: Map<string, UserTagSignal>) {
   );
 }
 
+function getConflictPenalty(
+  userProfile: Map<string, UserTagSignal>,
+  gameTagsMap: Map<string, ShortTag>,
+  profileTotal: number,
+) {
+  if (profileTotal === 0) return 0;
+
+  let conflictScore = 0;
+
+  for (const signal of userProfile.values()) {
+    const conflictingSlugs = TAG_CONFLICTS[signal.tag.slug];
+    if (!conflictingSlugs) continue;
+
+    const strongestConflict = conflictingSlugs.reduce((max, slug) => {
+      const tag = gameTagsMap.get(slug);
+
+      return tag ? Math.max(max, getTagStrengthWeight(tag.strength)) : max;
+    }, 0);
+
+    if (strongestConflict > 0) {
+      conflictScore += signal.score * strongestConflict;
+    }
+  }
+
+  return clampSimilarity(conflictScore / profileTotal) * CONFLICT_PENALTY_SHARE;
+}
+
+function getMissingActiveTagPenalty(
+  activeTags: ShortTag[],
+  activeTagMatches: number,
+) {
+  if (activeTags.length === 0) return 0;
+
+  const missingShare = 1 - activeTagMatches / activeTags.length;
+
+  return missingShare * MISSING_ACTIVE_TAG_PENALTY_SHARE;
+}
+
+function getCandidateNoisePenalty(
+  game: GameDto,
+  userProfile: Map<string, UserTagSignal>,
+  matchedSignals: UserTagSignal[],
+  totalGames: number,
+) {
+  if (matchedSignals.length === 0) return 0;
+
+  const weights = game.tags.reduce(
+    (acc, tag) => {
+      const weight = getTagSignalWeight(tag, totalGames);
+
+      return {
+        total: acc.total + weight,
+        unmatched: userProfile.has(tag.slug)
+          ? acc.unmatched
+          : acc.unmatched + weight,
+      };
+    },
+    { total: 0, unmatched: 0 },
+  );
+
+  if (weights.total === 0) return 0;
+
+  return (weights.unmatched / weights.total) * CANDIDATE_NOISE_PENALTY_SHARE;
+}
+
 function getScoreBreakdown(
   game: GameDto,
   userProfile: Map<string, UserTagSignal>,
   activeTags: ShortTag[],
   hasSelectedGames: boolean,
   rareTagThreshold: number,
+  totalGames: number,
 ) {
   let profileTotal = 0; // 15.339498328763304 + ...
   let matchedProfileScore = 0;
@@ -183,9 +264,7 @@ function getScoreBreakdown(
   let matchedRareProfileScore = 0;
 
   const matchedSignals: UserTagSignal[] = [];
-  const gameTagSlugs = new Set(game.tags.map((tag) => tag.slug));
-  console.log('userProfile.values(): ', userProfile.values())
-  console.log('gameTagSlugs', gameTagSlugs)
+  const gameTagsMap = new Map(game.tags.map((tag) => [tag.slug, tag]));
 
   for (const signal of userProfile.values()) {
     profileTotal += signal.score;
@@ -194,10 +273,16 @@ function getScoreBreakdown(
     if (signal.rarity >= rareTagThreshold) {
       rareProfileTotal += signal.score;
     }
-
-    if (gameTagSlugs.has(signal.tag.slug)) {
+    const matchedTag = gameTagsMap.get(signal.tag.slug);
+    if (matchedTag) {
       matchedSignals.push(signal);
-      matchedProfileScore += signal.score;
+
+      const candidateStrengthWeight = getTagStrengthWeight(matchedTag.strength);
+
+      const weightedMatchScore =
+        signal.score * ((1 + candidateStrengthWeight) / 2);
+
+      matchedProfileScore += weightedMatchScore;
       matchedActiveScore += signal.activeScore;
 
       if (signal.rarity >= rareTagThreshold) {
@@ -206,8 +291,6 @@ function getScoreBreakdown(
     }
   }
 
-  console.log('profileTotal', profileTotal)
-  console.log('matchedProfileScore', matchedProfileScore)
   if (profileTotal === 0) {
     return {
       activeTagMatches: 0,
@@ -216,15 +299,32 @@ function getScoreBreakdown(
     };
   }
 
-  const profileCoverage = matchedProfileScore / profileTotal;
+  const profileCoverage = Math.min(1, matchedProfileScore / profileTotal);
   const activeCoverage = activeTotal > 0 ? matchedActiveScore / activeTotal : 0;
   const hasRareProfileSignals = rareProfileTotal > 0;
   const rareTagCoverage = hasRareProfileSignals
     ? matchedRareProfileScore / rareProfileTotal
     : 0;
+  const activeTagMatches = getActiveTagMatchCount(game, activeTags);
+  const conflictPenalty = getConflictPenalty(
+    userProfile,
+    gameTagsMap,
+    profileTotal,
+  );
+  const missingActiveTagPenalty = getMissingActiveTagPenalty(
+    activeTags,
+    activeTagMatches,
+  );
+  const candidateNoisePenalty = getCandidateNoisePenalty(
+    game,
+    userProfile,
+    matchedSignals,
+    totalGames,
+  );
+  const totalPenalty =
+    conflictPenalty + missingActiveTagPenalty + candidateNoisePenalty;
 
   if (!hasSelectedGames && activeTags.length > 0) {
-    const activeTagMatches = getActiveTagMatchCount(game, activeTags);
     const activeCountCoverage = activeTagMatches / activeTags.length;
     const fullActiveMatch = activeTagMatches === activeTags.length;
     const activeBoostShare = hasRareProfileSignals ? 0.07 : 0.1;
@@ -233,26 +333,26 @@ function getScoreBreakdown(
       activeCountCoverage * 0.9 +
       (fullActiveMatch
         ? activeCoverage * activeBoostShare + rareTagCoverage * rareBoostShare
-        : 0);
+        : 0) -
+      totalPenalty;
 
     return {
       activeTagMatches,
       matchedSignals,
-      similarity,
+      similarity: clampSimilarity(similarity),
     };
   }
-  console.log('profileCoverage', profileCoverage)
   const specificMatchShare = hasRareProfileSignals ? SPECIFIC_MATCH_SHARE : 0;
   const baseShare =
     1 - specificMatchShare - (activeTags.length > 0 ? ACTIVE_MATCH_SHARE : 0);
-    console.log('baseShare', baseShare)
   const similarity =
     profileCoverage * baseShare +
     activeCoverage * ACTIVE_MATCH_SHARE +
-    rareTagCoverage * specificMatchShare;
+    rareTagCoverage * specificMatchShare -
+    totalPenalty;
 
   return {
-    activeTagMatches: getActiveTagMatchCount(game, activeTags),
+    activeTagMatches,
     matchedSignals,
     similarity: curveSimilarity(similarity),
   };
@@ -294,44 +394,24 @@ async function getCandidateGames(tagSlugs: string[], selectedGames: GameDto[]) {
     },
   };
 
-  const [tagMatchGames, popularDiscoveryGames, hiddenGemGames] =
-    await Promise.all([
-      tagSlugs.length > 0
-        ? prisma.game.findMany({
-            where: {
-              ...baseWhere,
-              tags: {
-                some: {
-                  tag: {
-                    slug: {
-                      in: tagSlugs,
-                    },
+  const tagMatchGames =
+    tagSlugs.length > 0
+      ? await prisma.game.findMany({
+          where: {
+            ...baseWhere,
+            tags: {
+              some: {
+                tag: {
+                  slug: {
+                    in: tagSlugs,
                   },
                 },
               },
             },
-            include: gameWithTagsInclude,
-            take: TAG_MATCH_CANDIDATE_LIMIT,
-          })
-        : [],
-      prisma.game.findMany({
-        where: baseWhere,
-        include: gameWithTagsInclude,
-        orderBy: [{ added: "desc" }, { rating: "desc" }],
-        take: POPULAR_DISCOVERY_CANDIDATE_LIMIT,
-      }),
-      prisma.game.findMany({
-        where: {
-          ...baseWhere,
-          added: {
-            not: 0,
           },
-        },
-        include: gameWithTagsInclude,
-        orderBy: [{ added: "asc" }, { rating: "desc" }],
-        take: HIDDEN_GEM_CANDIDATE_LIMIT,
-      }),
-    ]);
+          include: gameWithTagsInclude,
+        })
+      : [];
 
   return Array.from(
     new Map([...tagMatchGames].map((game) => [game.slug, game])).values(),
@@ -374,8 +454,7 @@ export async function findMatchingGames(
     prisma.game.count(),
   ]);
   const userProfile = getUserProfile(selectedGames, activeTags, totalGames);
-  const rareTagThreshold = getProfileRareTagThreshold(userProfile);  // 2.7269186854065928
-  console.log('rareTagThreshold', rareTagThreshold)
+  const rareTagThreshold = getProfileRareTagThreshold(userProfile); // 2.7269186854065928
 
   return games
     .map((game) => {
@@ -386,6 +465,7 @@ export async function findMatchingGames(
         activeTags,
         hasSelectedGames,
         rareTagThreshold,
+        totalGames,
       );
 
       return {
@@ -399,9 +479,19 @@ export async function findMatchingGames(
       };
     })
     .sort((a, b) => {
-      if (b.similarity !== a.similarity) {
-        return b.similarity - a.similarity;
+      const similarityDiff =
+        Math.round(b.similarity * 100) - Math.round(a.similarity * 100);
+
+      if (similarityDiff !== 0) {
+        return similarityDiff;
       }
+
+      const metacriticDiff = (b.metacritic ?? 0) - (a.metacritic ?? 0);
+
+      if (metacriticDiff !== 0) {
+        return metacriticDiff;
+      }
+
       if (b.activeTagMatches !== a.activeTagMatches) {
         return b.activeTagMatches - a.activeTagMatches;
       }
