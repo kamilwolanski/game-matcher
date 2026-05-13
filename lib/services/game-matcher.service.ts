@@ -125,6 +125,12 @@ function clampSimilarity(score: number) {
   return Math.min(Math.max(score, 0), 1);
 }
 
+function getCandidateMatchQuality(strength?: 1 | 2 | 3) {
+  if (!strength) return 1;
+
+  return 0.5 + getTagStrengthWeight(strength) / (2 * STRENGTH_WEIGHTS[3]);
+}
+
 function getUserProfile(
   selectedGames: GameDto[],
   activeTags: ShortTag[],
@@ -305,9 +311,11 @@ function getScoreBreakdown(
       matchedSignals.push(signal);
 
       const candidateStrengthWeight = getTagStrengthWeight(matchedTag.strength);
+      const candidateMatchQuality = getCandidateMatchQuality(
+        matchedTag.strength,
+      );
 
-      const weightedMatchScore =
-        signal.score * ((1 + candidateStrengthWeight) / 2);
+      const weightedMatchScore = signal.score * candidateMatchQuality;
 
       matchedProfileScore += weightedMatchScore;
       matchedActiveScore += signal.activeScore;
