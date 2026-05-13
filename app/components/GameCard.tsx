@@ -35,12 +35,13 @@ export const GameCard = ({ game, onClick, index = 0 }: Props) => {
       )}
     >
       <div className="relative">
-        <div className="aspect-3/4 overflow-hidden transition-bounce group-hover:scale-110">
+        <div className="relative aspect-3/4 overflow-hidden transition-bounce group-hover:scale-110">
           <Image
             src={image}
             alt={game.name}
             fill
-            className="object-cover object-top  "
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 35vw"
+            className="object-cover object-top"
           />
           <div className="absolute inset-0 bg-linear-to-t from-card via-card/10 to-transparent " />
         </div>

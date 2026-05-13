@@ -59,7 +59,7 @@ export const SuggestedPanel = ({
         aria-hidden
         className="mb-0 pointer-events-none absolute inset-0 z-0 animate-shimmer-sweep bg-[linear-gradient(110deg,transparent_30%,color-mix(in_srgb,var(--color-secondary)_18%,transparent)_50%,transparent_70%)]"
       />
-      <div className="flex items-center gap-2 text-sm font-semibold">
+      <div className="hidden md:flex  items-center gap-2 text-sm font-semibold">
         <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-secondary/20 text-secondary">
           <Sparkles className="h-4 w-4" />
         </span>
@@ -79,6 +79,18 @@ export const SuggestedPanel = ({
             {statusText}
           </span>
         )}
+      </div>
+      <div className="flex flex-col md:hidden gap-2 text-sm font-semibold">
+        <div className="flex items-center gap-2">
+          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-secondary/20 text-secondary">
+            <Sparkles className="h-4 w-4" />
+          </span>
+          Suggested from your picks
+        </div>
+        <span className="text-xs font-normal text-muted-foreground">
+          shared across your selected games
+        </span>
+
       </div>
       <div className="flex flex-wrap gap-1.5 md:gap-2">
         {suggestedTags.map((tag, idx) => (

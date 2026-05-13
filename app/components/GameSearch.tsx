@@ -36,7 +36,7 @@ const AnalyzingPhrase = ({ seed }: { seed: number }) => {
   return (
     <span
       key={idx}
-      className="text-[11px] text-muted-foreground animate-fade-in"
+      className="text-[11px] max-w-35 text-muted-foreground animate-fade-in"
     >
       {ANALYZING_PHRASES[idx]}
     </span>
@@ -304,7 +304,7 @@ export const GameSearch = ({
                 ) : (
                   <div className="w-9 h-12 rounded-lg bg-background border border-border" />
                 )}
-                <div className="relative flex flex-col min-w-0 max-w-50 pr-1">
+                <div className="relative flex flex-col min-w-0 max-w-50 pr-1 gap-1">
                   <span className="text-sm font-medium pr-1 max-w-40 truncate">
                     {name}
                   </span>

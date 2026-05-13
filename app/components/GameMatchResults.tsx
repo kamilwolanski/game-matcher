@@ -103,7 +103,7 @@ export function GameMatchResults({
               <div className="space-y-6">
                 <div className="h-px w-full bg-linear-to-r from-transparent via-border to-transparent" />
                 {!showBroader ? (
-                  <div className="flex flex-col items-center gap-2 text-center animate-fade-in">
+                  <div className="flex flex-col items-center gap-3 text-center animate-fade-in">
                     <button
                       onClick={() => setShowBroader(true)}
                       className="group relative inline-flex items-center gap-2.5 px-7 py-3.5 rounded-full font-semibold text-sm text-primary-foreground gradient-primary transition-bounce 
@@ -117,10 +117,12 @@ export function GameMatchResults({
                         +{broader.length}
                       </span>
                     </button>
-                    <p className="text-xs text-muted-foreground max-w-sm">
-                      These games are less closely matched to your picks, but
-                      may still surprise you.
-                    </p>
+                    <div className="max-w-75">
+                      <p className="text-xs text-muted-foreground ">
+                        These games are less closely matched to your picks, but
+                        may still surprise you.
+                      </p>
+                    </div>
                   </div>
                 ) : (
                   <>
