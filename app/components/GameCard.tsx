@@ -41,13 +41,13 @@ export const GameCard = ({ game, onClick, index = 0 }: Props) => {
       style={{ animationDelay: `${index * 60}ms` }}
       className={cn(
         "group relative flex flex-col overflow-hidden rounded-2xl border border-border gradient-card text-left",
-        "transition-bounce hover:-translate-y-2 hover:border-secondary/50",
-        "shadow-(--shadow-card) hover:shadow-(--shadow-card-hover)",
+        "transition-bounce md:hover:-translate-y-2 md:hover:border-secondary/50",
+        "shadow-(--shadow-card) md:hover:shadow-(--shadow-card-hover)",
         "animate-fade-in-up opacity-0 fill-mode-forwards",
       )}
     >
       <div className="relative">
-        <div className="relative aspect-3/4 overflow-hidden transition-bounce group-hover:scale-110">
+        <div className="relative aspect-3/4 overflow-hidden transition-bounce md:group-hover:scale-110">
           <Image
             src={image}
             alt={game.name}
@@ -58,7 +58,7 @@ export const GameCard = ({ game, onClick, index = 0 }: Props) => {
           <div className="absolute inset-0 bg-linear-to-t from-card via-card/10 to-transparent " />
         </div>
 
-        <div className="glass absolute right-3 top-3 flex items-center gap-1.5 rounded-full px-3 py-1.5 backdrop-blur-xl">
+        <div className="glass absolute right-3 top-3 flex items-center gap-1.5 rounded-full px-3 py-1.5 backdrop-blur-0 md:backdrop-blur-xl">
           <span
             className={cn(
               "bg-linear-to-r bg-clip-text text-base font-bold text-transparent",
@@ -72,11 +72,11 @@ export const GameCard = ({ game, onClick, index = 0 }: Props) => {
           </span>
         </div>
 
-        <div className="absolute -bottom-3.75 inset-0 flex flex-col justify-end bg-linear-to-t from-card via-card/95 to-transparent p-4 opacity-0 transition-smooth group-hover:opacity-100">
-          <p className="mb-3 line-clamp-3 translate-y-2 text-sm text-foreground/90 transition-smooth group-hover:translate-y-0">
+        <div className="absolute -bottom-3.75 inset-0 flex flex-col justify-end bg-linear-to-t from-card via-card/95 to-transparent p-4 opacity-0 transition-smooth md:group-hover:opacity-100">
+          <p className="mb-3 line-clamp-3 translate-y-2 text-sm text-foreground/90 transition-smooth md:group-hover:translate-y-0">
             {visibleDescription}
           </p>
-          <div className="gradient-primary inline-flex translate-y-2 items-center justify-center self-start rounded-full px-3 py-1.5 text-xs font-semibold text-primary-foreground transition-smooth group-hover:translate-y-0">
+          <div className="gradient-primary inline-flex translate-y-2 items-center justify-center self-start rounded-full px-3 py-1.5 text-xs font-semibold text-primary-foreground transition-smooth md:group-hover:translate-y-0">
             View details
           </div>
         </div>

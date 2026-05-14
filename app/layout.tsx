@@ -78,7 +78,10 @@ export default function RootLayout({
       )}
     >
       <body className="min-h-full">
-        <div className="max-w-7xl mx-auto px-6 xl:px-0">{children}</div>
+        <div aria-hidden className="app-background pointer-events-none fixed inset-0 z-0" />
+        <div className="relative z-10 max-w-7xl mx-auto px-6 xl:px-0">
+          {children}
+        </div>
       </body>
     </html>
   );
