@@ -1,4 +1,3 @@
-import { useWindowSize } from "react-use";
 import { cn } from "@/lib/utils";
 import { type ShortTag } from "@/lib/dto/tag.dto";
 import {
@@ -48,6 +47,7 @@ export const TagSelector = ({
     Experience: false,
     Perspective: false,
   });
+  const [searchResetKey, setSearchResetKey] = useState(0);
 
   const groupedTags = useMemo(() => {
     const defaultTags = getDefaultVisibleTags(tags);
@@ -78,12 +78,14 @@ export const TagSelector = ({
     (tag) => TAGS_AS_OBJECT[tag.slug].defaultVisible,
   );
   const visibleDefaultTags = defaultSectionTags.slice(0, limit);
+  const visibleDefaultSlugs = new Set(
+    visibleDefaultTags.map((tag) => tag.slug),
+  );
   const selectedHiddenTags = activeSectionTags.filter(
-    (tag) =>
-      activeSlugs.has(tag.slug) && !TAGS_AS_OBJECT[tag.slug].defaultVisible,
+    (tag) => activeSlugs.has(tag.slug) && !visibleDefaultSlugs.has(tag.slug),
   );
 
-  const extraTags = defaultSectionTags
+  const extraTags = activeSectionTags
     .slice(limit)
     .filter((at) => selectedHiddenTags.every((sht) => sht.slug !== at.slug));
 
@@ -100,6 +102,11 @@ export const TagSelector = ({
     setExpanded((prev) => ({ ...prev, [activeSection]: !prev[activeSection] }));
   };
 
+  const handleClearAll = () => {
+    clearAllTags();
+    setSearchResetKey((key) => key + 1);
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3">
@@ -107,7 +114,7 @@ export const TagSelector = ({
           Refine your <span className="gradient-text">taste</span>
         </h2>
         <button
-          onClick={clearAllTags}
+          onClick={handleClearAll}
           className={cn(
             `
       shrink-0
@@ -145,7 +152,12 @@ export const TagSelector = ({
         </button>
       </div>
 
-      <TagSearch tags={tags} onToggle={onToggle} activeSlugs={activeSlugs} />
+      <TagSearch
+        key={searchResetKey}
+        tags={tags}
+        onToggle={onToggle}
+        activeSlugs={activeSlugs}
+      />
 
       <SuggestedPanel
         suggestedTags={suggestedTags}
