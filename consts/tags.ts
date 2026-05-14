@@ -361,6 +361,17 @@ const BASE_TAGS: BaseTag[] = [
     name: "Match Based",
     section: "Gameplay",
   },
+  {
+    slug: "mmo",
+    category: "structure",
+    name: "MMO",
+    section: "Gameplay",
+    aliases: [
+      "MMORPG",
+      "Massively Multiplayer Online",
+      "Massively Multiplayer",
+    ],
+  },
 
   // Mechanics
   {
@@ -1078,6 +1089,7 @@ export const DEFAULT_VISIBLE_TAG_SLUGS = [
   "tps",
   "hack-and-slash",
   "moba",
+  "mmo",
   "rts",
   "open-world",
   "sandbox",

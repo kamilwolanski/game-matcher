@@ -61,6 +61,7 @@ const PARENT_TAG_RULES: Record<string, readonly string[]> = {
   "norse-mythology": ["mythology"],
   "urban-fantasy": ["fantasy"],
   lovecraftian: ["horror", "dark"],
+  mmo: ["multiplayer", "shared-world"],
 };
 
 function compactDescription(description?: string) {
@@ -266,6 +267,32 @@ export async function generateGameTags(
             { "slug": "narrative-driven", "strength": 2 },
             { "slug": "isometric", "strength": 1 }
           ]
+
+          15. Use the "mmo" tag only when the game's core identity
+            depends on a persistent large-scale online world with
+            massive player interaction, long-term progression,
+            and shared online systems.
+
+            Do not use "mmo" for:
+            - standard multiplayer games
+            - match-based games
+            - battle royale games
+            - hero shooters
+            - small-session co-op games
+
+            Examples that SHOULD usually include "mmo":
+            - World of Warcraft
+            - Final Fantasy XIV
+            - Guild Wars 2
+            - EVE Online
+            - RuneScape
+
+            Examples that SHOULD usually NOT include "mmo":
+            - Dota 2
+            - Overwatch
+            - PUBG
+            - Rust
+            - Fall Guys
 
           Return ONLY a JSON object matching the required schema.
           `,
