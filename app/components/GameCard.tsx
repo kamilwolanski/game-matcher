@@ -40,10 +40,10 @@ export const GameCard = ({ game, onClick, index = 0 }: Props) => {
       onClick={onClick}
       style={{ animationDelay: `${index * 60}ms` }}
       className={cn(
-        "group relative flex flex-col overflow-hidden rounded-2xl border border-border gradient-card text-left",
+        "game-card group relative flex flex-col overflow-hidden rounded-2xl border border-border gradient-card text-left",
         "transition-bounce md:hover:-translate-y-2 md:hover:border-secondary/50",
         "shadow-(--shadow-card) md:hover:shadow-(--shadow-card-hover)",
-        "animate-fade-in-up opacity-0 fill-mode-forwards",
+        "md:animate-fade-in-up md:opacity-0 md:fill-mode-forwards",
       )}
     >
       <div className="relative">
@@ -58,7 +58,7 @@ export const GameCard = ({ game, onClick, index = 0 }: Props) => {
           <div className="absolute inset-0 bg-linear-to-t from-card via-card/10 to-transparent " />
         </div>
 
-        <div className="glass absolute right-3 top-3 flex items-center gap-1.5 rounded-full px-3 py-1.5 backdrop-blur-0 md:backdrop-blur-xl">
+        <div className="absolute right-3 top-3 flex items-center gap-1.5 rounded-full bg-card/85 px-3 py-1.5 shadow-[0_0_0_1px_hsl(260_60%_50%/0.2),0_4px_16px_hsl(260_60%_50%/0.12)] md:glass">
           <span
             className={cn(
               "bg-linear-to-r bg-clip-text text-base font-bold text-transparent",

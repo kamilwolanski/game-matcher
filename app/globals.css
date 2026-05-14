@@ -104,6 +104,13 @@
     margin-right: auto !important;
   }
 
+  @media (max-width: 767px) {
+    .game-card {
+      content-visibility: auto;
+      contain-intrinsic-size: 360px;
+    }
+  }
+
   * {
     border-color: var(--color-border);
   }
