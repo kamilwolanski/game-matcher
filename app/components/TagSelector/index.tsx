@@ -102,22 +102,47 @@ export const TagSelector = ({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between flex-wrap gap-2">
-        <h2 className="text-2xl md:text-4xl font-bold">
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="text-2xl md:text-4xl font-bold leading-none">
           Refine your <span className="gradient-text">taste</span>
         </h2>
-        {activeTags.length > 0 && (
-          <button
-            onClick={clearAllTags}
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-full border border-border/60 hover:border-primary/40 bg-card/40 transition-smooth"
-          >
-            <X className="h-3.5 w-3.5" />
-            Clear all
-            <span className="text-muted-foreground/60">
-              ({activeTags.length})
-            </span>
-          </button>
-        )}
+        <button
+          onClick={clearAllTags}
+          className={cn(
+            `
+      shrink-0
+      inline-flex
+      items-center
+      gap-1.5
+      text-xs
+      font-medium
+      px-3
+      py-1.5
+      rounded-full
+      border
+      transition-smooth
+    `,
+            activeTags.length > 0
+              ? `
+        text-muted-foreground
+        hover:text-foreground
+        border-border/60
+        hover:border-primary/40
+        bg-card/40
+        opacity-100
+      `
+              : `
+        opacity-0
+        pointer-events-none
+      `,
+          )}
+        >
+          <X className="h-3.5 w-3.5" />
+          Clear all
+          <span className="text-muted-foreground/60">
+            ({activeTags.length})
+          </span>
+        </button>
       </div>
 
       <TagSearch tags={tags} onToggle={onToggle} activeSlugs={activeSlugs} />
@@ -148,7 +173,7 @@ export const TagSelector = ({
               className={cn(
                 "flex items-center justify-center gap-1 md:gap-2 rounded-lg border px-2 py-2 md:px-3 md:py-3 text-xs md:text-sm font-medium transition-bounce",
                 isActive
-                  ? "border-primary/30 bg-linear-to-br from-primary/18 to-secondary/14 text-foreground shadow-[0_0_0_1px_hsl(217_100%_62%_/_0.15)]"
+                  ? "border-primary/30 bg-linear-to-br from-primary/18 to-secondary/14 text-foreground shadow-[0_0_0_1px_hsl(217_100%_62%/0.15)]"
                   : "border-border bg-transparent text-foreground/75 hover:border-primary/50 hover:text-foreground",
               )}
             >
