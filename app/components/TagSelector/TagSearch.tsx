@@ -133,7 +133,7 @@ const TagSearch = ({ tags, activeSlugs, onToggle }: Props) => {
     <div ref={searchWrapRef} className="relative">
       <div
         className={cn(
-          "flex items-center gap-2 px-3 py-2 md:px-4 md:py-2.5 rounded-xl border bg-card/40 transition-smooth",
+          "mobile-input-surface flex items-center gap-2 px-3 py-2 md:px-4 md:py-2.5 rounded-xl border bg-card/40 transition-smooth",
           searchOpen
             ? "border-primary/50 shadow-[0_0_0_3px_hsl(var(--primary)/0.08)]"
             : "border-border hover:border-primary/40",
@@ -165,7 +165,7 @@ const TagSearch = ({ tags, activeSlugs, onToggle }: Props) => {
             }
           }}
           placeholder="Search all tags..."
-          className="flex-1 bg-transparent outline-none text-sm placeholder:text-muted-foreground"
+          className="flex-1 bg-transparent outline-none text-base md:text-sm placeholder:text-muted-foreground"
         />
         {query && (
           <button

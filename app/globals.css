@@ -105,6 +105,18 @@
   }
 
   @media (max-width: 767px) {
+    input,
+    textarea,
+    select {
+      font-size: 16px;
+    }
+
+    .mobile-input-surface {
+      -webkit-backdrop-filter: none !important;
+      backdrop-filter: none !important;
+      transform: translateZ(0);
+    }
+
     .game-card {
       content-visibility: auto;
       contain-intrinsic-size: 360px;
@@ -427,4 +439,9 @@ button:disabled {
 
 @utility transition-bounce {
   transition: var(--transition-bounce);
+}
+
+.selectable-text {
+  -webkit-user-select: text;
+  user-select: text;
 }

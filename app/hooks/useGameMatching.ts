@@ -22,9 +22,14 @@ export function useGameMatching(
 
   useEffect(() => {
     if (!isMatchingPending && matchedGames.length > 0 && resultsRef.current) {
-      resultsRef.current?.scrollIntoView({
+      const top =
+        resultsRef.current.getBoundingClientRect().top +
+        window.scrollY -
+        (window.matchMedia("(max-width: 767px)").matches ? 20 : 56);
+
+      window.scrollTo({
+        top: Math.max(0, top),
         behavior: "smooth",
-        block: "start",
       });
     }
   }, [isMatchingPending, matchedGames.length]);

@@ -123,7 +123,7 @@ export const GameSearch = ({
     <div ref={wrapRef} className="relative w-full">
       <div
         className={cn(
-          "glass rounded-xl overflow-hidden transition-smooth",
+          "mobile-input-surface glass rounded-xl overflow-hidden transition-smooth",
           open && results.length > 0 && "shadow-2xl",
         )}
       >

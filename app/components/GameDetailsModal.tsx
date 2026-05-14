@@ -176,7 +176,7 @@ export const GameDetailsModal = ({ open, onOpenChange, game }: Props) => {
           </div>
         </div>
 
-        <div className="max-h-[calc(min(90vh,760px)-16rem)] space-y-6 overflow-y-auto p-5 pt-0 md:max-h-[calc(min(90vh,760px)-20rem)] md:p-8 md:pt-4">
+        <div className="selectable-text max-h-[calc(min(90vh,760px)-16rem)] space-y-6 overflow-y-auto p-5 pt-0 md:max-h-[calc(min(90vh,760px)-20rem)] md:p-8 md:pt-4">
           <p className="text-sm md:text-base whitespace-pre-line leading-relaxed text-foreground/90">
             {description}
           </p>

@@ -35,12 +35,31 @@ export const GameCard = ({ game, onClick, index = 0 }: Props) => {
         ? "from-primary to-secondary"
         : "from-secondary/70 to-primary/70";
 
+  const handleOpen = () => {
+    const selectedText = window.getSelection()?.toString().trim();
+
+    if (selectedText) {
+      return;
+    }
+
+    onClick();
+  };
+
   return (
-    <button
-      onClick={onClick}
+    <article
+      onClick={handleOpen}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onClick();
+        }
+      }}
+      role="button"
+      tabIndex={0}
       style={{ animationDelay: `${index * 60}ms` }}
       className={cn(
-        "game-card group relative flex flex-col overflow-hidden rounded-2xl border border-border gradient-card text-left",
+        "game-card group relative flex cursor-pointer flex-col overflow-hidden rounded-2xl border border-border gradient-card text-left",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/80 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
         "transition-bounce md:hover:-translate-y-2 md:hover:border-secondary/50",
         "shadow-(--shadow-card) md:hover:shadow-(--shadow-card-hover)",
         "md:animate-fade-in-up md:opacity-0 md:fill-mode-forwards",
@@ -84,7 +103,7 @@ export const GameCard = ({ game, onClick, index = 0 }: Props) => {
 
       <div className="space-y-2 md:space-y-3 p-3 md:p-4 ">
         <div>
-          <h3 className="line-clamp-1 text-base font-bold leading-tight">
+          <h3 className="selectable-text line-clamp-1 text-base font-bold leading-tight">
             {game.name}
           </h3>
 
@@ -96,7 +115,11 @@ export const GameCard = ({ game, onClick, index = 0 }: Props) => {
                 </span>
               )}
 
-              {platforms && <span className="line-clamp-1">{platforms}</span>}
+              {platforms && (
+                <span className="selectable-text line-clamp-1">
+                  {platforms}
+                </span>
+              )}
             </div>
           )}
         </div>
@@ -124,7 +147,7 @@ export const GameCard = ({ game, onClick, index = 0 }: Props) => {
           ))}
         </div>
       </div>
-    </button>
+    </article>
   );
 };
 
