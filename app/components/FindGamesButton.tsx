@@ -29,10 +29,10 @@ export function FindGamesButton({
         disabled={!canSearch || isMatchingPending}
         aria-busy={isMatchingPending}
         className={cn(
-          "group relative inline-flex items-center gap-3 px-10 py-5 rounded-2xl font-bold text-base md:text-lg",
+          "group relative inline-flex items-center gap-3 px-7 py-4 md:px-10 md:py-5 rounded-2xl font-bold text-base md:text-lg",
           "gradient-primary text-primary-foreground transition-bounce",
           "shadow-[0_10px_40px_-10px_var(--color-primary),0_10px_40px_-10px_hsl(var(--secondary)/0.5)]",
-          "hover:scale-105 hover:shadow-[0_20px_50px_-10px_(var(--color-primary)),0_20px_50px_-10px_var(--color-secondary)]",
+          "hover:scale-102 hover:shadow-[0_12px_32px_-12px_var(--color-primary),0_12px_32px_-12px_var(--color-secondary)]",
           "disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100",
           canSearch && !isMatchingPending && "animate-pulse-glow",
           isMatchingPending && "overflow-hidden",

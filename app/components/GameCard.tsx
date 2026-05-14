@@ -1,6 +1,7 @@
 import { GameMatchDto } from "@/lib/dto/game-match.dto";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
+import { formatPlatforms } from "./GameDetailsModal";
 
 type Props = {
   game: GameMatchDto;
@@ -13,7 +14,8 @@ export const GameCard = ({ game, onClick, index = 0 }: Props) => {
   const releasedYear = game.released
     ? new Date(game.released).getFullYear()
     : null;
-  const platforms = game.platforms.slice(0, 2).join(" / ");
+
+  const platforms = formatPlatforms(game.platforms.slice(0, 2));
   const rawDescription =
     game.description?.trim() || "No description is available yet.";
 
@@ -80,20 +82,27 @@ export const GameCard = ({ game, onClick, index = 0 }: Props) => {
         </div>
       </div>
 
-      <div className="space-y-3 p-4 ">
+      <div className="space-y-2 md:space-y-3 p-3 md:p-4 ">
         <div>
           <h3 className="line-clamp-1 text-base font-bold leading-tight">
             {game.name}
           </h3>
+
           {(releasedYear || platforms) && (
-            <p className="mt-0.5 text-xs text-muted-foreground">
-              {[releasedYear, platforms].filter(Boolean).join(" / ")}
-            </p>
+            <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+              {releasedYear && (
+                <span className="text-[11px] font-medium text-foreground/90">
+                  {releasedYear}
+                </span>
+              )}
+
+              {platforms && <span className="line-clamp-1">{platforms}</span>}
+            </div>
           )}
         </div>
 
         <div className="space-y-1.5">
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+          <div className="h-1 md:h-1.5 w-full overflow-hidden rounded-full bg-muted">
             <div
               className={cn(
                 "h-full rounded-full bg-linear-to-r transition-smooth",
@@ -104,7 +113,7 @@ export const GameCard = ({ game, onClick, index = 0 }: Props) => {
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-1.5">
+        <div className="hidden md:flex flex-wrap gap-1.5">
           {game.tags.slice(0, 3).map((tag) => (
             <span
               key={tag.slug}

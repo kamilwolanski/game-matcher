@@ -13,9 +13,10 @@ import { TagSelector } from "./TagSelector";
 
 type Props = {
   availableTags: ShortTag[];
+  isMobile: boolean;
 };
 
-export function HomeInteractiveSection({ availableTags }: Props) {
+export function HomeInteractiveSection({ availableTags, isMobile }: Props) {
   const {
     activeTagSection,
     activeTags,
@@ -49,7 +50,7 @@ export function HomeInteractiveSection({ availableTags }: Props) {
   return (
     <div>
       <div
-        className="max-w-4xl mx-auto mt-12 animate-fade-in-up pb-12"
+        className="max-w-4xl mx-auto mt-4 md:mt-12 animate-fade-in-up pb-8 md:pb-10"
         style={{ animationDelay: "120ms" }}
       >
         <GameSearch
@@ -61,7 +62,7 @@ export function HomeInteractiveSection({ availableTags }: Props) {
         />
       </div>
 
-      <section className="pb-12">
+      <section className="pb-10 md:pb-12">
         <div className="max-w-4xl mx-auto">
           <TagSelector
             tags={availableTags}
@@ -72,10 +73,11 @@ export function HomeInteractiveSection({ availableTags }: Props) {
             onToggle={toggleTag}
             clearAllTags={clearAllTags}
             isAnalyzing={isAnalyzing}
+            isMobile={isMobile}
           />
         </div>
       </section>
-      <section className="pb-24">
+      <section className="md:pb-24">
         <FindGamesButton
           canSearch={canSearch}
           isAnalyzing={isAnalyzing}

@@ -25,6 +25,7 @@ type Props = {
   activeTags: ShortTag[];
   suggestedTags: ShortTag[];
   isAnalyzing: boolean;
+  isMobile: boolean;
   onSectionChange: (section: BaseTagSection) => void;
   onToggle: (tag: ShortTag) => void;
   clearAllTags: () => void;
@@ -36,12 +37,11 @@ export const TagSelector = ({
   activeTags,
   suggestedTags,
   isAnalyzing,
+  isMobile,
   onSectionChange,
   onToggle,
-  clearAllTags
+  clearAllTags,
 }: Props) => {
-  const { width } = useWindowSize();
-  const isMobile = width < 768;
   const [expanded, setExpanded] = useState<Record<BaseTagSection, boolean>>({
     Gameplay: false,
     "Style & Theme": false,
@@ -109,13 +109,12 @@ export const TagSelector = ({
         {activeTags.length > 0 && (
           <button
             onClick={clearAllTags}
-            className="w-30 inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-full border border-border/60 hover:border-primary/40 bg-card/40 transition-smooth"
+            className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-full border border-border/60 hover:border-primary/40 bg-card/40 transition-smooth"
           >
             <X className="h-3.5 w-3.5" />
             Clear all
-            <span>·</span>
-            <span className="text-[11px] text-muted-foreground/80">
-                {activeTags.length}
+            <span className="text-muted-foreground/60">
+              ({activeTags.length})
             </span>
           </button>
         )}
@@ -147,21 +146,21 @@ export const TagSelector = ({
               type="button"
               onClick={() => onSectionChange(section.name)}
               className={cn(
-                "flex items-center justify-center gap-2 rounded-lg border px-3 py-3 text-sm font-medium transition-bounce",
+                "flex items-center justify-center gap-1 md:gap-2 rounded-lg border px-2 py-2 md:px-3 md:py-3 text-xs md:text-sm font-medium transition-bounce",
                 isActive
-                  ? "gradient-primary border-0 text-primary-foreground shadow-[0_4px_20px_-4px_var(--color-primary)]"
+                  ? "border-primary/30 bg-linear-to-br from-primary/18 to-secondary/14 text-foreground shadow-[0_0_0_1px_hsl(217_100%_62%_/_0.15)]"
                   : "border-border bg-transparent text-foreground/75 hover:border-primary/50 hover:text-foreground",
               )}
             >
               <span
                 className={cn(
-                  "flex h-9 w-9 items-center justify-center rounded-full transition-smooth",
+                  "flex h-6 w-6 md:h-9 md:w-9 items-center justify-center rounded-full transition-smooth",
                   isActive
-                    ? "bg-primary-foreground/15 text-primary-foreground"
+                    ? "bg-primary/15 text-primary"
                     : "bg-primary/10 text-primary",
                 )}
               >
-                <Icon className="h-4 w-4 shrink-0" />
+                <Icon className="h-3 w-3 md:h-4 md:w-4 shrink-0" />
               </span>
               <span>{config.label}</span>
               <span
@@ -169,8 +168,8 @@ export const TagSelector = ({
                   "flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[11px] transition-opacity",
                   activeCount > 0 ? "opacity-100" : "opacity-0",
                   isActive
-                    ? "bg-background/20 text-primary-foreground"
-                    : "bg-primary/10 text-primary",
+                    ? "bg-white/5 text-foreground/80"
+                    : "bg-primary/12 text-primary",
                 )}
               >
                 {activeCount}

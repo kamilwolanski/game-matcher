@@ -3,17 +3,21 @@ import Image from "next/image";
 import Link from "next/link";
 import { HomeInteractiveSection } from "./components/HomeInteractiveSection";
 import { getBaseTags } from "@/lib/services/game.service";
+import { userAgent } from "next/server";
+import { headers } from "next/headers";
 
 export default async function Home() {
+  const ua = userAgent({ headers: await headers() });
+  const isMobile = ua.device.type === "mobile";
   const baseTags = await getBaseTags();
-  
+
   return (
     <main className="relative min-h-screen mx-auto flex flex-col">
       <div
         aria-hidden
         className="pointer-events-none fixed inset-0 overflow-hidden -z-10"
       >
-        <div className="absolute -top-40 -left-32 h-96 w-96 rounded-full bg-primary/20 blur-[120px] animate-float" />
+        <div className="absolute -top-40 -left-32 h-72 w-72 md:h-96 md:w-96 rounded-full bg-primary/20 blur-[80px] md:blur-[120px] animate-float" />
         <div
           className="absolute top-1/3 -right-32 h-112 w-md rounded-full bg-secondary/20 blur-[140px] animate-float"
           style={{ animationDelay: "1.5s" }}
@@ -28,8 +32,7 @@ export default async function Home() {
               alt="Game Matcher"
               width={1027}
               height={281}
-              className="w-44 h-auto"
-              quality={100}
+              className="w-36 md:w-44 h-auto"
               priority
             />
           </Link>
@@ -40,9 +43,9 @@ export default async function Home() {
         </div>
       </header>
 
-      <section className="grow pt-8 md:pt-16 pb-20">
-        <div className="max-w-3xl mx-auto text-center space-y-6 animate-fade-in-up">
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.05]">
+      <section className="grow pt-4 md:pt-16 pb-16 md:pb-20">
+        <div className="max-w-3xl mx-auto text-center space-y-3 md:space-y-6 animate-fade-in-up">
+          <h1 className="text-[2.6rem] md:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.05]">
             Find games you&apos;ll{" "}
             <span className="gradient-text bg-size-[200%_auto] animate-gradient-shift">
               love
@@ -53,10 +56,10 @@ export default async function Home() {
           </p>
         </div>
 
-        <HomeInteractiveSection availableTags={baseTags} />
+        <HomeInteractiveSection availableTags={baseTags} isMobile={isMobile} />
       </section>
 
-      <footer className="border-t border-border/50 mt-8">
+      <footer className="border-t border-border/50 mt-4 md:mt-8">
         <div className="container py-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4 text-xs text-muted-foreground">
           <div className="space-y-0.5">
             <div className="font-semibold text-foreground/90 tracking-tight">

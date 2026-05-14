@@ -67,7 +67,7 @@ export function GameMatchResults({
   if (!isMatchingPending && matchedGames.length === 0) return null;
 
   return (
-    <section className="pb-32 scroll-mt-8">
+    <section className="pb-32 scroll-mt-8 mt-10 md:mt-0">
       <div className="space-y-10 animate-fade-in">
         {isMatchingPending ? (
           <MatchSkeleton />

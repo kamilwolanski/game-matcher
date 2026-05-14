@@ -136,7 +136,7 @@ export const GameDetailsModal = ({ open, onOpenChange, game }: Props) => {
             <X className="h-4 w-4" />
           </button>
 
-          <div className="absolute bottom-5 left-6 right-6">
+          <div className="absolute bottom-8 left-4 right-4 md:bottom-5 md:left-6 md:right-6">
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div className="min-w-0">
                 <h2 className="text-2xl md:text-3xl font-extrabold leading-tight">
@@ -176,8 +176,8 @@ export const GameDetailsModal = ({ open, onOpenChange, game }: Props) => {
           </div>
         </div>
 
-        <div className="max-h-[calc(min(90vh,760px)-16rem)] space-y-6 overflow-y-auto p-6 md:max-h-[calc(min(90vh,760px)-20rem)] md:p-8 md:pt-4">
-          <p className="text-base whitespace-pre-line leading-relaxed text-foreground/90">
+        <div className="max-h-[calc(min(90vh,760px)-16rem)] space-y-6 overflow-y-auto p-5 pt-0 md:max-h-[calc(min(90vh,760px)-20rem)] md:p-8 md:pt-4">
+          <p className="text-sm md:text-base whitespace-pre-line leading-relaxed text-foreground/90">
             {description}
           </p>
 
@@ -185,16 +185,16 @@ export const GameDetailsModal = ({ open, onOpenChange, game }: Props) => {
             <div className="rounded-2xl border border-secondary/40 bg-linear-to-br from-primary/10 via-card to-secondary/10 p-5 shadow-[0_8px_30px_-12px_color-mix(in_srgb,var(--color-primary)_35%,transparent)]">
               <div className="mb-3 flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-secondary" />
-                <h3 className="font-semibold">Why this game?</h3>
+                <h3 className="text-sm md:text-base font-semibold">Why this game?</h3>
               </div>
-              <p className="mb-4 text-sm text-muted-foreground">
+              <p className="mb-4 text-xs md:text-sm text-muted-foreground">
                 {game.matchReason.title}
               </p>
               <div className="flex flex-wrap gap-2">
                 {game.matchReason.tags.map((tag) => (
                   <span
                     key={tag.slug}
-                    className="gradient-primary rounded-full px-3 py-1.5 text-xs font-medium text-primary-foreground"
+                    className="gradient-primary rounded-full px-2.5 py-1 text-[11px] md:px-3 md:py-1.5 md:text-xs font-medium text-primary-foreground"
                   >
                     {tag.name}
                   </span>
@@ -211,7 +211,7 @@ export const GameDetailsModal = ({ open, onOpenChange, game }: Props) => {
               {game.tags.map((tag) => (
                 <span
                   key={tag.slug}
-                  className="rounded-full border border-border bg-muted px-3 py-1 text-xs text-foreground/80"
+                  className="rounded-full border border-border bg-muted px-2.5 py-0.5 text-[11px] md:px-3 md:py-1 md:text-xs text-foreground/80"
                 >
                   {tag.name}
                 </span>

@@ -123,11 +123,11 @@ export const GameSearch = ({
     <div ref={wrapRef} className="relative w-full">
       <div
         className={cn(
-          "glass rounded-2xl overflow-hidden transition-smooth",
+          "glass rounded-xl overflow-hidden transition-smooth",
           open && results.length > 0 && "shadow-2xl",
         )}
       >
-        <div className="flex items-center gap-3 px-5 py-4">
+        <div className="flex items-center gap-3 px-3 py-2.5 md:px-5 md:py-4">
           <Search
             className={cn(
               "h-5 w-5 shrink-0 transition-colors",
@@ -186,10 +186,10 @@ export const GameSearch = ({
                 {Array.from({ length: 3 }).map((_, i) => (
                   <li
                     key={i}
-                    className="flex items-center gap-4 px-5 py-3 animate-pulse"
+                    className="flex items-center gap-3 px-3 py-2.5 md:px-5 md:py-3 animate-pulse"
                     style={{ animationDelay: `${i * 80}ms` }}
                   >
-                    <div className="w-12 h-16 rounded-md bg-surface-elevated shrink-0" />
+                    <div className="w-10 h-14 md:w-12 md:h-16 rounded-md bg-surface-elevated shrink-0" />
                     <div className="flex-1 space-y-2">
                       <div className="h-3.5 w-2/3 rounded bg-surface-elevated" />
                       <div className="h-3 w-1/4 rounded bg-surface-elevated/70" />
@@ -202,7 +202,7 @@ export const GameSearch = ({
                 No games found for {query}
               </div>
             ) : (
-              <ul className="max-h-80 overflow-y-auto">
+              <ul className="max-h-50 md:max-h-80 overflow-y-auto">
                 {results.map((g) => {
                   const isSelected = pickedGames.some(
                     (pg) => pg.rawgId === g.rawgId,
@@ -218,13 +218,13 @@ export const GameSearch = ({
                         }}
                         disabled={isSelected}
                         className={cn(
-                          "w-full flex items-center gap-4 px-5 py-3 text-left cursor-pointer transition-smooth hover:bg-primary/10",
+                          "w-full flex items-center gap-3 px-3 py-2.5 md:px-5 md:py-3 text-left cursor-pointer transition-smooth hover:bg-primary/10",
                           isSelected &&
                             "cursor-default opacity-50 hover:bg-transparent",
                         )}
                       >
                         {g.image ? (
-                          <div className="relative w-12 h-16 shrink-0 overflow-hidden rounded-md">
+                          <div className="relative w-10 h-14 md:w-12 md:h-16 shrink-0 overflow-hidden rounded-md">
                             <Image
                               src={g.image}
                               alt={g.name}
@@ -234,13 +234,13 @@ export const GameSearch = ({
                             />
                           </div>
                         ) : (
-                          <div className="w-12 h-16 rounded-md shrink-0 bg-surface-elevated border border-border" />
+                          <div className="w-10 h-14 md:w-12 md:h-16 rounded-md shrink-0 bg-surface-elevated border border-border" />
                         )}
 
                         <div className="min-w-0 flex-1">
-                          <p className="font-semibold truncate">{g.name}</p>
+                          <p className="text-sm md:text-base font-semibold truncate">{g.name}</p>
                           {g.released && (
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-xs text-muted-foreground">
                               {new Date(g.released).getFullYear()}
                             </p>
                           )}

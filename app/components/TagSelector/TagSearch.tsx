@@ -133,7 +133,7 @@ const TagSearch = ({ tags, activeSlugs, onToggle }: Props) => {
     <div ref={searchWrapRef} className="relative">
       <div
         className={cn(
-          "flex items-center gap-2 px-4 py-2.5 rounded-xl border bg-card/40 transition-smooth",
+          "flex items-center gap-2 px-3 py-2 md:px-4 md:py-2.5 rounded-xl border bg-card/40 transition-smooth",
           searchOpen
             ? "border-primary/50 shadow-[0_0_0_3px_hsl(var(--primary)/0.08)]"
             : "border-border hover:border-primary/40",
@@ -181,13 +181,13 @@ const TagSearch = ({ tags, activeSlugs, onToggle }: Props) => {
         )}
       </div>
       {searchOpen && (
-        <div className="absolute z-30 left-0 right-0 mt-2 rounded-xl border border-border bg-popover/95 backdrop-blur-sm shadow-[0_20px_50px_-20px_hsl(var(--primary)/0.4)] overflow-hidden animate-fade-in">
+        <div className="absolute z-30 left-0 right-0 mt-2 rounded-xl border border-border bg-popover/95 backdrop-blur-sm shadow-[0_10px_30px_-12px_hsl(var(--primary)/0.25)] overflow-hidden animate-fade-in">
           {results.length === 0 ? (
             <div className="px-4 py-6 text-sm text-muted-foreground text-center">
               No tags match &quot;{query}&quot;
             </div>
           ) : (
-            <ul className="max-h-80 overflow-y-auto py-1">
+            <ul className="max-h-55 md:max-h-80 overflow-y-auto py-1">
               {results.map((r, i) => {
                 const isActive = activeSlugs.has(r.slug);
                 const tagSection = TAGS_AS_OBJECT[r.slug].section;
@@ -207,24 +207,24 @@ const TagSearch = ({ tags, activeSlugs, onToggle }: Props) => {
                         });
                       }}
                       className={cn(
-                        "w-full flex items-center gap-3 px-4 py-2.5 text-left transition-smooth",
+                        "w-full flex items-center gap-2 md:gap-3 px-3 py-2 md:px-4 md:py-2.5 text-left transition-smooth",
                         isHi ? "bg-primary/10" : "hover:bg-primary/5",
                       )}
                     >
                       <span
                         className={cn(
-                          "flex h-5 w-5 shrink-0 items-center justify-center rounded-md border",
+                          "flex h-4 w-4 md:h-5 md:w-5 shrink-0 items-center justify-center rounded-md border",
                           isActive
                             ? "gradient-primary border-transparent text-primary-foreground"
                             : "border-border bg-background/40",
                         )}
                       >
-                        {isActive && <Check className="h-3 w-3" />}
+                        {isActive && <Check className="h-2.5 w-2.5 md:h-3 md:w-3" />}
                       </span>
                       <span className="flex-1 text-sm font-medium">
                         {renderHighlighted(r.name, query)}
                       </span>
-                      <span className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                      <span className="hidden md:block tracking-wide text-[10px] uppercase text-muted-foreground/60">
                         {tagSection}
                       </span>
                     </button>
