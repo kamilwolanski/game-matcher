@@ -1,13 +1,17 @@
 // import "server-only";
 
 import prisma from "@/lib/prisma";
-import { fetchRawgGameDetails } from "@/lib/clients/rawg.client";
+import {
+  fetchRawgGameDetails,
+  fetchRawgGameSeries,
+} from "@/lib/clients/rawg.client";
 import { toGameDto } from "@/lib/mappers/game.mapper";
 import type { RawgGame } from "@/types/rawg";
 import { TAGS, TAG_SLUGS } from "@/consts/tags";
 import { ShortTag } from "../dto/tag.dto";
 import { Prisma } from "@/app/generated/prisma/client";
 import { generateGameTags } from "@/lib/services/game-ai-tagging.service";
+import { extractSeriesCandidate, GameSeries } from "../series/game-series";
 
 const gameWithTagsInclude = {
   tags: {
@@ -57,7 +61,7 @@ export async function getBaseTags(): Promise<ShortTag[]> {
   }));
 }
 
-export async function saveRawgGame(rawgGame: RawgGame) {
+export async function saveRawgGame(rawgGame: RawgGame, gameSeries: GameSeries) {
   // =========================================================
   // AI tagging
   // =========================================================
@@ -84,6 +88,11 @@ export async function saveRawgGame(rawgGame: RawgGame) {
           released: rawgGame.released ? new Date(rawgGame.released) : null,
           platforms: rawgGame.platforms?.map((p) => p.platform.name) ?? [],
           metacritic: rawgGame.metacritic,
+          developerSlug: rawgGame.developers?.[0]?.slug ?? null,
+          developerName: rawgGame.developers?.[0]?.name ?? null,
+          developerGamesCount: rawgGame.developers?.[0]?.games_count ?? null,
+          seriesName: gameSeries?.name,
+          seriesSlug: gameSeries?.slug
         },
       });
 
@@ -177,13 +186,20 @@ export async function saveRawgGame(rawgGame: RawgGame) {
 export async function getOrCreateGameByRawgId(rawgId: number) {
   const existingGame = await getGameByRawgId(rawgId);
 
+
+
+  const [rawgGame, gameSeries] = await Promise.all([
+    fetchRawgGameDetails(rawgId),
+    fetchRawgGameSeries(rawgId),
+  ]);
+
+  const series = extractSeriesCandidate([...gameSeries, rawgGame]);
+
   if (existingGame) {
     return existingGame;
   }
 
-  const rawgGame = await fetchRawgGameDetails(rawgId);
-
-  return saveRawgGame(rawgGame);
+  return saveRawgGame(rawgGame, series);
 }
 
 export const getGame = getGameByRawgId;

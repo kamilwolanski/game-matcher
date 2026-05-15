@@ -6,8 +6,8 @@ const client = new OpenAI();
 
 const OPENAI_MODEL = "gpt-5.4-mini";
 const DESCRIPTION_LIMIT = 600;
-const MIN_TAGS = 6;
-const MAX_TAGS = 10;
+const MIN_TAGS = 7;
+const MAX_TAGS = 11;
 
 type GameAiTag = {
   slug: string;

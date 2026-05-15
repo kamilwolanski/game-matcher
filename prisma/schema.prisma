@@ -26,6 +26,12 @@ model Game {
 
   platforms String[]
 
+  developerSlug       String?
+  developerName       String?
+  seriesSlug          String?
+  seriesName          String?
+  developerGamesCount Int?
+
   tags GameTag[]
 
   released  DateTime?
@@ -45,13 +51,13 @@ model Tag {
 }
 
 model GameTag {
-  gameId   Int
-  tagId    Int
+  gameId Int
+  tagId  Int
 
-  strength Int  @default(2)
-  
-  game     Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
-  tag      Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  strength Int @default(2)
+
+  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
 
   @@id([gameId, tagId])
 }

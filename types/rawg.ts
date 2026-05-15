@@ -17,6 +17,13 @@ export type RawgTagLike = {
   name: string;
 };
 
+type RawgDeveloper = {
+  id: number;
+  name: string;
+  slug: string;
+  games_count: number;
+};
+
 export type RawgGame = {
   id: number;
   name: string;
@@ -39,7 +46,8 @@ export type RawgGame = {
   tags: RawgTag[];
   genres: RawgGenre[];
   tba: boolean;
-  metacritic: number | null
+  metacritic: number | null;
+  developers: RawgDeveloper[];
 };
 
 export type RawgSearchGame = {

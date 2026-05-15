@@ -48,7 +48,7 @@ export const CATEGORY_WEIGHTS: Record<TagCategory, number> = {
   progression: 3,
   theme: 2,
   aesthetic: 2,
-  perspective: 2,
+  perspective: 3,
   mode: 2,
   pace: 2,
   mood: 1,

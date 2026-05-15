@@ -72,3 +72,12 @@ export async function searchRawgGames(query: string) {
 
   return data.results.map(toSearchGameResult);
 }
+
+export async function fetchRawgGameSeries(rawgId: number) {
+  const data = await fetchRawg<{ results: RawgGame[] }>(
+    createRawgUrl(`/games/${rawgId}/game-series`),
+  );
+
+  return data.results;
+}
+

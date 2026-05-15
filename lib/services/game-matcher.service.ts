@@ -9,7 +9,7 @@ import { CATEGORY_WEIGHTS, TAGS_AS_OBJECT } from "@/consts/tags";
 
 const SELECTED_GAME_TAG_WEIGHT = 1;
 const ACTIVE_TAG_WEIGHT = 2;
-const ACTIVE_MATCH_SHARE = 0.20;
+const ACTIVE_MATCH_SHARE = 0.2;
 const REPEATED_TAG_DECAY = 0.65;
 const ULTRA_RARE_DAMPING_START = 2.5;
 const ULTRA_RARE_DAMPING_CURVE = 0.55;
@@ -27,12 +27,12 @@ const SHARED_TRAITS_LIMIT = 6;
 const CONFLICT_PENALTY_SHARE = 0.22;
 const MISSING_ACTIVE_TAG_PENALTY_SHARE = 0.25;
 const ACTIVE_ONLY_MISSING_ACTIVE_TAG_PENALTY_SHARE = 0.08;
-const CANDIDATE_NOISE_PENALTY_SHARE = 0.10;
+const CANDIDATE_NOISE_PENALTY_SHARE = 0.1;
 const ACTIVE_ONLY_CANDIDATE_NOISE_PENALTY_SHARE = 0.025;
 const ACTIVE_ONLY_PRIMARY_MATCH_SHARE = 0.45;
 const ACTIVE_ONLY_WEIGHTED_COVERAGE_SHARE = 0.25;
 const ACTIVE_ONLY_MATCH_STRENGTH_SHARE = 0.15;
-const ACTIVE_ONLY_COUNT_COVERAGE_SHARE = 0.10;
+const ACTIVE_ONLY_COUNT_COVERAGE_SHARE = 0.1;
 const ACTIVE_ONLY_FULL_MATCH_BONUS_SHARE = 0.05;
 const MATCH_REASON_TITLE =
   "Matched on shared gameplay and atmosphere traits from your picks.";
@@ -172,14 +172,50 @@ const getTagRarity = (count: number, totalGames: number) => {
   if (totalGames <= 0) return MIN_TAG_RARITY;
   if (totalGames < MIN_GAMES_FOR_RARITY) return 1;
 
-  const normalizedCount = Math.min(Math.max(count, 0), totalGames); 
+  const normalizedCount = Math.min(Math.max(count, 0), totalGames);
   const rarity = Math.log(
     (totalGames + TAG_COUNT_SMOOTHING) /
       (normalizedCount + TAG_COUNT_SMOOTHING),
-  ); 
+  );
 
-  return Math.min(MAX_TAG_RARITY, Math.max(MIN_TAG_RARITY, rarity)); 
+  return Math.min(MAX_TAG_RARITY, Math.max(MIN_TAG_RARITY, rarity));
 };
+
+function applyAffinityBonuses(
+  similarity: number,
+  candidateGame: GameDto,
+  selectedGames: GameDto[],
+) {
+  const selectedSeriesSlugs = new Set(
+    selectedGames.map((game) => game.seriesSlug).filter(Boolean),
+  );
+
+  const selectedDeveloperSlugs = new Set(
+    selectedGames.map((game) => game.developerSlug).filter(Boolean),
+  );
+
+  const hasSeriesContext = selectedSeriesSlugs.size > 0;
+
+  const hasSameSeries =
+    candidateGame.seriesSlug &&
+    selectedSeriesSlugs.has(candidateGame.seriesSlug);
+
+  const hasSameDeveloper =
+    candidateGame.developerSlug &&
+    selectedDeveloperSlugs.has(candidateGame.developerSlug);
+
+  if (hasSameSeries) {
+    similarity += (1 - similarity) * 0.35;
+  } else if (hasSeriesContext) {
+    similarity -= similarity * 0.02;
+  }
+
+  if (similarity > 0.45 && hasSameDeveloper) {
+    similarity += (1 - similarity) * 0.08;
+  }
+
+  return clampSimilarity(similarity);
+}
 
 function curveSimilarity(score: number) {
   return Math.pow(Math.min(Math.max(score, 0), 1), SELECTED_GAME_SCORE_CURVE);
@@ -492,8 +528,7 @@ function getActiveProfileBreakdown(
       MISSING_ACTIVE_TAG_PENALTY_SHARE);
   const candidateNoisePenalty =
     getCandidateNoisePenalty(game, activeProfile, matchedSignals, totalGames) *
-    (ACTIVE_ONLY_CANDIDATE_NOISE_PENALTY_SHARE /
-      CANDIDATE_NOISE_PENALTY_SHARE);
+    (ACTIVE_ONLY_CANDIDATE_NOISE_PENALTY_SHARE / CANDIDATE_NOISE_PENALTY_SHARE);
   const similarity =
     strongestActiveTagCoverage * ACTIVE_ONLY_PRIMARY_MATCH_SHARE +
     activeCoverage * ACTIVE_ONLY_WEIGHTED_COVERAGE_SHARE +
@@ -533,13 +568,13 @@ function aggregateTasteSimilarities(similarities: number[]) {
           0,
         ) / softmaxTotal
       : strongestMatch;
-const weights = getTasteAggregationWeights(similarities.length);
+  const weights = getTasteAggregationWeights(similarities.length);
 
-return (
-  strongestMatch * weights.top +
-  softmaxMatch * weights.softmax +
-  averageMatch * weights.average
-);
+  return (
+    strongestMatch * weights.top +
+    softmaxMatch * weights.softmax +
+    averageMatch * weights.average
+  );
   // return (
   //   strongestMatch * TASTE_TOP_MATCH_SHARE +
   //   softmaxMatch * TASTE_SOFTMAX_MATCH_SHARE +
@@ -700,6 +735,11 @@ function toGameMatchDto(game: ScoredGame): GameMatchDto {
     tags: game.tags,
     similarity: game.similarity,
     matchReason: game.matchReason,
+    developerSlug: game.developerSlug,
+    developerName: game.developerName,
+    developerGamesCount: game.developerGamesCount,
+    seriesName: game.seriesName,
+    seriesSlug: game.seriesSlug,
   };
 }
 
@@ -735,10 +775,16 @@ export async function findMatchingGames(
         totalGames,
       );
 
+      const similarity = applyAffinityBonuses(
+        breakdown.similarity,
+        dto,
+        selectedGames,
+      );
+
       return {
         ...dto,
         activeTagMatches: breakdown.activeTagMatches,
-        similarity: breakdown.similarity,
+        similarity: similarity,
         matchReason: {
           title: MATCH_REASON_TITLE,
           tags: getSharedTraits(breakdown.matchedSignals, totalGames),
