@@ -11,6 +11,9 @@ const SELECTED_GAME_TAG_WEIGHT = 1;
 const ACTIVE_TAG_WEIGHT = 2;
 const ACTIVE_MATCH_SHARE = 0.20;
 const REPEATED_TAG_DECAY = 0.65;
+const ULTRA_RARE_DAMPING_START = 2.5;
+const ULTRA_RARE_DAMPING_CURVE = 0.55;
+const TASTE_SOFTMAX_TEMPERATURE = 0.18;
 const SPECIFIC_MATCH_SHARE = 0.15;
 const MIN_TAG_RARITY = 0.15;
 const MAX_TAG_RARITY = 4;
@@ -68,6 +71,16 @@ type UserTagSignal = {
   activeScore: number;
 };
 
+type TasteProfile = {
+  signals: Map<string, UserTagSignal>;
+};
+
+type ProfileScoreBreakdown = {
+  activeTagMatches: number;
+  matchedSignals: UserTagSignal[];
+  similarity: number;
+};
+
 type ScoredGame = GameDto & {
   activeTagMatches: number;
   similarity: number;
@@ -88,6 +101,38 @@ function getTagStrengthWeight(strength?: 1 | 2 | 3) {
   return STRENGTH_WEIGHTS[strength];
 }
 
+function getTasteAggregationWeights(profileCount: number) {
+  switch (profileCount) {
+    case 1:
+      return {
+        top: 0.7,
+        softmax: 0.2,
+        average: 0.1,
+      };
+
+    case 2:
+      return {
+        top: 0.6,
+        softmax: 0.3,
+        average: 0.1,
+      };
+
+    case 3:
+      return {
+        top: 0.5,
+        softmax: 0.35,
+        average: 0.15,
+      };
+
+    default:
+      return {
+        top: 0.45,
+        softmax: 0.4,
+        average: 0.15,
+      };
+  }
+}
+
 const getTagCategoryWeight = (slug: string) => {
   const tag = TAGS_AS_OBJECT[slug];
 
@@ -99,6 +144,25 @@ const getTagCategoryWeight = (slug: string) => {
 const getTagSignalWeight = (tag: ShortTag, totalGames: number) => {
   return (
     getTagRarity(tag.gamesCount, totalGames) *
+    getTagCategoryWeight(tag.slug) *
+    getTagStrengthWeight(tag.strength)
+  );
+};
+
+const getDampenedTagRarity = (rarity: number) => {
+  if (rarity <= ULTRA_RARE_DAMPING_START) return rarity;
+
+  return (
+    ULTRA_RARE_DAMPING_START +
+    Math.pow(rarity - ULTRA_RARE_DAMPING_START, ULTRA_RARE_DAMPING_CURVE)
+  );
+};
+
+const getSelectedGameTagSignalWeight = (tag: ShortTag, totalGames: number) => {
+  const rarity = getTagRarity(tag.gamesCount, totalGames);
+
+  return (
+    getDampenedTagRarity(rarity) *
     getTagCategoryWeight(tag.slug) *
     getTagStrengthWeight(tag.strength)
   );
@@ -131,39 +195,54 @@ function getCandidateMatchQuality(strength?: 1 | 2 | 3) {
   return 0.5 + getTagStrengthWeight(strength) / (2 * STRENGTH_WEIGHTS[3]);
 }
 
-function getUserProfile(
-  selectedGames: GameDto[],
-  activeTags: ShortTag[],
-  totalGames: number, // 1389
-) {
+function getSelectedGameProfile(game: GameDto, totalGames: number) {
   const profile = new Map<string, UserTagSignal>();
   const selectedTagOccurrences = new Map<string, number>();
 
-  for (const tag of selectedGames.flatMap((game) => game.tags)) {
-    const occurrence = (selectedTagOccurrences.get(tag.slug) ?? 0) + 1; // 1
+  const tagWeights = game.tags.map((tag) => ({
+    tag,
+    rarity: getTagRarity(tag.gamesCount, totalGames),
+    weight: getSelectedGameTagSignalWeight(tag, totalGames),
+  }));
+  const gameWeightTotal = tagWeights.reduce(
+    (total, tagWeight) => total + tagWeight.weight,
+    0,
+  );
 
-    const rarity = getTagRarity(tag.gamesCount, totalGames);
+  if (gameWeightTotal === 0) return profile;
 
-    const tagSignalWeight =
-      rarity *
-      getTagCategoryWeight(tag.slug) *
-      getTagStrengthWeight(tag.strength); 
+  for (const tagWeight of tagWeights) {
+    const occurrence =
+      (selectedTagOccurrences.get(tagWeight.tag.slug) ?? 0) + 1;
+    const repeatedTagWeight = 1 / Math.pow(occurrence, REPEATED_TAG_DECAY);
+    const score =
+      (tagWeight.weight / gameWeightTotal) *
+      SELECTED_GAME_TAG_WEIGHT *
+      repeatedTagWeight;
+    const existing = profile.get(tagWeight.tag.slug);
 
-    const repeatedTagWeight =
-      SELECTED_GAME_TAG_WEIGHT / Math.pow(occurrence, REPEATED_TAG_DECAY); 
-
-    const score = tagSignalWeight * repeatedTagWeight; 
-
-    const existing = profile.get(tag.slug);
-
-    selectedTagOccurrences.set(tag.slug, occurrence);
-    profile.set(tag.slug, {
-      tag,
-      rarity,
+    selectedTagOccurrences.set(tagWeight.tag.slug, occurrence);
+    profile.set(tagWeight.tag.slug, {
+      tag: tagWeight.tag,
+      rarity: tagWeight.rarity,
       score: (existing?.score ?? 0) + score,
-      activeScore: existing?.activeScore ?? 0,
+      activeScore: 0,
     });
   }
+
+  return profile;
+}
+
+function getTasteProfiles(selectedGames: GameDto[], totalGames: number) {
+  return selectedGames
+    .map((game) => ({
+      signals: getSelectedGameProfile(game, totalGames),
+    }))
+    .filter((profile) => profile.signals.size > 0);
+}
+
+function getActiveTagsProfile(activeTags: ShortTag[], totalGames: number) {
+  const profile = new Map<string, UserTagSignal>();
 
   for (const tag of activeTags) {
     const rarity = getTagRarity(tag.gamesCount, totalGames);
@@ -181,8 +260,9 @@ function getUserProfile(
   return profile;
 }
 
-function getProfileRareTagThreshold(userProfile: Map<string, UserTagSignal>) {
-  const rarities = Array.from(userProfile.values())
+function getProfileRareTagThreshold(profiles: Map<string, UserTagSignal>[]) {
+  const rarities = profiles
+    .flatMap((profile) => Array.from(profile.values()))
     .map((signal) => signal.rarity)
     .toSorted((a, b) => a - b);
 
@@ -280,20 +360,15 @@ function getStrongestActiveTagCoverage(
   return strongestMatchedActiveScore / strongestActiveScore;
 }
 
-function getScoreBreakdown(
+function getProfileMatchBreakdown(
   game: GameDto,
   userProfile: Map<string, UserTagSignal>,
-  activeTags: ShortTag[],
-  hasSelectedGames: boolean,
   rareTagThreshold: number,
   totalGames: number,
-) {
-  let profileTotal = 0; // 15.339498328763304 + ...
+): ProfileScoreBreakdown {
+  let profileTotal = 0;
   let matchedProfileScore = 0;
-  let activeTotal = 0;
-  let matchedActiveScore = 0;
-  let matchedActiveStrengthScore = 0;
-  let rareProfileTotal = 0; /// rpg rarity nie trafia
+  let rareProfileTotal = 0;
   let matchedRareProfileScore = 0;
 
   const matchedSignals: UserTagSignal[] = [];
@@ -301,7 +376,6 @@ function getScoreBreakdown(
 
   for (const signal of userProfile.values()) {
     profileTotal += signal.score;
-    activeTotal += signal.activeScore;
 
     if (signal.rarity >= rareTagThreshold) {
       rareProfileTotal += signal.score;
@@ -310,7 +384,6 @@ function getScoreBreakdown(
     if (matchedTag) {
       matchedSignals.push(signal);
 
-      const candidateStrengthWeight = getTagStrengthWeight(matchedTag.strength);
       const candidateMatchQuality = getCandidateMatchQuality(
         matchedTag.strength,
       );
@@ -318,9 +391,6 @@ function getScoreBreakdown(
       const weightedMatchScore = signal.score * candidateMatchQuality;
 
       matchedProfileScore += weightedMatchScore;
-      matchedActiveScore += signal.activeScore;
-      matchedActiveStrengthScore +=
-        signal.activeScore * candidateStrengthWeight;
 
       if (signal.rarity >= rareTagThreshold) {
         matchedRareProfileScore += signal.score;
@@ -337,24 +407,14 @@ function getScoreBreakdown(
   }
 
   const profileCoverage = Math.min(1, matchedProfileScore / profileTotal);
-  const activeCoverage = activeTotal > 0 ? matchedActiveScore / activeTotal : 0;
-  const activeStrengthCoverage =
-    activeTotal > 0
-      ? matchedActiveStrengthScore / (activeTotal * STRENGTH_WEIGHTS[3])
-      : 0;
   const hasRareProfileSignals = rareProfileTotal > 0;
   const rareTagCoverage = hasRareProfileSignals
     ? matchedRareProfileScore / rareProfileTotal
     : 0;
-  const activeTagMatches = getActiveTagMatchCount(game, activeTags);
   const conflictPenalty = getConflictPenalty(
     userProfile,
     gameTagsMap,
     profileTotal,
-  );
-  const missingActiveTagPenalty = getMissingActiveTagPenalty(
-    activeTags,
-    activeTagMatches,
   );
   const candidateNoisePenalty = getCandidateNoisePenalty(
     game,
@@ -362,54 +422,202 @@ function getScoreBreakdown(
     matchedSignals,
     totalGames,
   );
-  const totalPenalty =
-    conflictPenalty + missingActiveTagPenalty + candidateNoisePenalty;
-
-  if (!hasSelectedGames && activeTags.length > 0) {
-    const activeCountCoverage = activeTagMatches / activeTags.length;
-    const fullActiveMatch = activeTagMatches === activeTags.length;
-    const strongestActiveTagCoverage = getStrongestActiveTagCoverage(
-      userProfile,
-      matchedSignals,
-    );
-    const activeOnlyMissingPenalty = getMissingActiveTagPenalty(
-      activeTags,
-      activeTagMatches,
-    ) *
-      (ACTIVE_ONLY_MISSING_ACTIVE_TAG_PENALTY_SHARE /
-        MISSING_ACTIVE_TAG_PENALTY_SHARE);
-    const activeOnlyNoisePenalty =
-      candidateNoisePenalty *
-      (ACTIVE_ONLY_CANDIDATE_NOISE_PENALTY_SHARE /
-        CANDIDATE_NOISE_PENALTY_SHARE);
-    const similarity =
-      strongestActiveTagCoverage * ACTIVE_ONLY_PRIMARY_MATCH_SHARE +
-      activeCoverage * ACTIVE_ONLY_WEIGHTED_COVERAGE_SHARE +
-      activeStrengthCoverage * ACTIVE_ONLY_MATCH_STRENGTH_SHARE +
-      activeCountCoverage * ACTIVE_ONLY_COUNT_COVERAGE_SHARE +
-      (fullActiveMatch ? ACTIVE_ONLY_FULL_MATCH_BONUS_SHARE : 0) -
-      conflictPenalty -
-      activeOnlyNoisePenalty -
-      activeOnlyMissingPenalty;
-
-    return {
-      activeTagMatches,
-      matchedSignals,
-      similarity: curveSimilarity(similarity),
-    };
-  }
   const specificMatchShare = hasRareProfileSignals ? SPECIFIC_MATCH_SHARE : 0;
-  const baseShare =
-    1 - specificMatchShare - (activeTags.length > 0 ? ACTIVE_MATCH_SHARE : 0);
+  const baseShare = 1 - specificMatchShare;
   const similarity =
     profileCoverage * baseShare +
-    activeCoverage * ACTIVE_MATCH_SHARE +
     rareTagCoverage * specificMatchShare -
-    totalPenalty;
+    conflictPenalty -
+    candidateNoisePenalty;
+
+  return {
+    activeTagMatches: 0,
+    matchedSignals,
+    similarity: clampSimilarity(similarity),
+  };
+}
+
+function getActiveProfileBreakdown(
+  game: GameDto,
+  activeProfile: Map<string, UserTagSignal>,
+  activeTags: ShortTag[],
+  totalGames: number,
+): ProfileScoreBreakdown {
+  let activeTotal = 0;
+  let matchedActiveScore = 0;
+  let matchedActiveStrengthScore = 0;
+
+  const matchedSignals: UserTagSignal[] = [];
+  const gameTagsMap = new Map(game.tags.map((tag) => [tag.slug, tag]));
+
+  for (const signal of activeProfile.values()) {
+    activeTotal += signal.activeScore;
+
+    const matchedTag = gameTagsMap.get(signal.tag.slug);
+
+    if (!matchedTag) continue;
+
+    matchedSignals.push(signal);
+    matchedActiveScore += signal.activeScore;
+    matchedActiveStrengthScore +=
+      signal.activeScore * getTagStrengthWeight(matchedTag.strength);
+  }
+
+  if (activeTotal === 0) {
+    return {
+      activeTagMatches: 0,
+      matchedSignals,
+      similarity: 0,
+    };
+  }
+
+  const activeCoverage = matchedActiveScore / activeTotal;
+  const activeStrengthCoverage =
+    matchedActiveStrengthScore / (activeTotal * STRENGTH_WEIGHTS[3]);
+  const activeTagMatches = getActiveTagMatchCount(game, activeTags);
+  const activeCountCoverage = activeTagMatches / activeTags.length;
+  const fullActiveMatch = activeTagMatches === activeTags.length;
+  const strongestActiveTagCoverage = getStrongestActiveTagCoverage(
+    activeProfile,
+    matchedSignals,
+  );
+  const conflictPenalty = getConflictPenalty(
+    activeProfile,
+    gameTagsMap,
+    activeTotal,
+  );
+  const missingActiveTagPenalty =
+    getMissingActiveTagPenalty(activeTags, activeTagMatches) *
+    (ACTIVE_ONLY_MISSING_ACTIVE_TAG_PENALTY_SHARE /
+      MISSING_ACTIVE_TAG_PENALTY_SHARE);
+  const candidateNoisePenalty =
+    getCandidateNoisePenalty(game, activeProfile, matchedSignals, totalGames) *
+    (ACTIVE_ONLY_CANDIDATE_NOISE_PENALTY_SHARE /
+      CANDIDATE_NOISE_PENALTY_SHARE);
+  const similarity =
+    strongestActiveTagCoverage * ACTIVE_ONLY_PRIMARY_MATCH_SHARE +
+    activeCoverage * ACTIVE_ONLY_WEIGHTED_COVERAGE_SHARE +
+    activeStrengthCoverage * ACTIVE_ONLY_MATCH_STRENGTH_SHARE +
+    activeCountCoverage * ACTIVE_ONLY_COUNT_COVERAGE_SHARE +
+    (fullActiveMatch ? ACTIVE_ONLY_FULL_MATCH_BONUS_SHARE : 0) -
+    conflictPenalty -
+    candidateNoisePenalty -
+    missingActiveTagPenalty;
 
   return {
     activeTagMatches,
     matchedSignals,
+    similarity: clampSimilarity(similarity),
+  };
+}
+
+function aggregateTasteSimilarities(similarities: number[]) {
+  if (similarities.length === 0) return 0;
+
+  const strongestMatch = Math.max(...similarities);
+  const averageMatch =
+    similarities.reduce((total, similarity) => total + similarity, 0) /
+    similarities.length;
+  const softmaxWeights = similarities.map((similarity) =>
+    Math.exp((similarity - strongestMatch) / TASTE_SOFTMAX_TEMPERATURE),
+  );
+  const softmaxTotal = softmaxWeights.reduce(
+    (total, weight) => total + weight,
+    0,
+  );
+  const softmaxMatch =
+    softmaxTotal > 0
+      ? similarities.reduce(
+          (total, similarity, index) =>
+            total + similarity * softmaxWeights[index],
+          0,
+        ) / softmaxTotal
+      : strongestMatch;
+const weights = getTasteAggregationWeights(similarities.length);
+
+return (
+  strongestMatch * weights.top +
+  softmaxMatch * weights.softmax +
+  averageMatch * weights.average
+);
+  // return (
+  //   strongestMatch * TASTE_TOP_MATCH_SHARE +
+  //   softmaxMatch * TASTE_SOFTMAX_MATCH_SHARE +
+  //   averageMatch * TASTE_AVERAGE_MATCH_SHARE
+  // );
+}
+
+function mergeMatchedSignals(...signalGroups: UserTagSignal[][]) {
+  const signalsBySlug = new Map<string, UserTagSignal>();
+
+  for (const signal of signalGroups.flat()) {
+    const existing = signalsBySlug.get(signal.tag.slug);
+
+    if (
+      !existing ||
+      signal.score + signal.activeScore > existing.score + existing.activeScore
+    ) {
+      signalsBySlug.set(signal.tag.slug, signal);
+    }
+  }
+
+  return Array.from(signalsBySlug.values());
+}
+
+function getScoreBreakdown(
+  game: GameDto,
+  tasteProfiles: TasteProfile[],
+  activeProfile: Map<string, UserTagSignal>,
+  activeTags: ShortTag[],
+  rareTagThreshold: number,
+  totalGames: number,
+): ProfileScoreBreakdown {
+  const activeBreakdown = getActiveProfileBreakdown(
+    game,
+    activeProfile,
+    activeTags,
+    totalGames,
+  );
+
+  if (tasteProfiles.length === 0) {
+    return {
+      ...activeBreakdown,
+      similarity: curveSimilarity(activeBreakdown.similarity),
+    };
+  }
+
+  const tasteBreakdowns = tasteProfiles.map((profile) =>
+    getProfileMatchBreakdown(
+      game,
+      profile.signals,
+      rareTagThreshold,
+      totalGames,
+    ),
+  );
+  const bestTasteBreakdown = tasteBreakdowns.reduce(
+    (best, breakdown) =>
+      breakdown.similarity > best.similarity ? breakdown : best,
+    tasteBreakdowns[0],
+  );
+  const tasteSimilarity = aggregateTasteSimilarities(
+    tasteBreakdowns.map((breakdown) => breakdown.similarity),
+  );
+  const activeTagPenalty = getMissingActiveTagPenalty(
+    activeTags,
+    activeBreakdown.activeTagMatches,
+  );
+  const hasActiveTags = activeTags.length > 0;
+  const similarity =
+    tasteSimilarity * (hasActiveTags ? 1 - ACTIVE_MATCH_SHARE : 1) +
+    activeBreakdown.similarity * (hasActiveTags ? ACTIVE_MATCH_SHARE : 0) -
+    activeTagPenalty;
+
+  return {
+    activeTagMatches: activeBreakdown.activeTagMatches,
+    matchedSignals: mergeMatchedSignals(
+      bestTasteBreakdown.matchedSignals,
+      activeBreakdown.matchedSignals,
+    ),
     similarity: curveSimilarity(similarity),
   };
 }
@@ -504,22 +712,25 @@ export async function findMatchingGames(
     ...activeTags.map((tag) => tag.slug),
   ]);
   const tagSlugs = Array.from(tagSlugSet);
-  const hasSelectedGames = selectedGames.length > 0;
   const [games, totalGames] = await Promise.all([
     getCandidateGames(tagSlugs, selectedGames),
     prisma.game.count(),
   ]);
-  const userProfile = getUserProfile(selectedGames, activeTags, totalGames);
-  const rareTagThreshold = getProfileRareTagThreshold(userProfile); // 2.7269186854065928
+  const tasteProfiles = getTasteProfiles(selectedGames, totalGames);
+  const activeProfile = getActiveTagsProfile(activeTags, totalGames);
+  const rareTagThreshold = getProfileRareTagThreshold([
+    ...tasteProfiles.map((profile) => profile.signals),
+    activeProfile,
+  ]);
 
   return games
     .map((game) => {
       const dto = toGameDto(game);
       const breakdown = getScoreBreakdown(
         dto,
-        userProfile,
+        tasteProfiles,
+        activeProfile,
         activeTags,
-        hasSelectedGames,
         rareTagThreshold,
         totalGames,
       );
