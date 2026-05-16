@@ -80,7 +80,7 @@ export default async function Home() {
               </a>
             </p>
             <a
-              href="mailto:hello@gamematcher.gg"
+              href="mailto:hello@gamematcher.app"
               className="hover:text-primary transition-smooth"
             >
               hello@gamematcher.app
