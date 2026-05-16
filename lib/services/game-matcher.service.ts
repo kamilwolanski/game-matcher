@@ -9,7 +9,6 @@ import { CATEGORY_WEIGHTS, TAGS_AS_OBJECT } from "@/consts/tags";
 
 const SELECTED_GAME_TAG_WEIGHT = 1;
 const ACTIVE_TAG_WEIGHT = 2;
-const ACTIVE_MATCH_SHARE = 0.2;
 const REPEATED_TAG_DECAY = 0.65;
 const ULTRA_RARE_DAMPING_START = 2.5;
 const ULTRA_RARE_DAMPING_CURVE = 0.55;
@@ -131,6 +130,22 @@ function getTasteAggregationWeights(profileCount: number) {
         average: 0.15,
       };
   }
+}
+
+function getActiveMatchShare(selectedGamesCount: number) {
+  if (selectedGamesCount === 0) {
+    return 1;
+  }
+
+  if (selectedGamesCount === 1) {
+    return 0.12;
+  }
+
+  if (selectedGamesCount === 2) {
+    return 0.08;
+  }
+
+  return 0.05;
 }
 
 const getTagCategoryWeight = (slug: string) => {
@@ -642,9 +657,10 @@ function getScoreBreakdown(
     activeBreakdown.activeTagMatches,
   );
   const hasActiveTags = activeTags.length > 0;
+  const activeMatchShare = getActiveMatchShare(tasteProfiles.length);
   const similarity =
-    tasteSimilarity * (hasActiveTags ? 1 - ACTIVE_MATCH_SHARE : 1) +
-    activeBreakdown.similarity * (hasActiveTags ? ACTIVE_MATCH_SHARE : 0) -
+    tasteSimilarity * (hasActiveTags ? 1 - activeMatchShare : 1) +
+    activeBreakdown.similarity * (hasActiveTags ? activeMatchShare : 0) -
     activeTagPenalty;
 
   return {
