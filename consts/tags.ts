@@ -63,7 +63,7 @@ const BASE_TAGS: BaseTag[] = [
   { slug: "action", category: "genre", name: "Action", section: "Gameplay" },
   {
     slug: "adventure",
-    category: "genre",
+    category: "structure",
     name: "Adventure",
     section: "Gameplay",
   },

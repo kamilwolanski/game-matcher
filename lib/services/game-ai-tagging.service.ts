@@ -7,7 +7,7 @@ const client = new OpenAI();
 const OPENAI_MODEL = "gpt-5.4-mini";
 const DESCRIPTION_LIMIT = 600;
 const MIN_TAGS = 7;
-const MAX_TAGS = 11;
+const MAX_TAGS = 12;
 
 type GameAiTag = {
   slug: string;
@@ -62,6 +62,8 @@ const PARENT_TAG_RULES: Record<string, readonly string[]> = {
   "urban-fantasy": ["fantasy"],
   lovecraftian: ["horror", "dark"],
   mmo: ["multiplayer", "shared-world"],
+  noir: ["crime"],
+  "open-world": ["exploration"],
 };
 
 function compactDescription(description?: string) {
@@ -232,7 +234,49 @@ export async function generateGameTags(
               - prefer "cyberpunk" over:
                 "sci-fi" + "dystopian"
 
-          14. Order tags from most defining to least defining.
+          14. Do not use "open-world" for:
+          - interconnected zones
+          - metroidvania-like progression
+          - hub-based structures
+          - side-scrolling exploration games
+
+          15. Do not use "noir" for games that only feature:
+          - neon aesthetics
+          - retro-futurism
+          - detective themes
+          - jazz-inspired presentation
+
+          16. Do not use "retro" for retro-futuristic settings.
+            Use "retro" only when the game intentionally evokes
+            older game aesthetics or old-school presentation styles.
+
+        17. Exploration should represent discovery-driven gameplay,
+        not merely traversing large environments.
+
+        18. Do not infer CRPG from: - 
+        old-school RPG design - open-world RPG progression - faction systems - difficult progression - 
+        classic RPG atmosphere CRPG should represent games primarily rooted in: - isometric computer RPG traditions - 
+        dialogue-heavy roleplaying - party systems - tactical/stat-driven gameplayDo not infer CRPG from: - old-school RPG design - 
+        open-world RPG progression - faction systems - difficult progression - classic RPG atmosphere CRPG should represent games primarily rooted in: - 
+        isometric computer RPG traditions - dialogue-heavy roleplaying - party systems - tactical/stat-driven gameplay
+
+        19 Do not use "adventure" as a generic fallback tag for story-driven games.
+
+          "Adventure" should represent games primarily focused on:
+          - exploration-driven progression
+          - environmental interaction
+          - narrative discovery
+          - traversal and discovery as core gameplay
+
+          Do not use "adventure" for:
+          - most RPGs
+          - action RPGs
+          - open-world RPGs
+          - games where combat, progression, or RPG systems are the primary identity
+          
+          Do not use "adventure" when combat or RPG progression are the dominant gameplay loop.
+
+          20. Order tags from most defining to least defining.
 
           EXAMPLES:
 
@@ -268,7 +312,7 @@ export async function generateGameTags(
             { "slug": "isometric", "strength": 1 }
           ]
 
-          15. Use the "mmo" tag only when the game's core identity
+          21. Use the "mmo" tag only when the game's core identity
             depends on a persistent large-scale online world with
             massive player interaction, long-term progression,
             and shared online systems.
