@@ -1,6 +1,7 @@
 // import "server-only";
 
 import prisma from "@/lib/prisma";
+import { unstable_cache } from "next/cache";
 import {
   fetchRawgGameDetails,
   fetchRawgGameSeries,
@@ -38,28 +39,35 @@ export async function getGameByRawgId(rawgId: number) {
   return toGameDto(game);
 }
 
-export async function getBaseTags(): Promise<ShortTag[]> {
-  const dbTags = await prisma.tag.findMany({
-    where: {
-      slug: {
-        in: TAG_SLUGS,
+
+export const getBaseTags = unstable_cache(
+  async (): Promise<ShortTag[]> => {
+    const dbTags = await prisma.tag.findMany({
+      where: {
+        slug: {
+          in: TAG_SLUGS,
+        },
       },
-    },
-    select: {
-      slug: true,
-      name: true,
-      gamesCount: true,
-    },
-  });
+      select: {
+        slug: true,
+        name: true,
+        gamesCount: true,
+      },
+    });
 
-  const dbTagMap = new Map(dbTags.map((tag) => [tag.slug, tag]));
+    const dbTagMap = new Map(dbTags.map((tag) => [tag.slug, tag]));
 
-  return TAGS.map((tag) => ({
-    slug: tag.slug,
-    name: tag.name,
-    gamesCount: dbTagMap.get(tag.slug)?.gamesCount ?? 0,
-  }));
-}
+    return TAGS.map((tag) => ({
+      slug: tag.slug,
+      name: tag.name,
+      gamesCount: dbTagMap.get(tag.slug)?.gamesCount ?? 0,
+    }));
+  },
+  ["base-tags"],
+  {
+    revalidate: 60 * 60 * 24, // 24h
+  },
+);
 
 export async function saveRawgGame(rawgGame: RawgGame, gameSeries: GameSeries) {
   // =========================================================
