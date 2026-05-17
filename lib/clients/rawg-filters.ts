@@ -323,7 +323,6 @@ const BLOCKED_POSITIONS = new Set<string>([
   "tales-of-symphonia",
   "badland-game-of-the-year-edition",
   "dragon-age-origins-awakening",
-
   "mirror",
   "rush",
   "spore-galactic-adventures",
@@ -348,6 +347,15 @@ const BLOCKED_POSITIONS = new Set<string>([
   "need-for-speed-hot-pursuit-remastered",
   "pixel-puzzles-japan",
   "turbo-pug-dx",
+  "dungeon-keeper-gold",
+  "kingdom-come-deliverance-goodie-pack",
+  "kingdom-come-deliverance-a-womans-lot",
+  "kingdom-come-deliverance-from-the-ashes",
+  "kingdom-come-deliverance-band-of-bastards",
+  "tropico-3-gold-edition",
+  "tropico-4-modern-times",
+  "tropico-paradise-island",
+  "tropico-3-absolute-power"
 ] as const);
 
 function isFutureRelease(released: string | null) {
