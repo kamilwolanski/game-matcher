@@ -2,6 +2,7 @@ import { GameMatchDto } from "@/lib/dto/game-match.dto";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { formatPlatforms } from "./GameDetailsModal";
+import { getCloudinaryImage } from "@/lib/cloudinary";
 
 type Props = {
   game: GameMatchDto;
@@ -68,9 +69,10 @@ export const GameCard = ({ game, onClick, index = 0 }: Props) => {
       <div className="relative">
         <div className="relative aspect-3/4 overflow-hidden transition-bounce md:group-hover:scale-110">
           <Image
-            src={image}
+            src={getCloudinaryImage(image, 1000)}
             alt={game.name}
             fill
+            unoptimized
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 35vw"
             className="object-cover object-top"
           />
