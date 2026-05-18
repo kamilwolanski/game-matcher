@@ -57,7 +57,7 @@ export const GameSearch = ({
   const [isSearching, setIsSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [results, setResults] = useState<SearchGameResult[]>([]);
-  const debouncedQuery = useDebounce(query, 250);
+  const debouncedQuery = useDebounce(query, 300);
 
   useEffect(() => {
     const trimmedQuery = debouncedQuery.trim();

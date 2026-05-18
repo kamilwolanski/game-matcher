@@ -570,6 +570,12 @@ const BASE_TAGS: BaseTag[] = [
     name: "Party Based",
     section: "Gameplay",
   },
+  {
+    slug: "flight",
+    category: "mechanic",
+    name: "Flight",
+    section: "Gameplay",
+  },
   // =========================================================
   // EXPERIENCE
   // =========================================================

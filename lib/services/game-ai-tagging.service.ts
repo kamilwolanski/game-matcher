@@ -276,7 +276,17 @@ export async function generateGameTags(
           
           Do not use "adventure" when combat or RPG progression are the dominant gameplay loop.
 
-          20. Order tags from most defining to least defining.
+        20. Use "flight" only when piloting aircraft is
+            a meaningful recurring gameplay component.
+
+            Do not use it for:
+            - occasional flying vehicles
+            - scripted flying sections
+            - gliding
+            - jetpacks
+            - traversal abilities
+
+          21. Order tags from most defining to least defining.
 
           EXAMPLES:
 
@@ -312,7 +322,7 @@ export async function generateGameTags(
             { "slug": "isometric", "strength": 1 }
           ]
 
-          21. Use the "mmo" tag only when the game's core identity
+          22. Use the "mmo" tag only when the game's core identity
             depends on a persistent large-scale online world with
             massive player interaction, long-term progression,
             and shared online systems.
