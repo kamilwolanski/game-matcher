@@ -276,15 +276,33 @@ export async function generateGameTags(
           
           Do not use "adventure" when combat or RPG progression are the dominant gameplay loop.
 
-        20. Use "flight" only when piloting aircraft is
-            a meaningful recurring gameplay component.
+        20. "flight" should represent games where piloting
+          an aircraft or spacecraft is a core gameplay pillar.
 
-            Do not use it for:
+          This includes:
+          - aircraft combat
+          - space dogfighting
+          - flight simulators
+          - spaceship piloting gameplay
+
+          Do not use it for:
+            - simple flying traversal
+            - scripted flight moments
+            - passive vehicle travel
             - occasional flying vehicles
             - scripted flying sections
             - gliding
             - jetpacks
             - traversal abilities
+
+          Examples of games that should use "flight":
+          - Microsoft Flight Simulator
+          - Ace Combat
+          - DCS World
+          - Project Wingman
+          - Star Wars: Squadrons
+          - Everspace
+          - Everspace 2
 
           21. Order tags from most defining to least defining.
 

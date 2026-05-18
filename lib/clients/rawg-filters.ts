@@ -167,7 +167,6 @@ const BLOCKED_POSITIONS = new Set<string>([
   "the-walking-dead-the-telltale-definitive-series",
   "game-room",
   "pokemon-ruby",
-  "heretic",
   "horizon-zero-dawn-the-frozen-wilds",
   "katamari-damacy-reroll",
   "legend-of-keepers-prologue",
