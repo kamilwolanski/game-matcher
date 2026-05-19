@@ -4,12 +4,13 @@ import type { GameDto } from "@/lib/dto/game.dto";
 import type { GameMatchDto } from "@/lib/dto/game-match.dto";
 import type { ShortTag } from "@/lib/dto/tag.dto";
 import { toGameDto } from "@/lib/mappers/game.mapper";
+import embeddings from "@/data/embeddings.json";
 import prisma from "@/lib/prisma";
 import { CATEGORY_WEIGHTS, TAGS_AS_OBJECT } from "@/consts/tags";
 
 const SELECTED_GAME_TAG_WEIGHT = 1;
 const ACTIVE_TAG_WEIGHT = 2;
-const REPEATED_TAG_DECAY = 0.65;
+const REPEATED_TAG_DECAY = 0.5;
 const ULTRA_RARE_DAMPING_START = 2.5;
 const ULTRA_RARE_DAMPING_CURVE = 0.55;
 const TASTE_SOFTMAX_TEMPERATURE = 0.18;
@@ -24,15 +25,18 @@ const DEFAULT_CATEGORY_WEIGHT = 1;
 const RESULTS_LIMIT = 80;
 const SHARED_TRAITS_LIMIT = 6;
 const CONFLICT_PENALTY_SHARE = 0.22;
-const MISSING_ACTIVE_TAG_PENALTY_SHARE = 0.25;
+const MISSING_ACTIVE_TAG_PENALTY_SHARE = 0.15;
 const ACTIVE_ONLY_MISSING_ACTIVE_TAG_PENALTY_SHARE = 0.08;
-const CANDIDATE_NOISE_PENALTY_SHARE = 0.1;
+const CANDIDATE_NOISE_PENALTY_SHARE = 0.05;
 const ACTIVE_ONLY_CANDIDATE_NOISE_PENALTY_SHARE = 0.025;
 const ACTIVE_ONLY_PRIMARY_MATCH_SHARE = 0.45;
 const ACTIVE_ONLY_WEIGHTED_COVERAGE_SHARE = 0.25;
 const ACTIVE_ONLY_MATCH_STRENGTH_SHARE = 0.15;
 const ACTIVE_ONLY_COUNT_COVERAGE_SHARE = 0.1;
 const ACTIVE_ONLY_FULL_MATCH_BONUS_SHARE = 0.05;
+const EMBEDDING_THRESHOLD = 0.6;
+const EMBEDDING_RELATION_SCALE = 0.5;
+const PARTIAL_MATCH_SCALE = 0.7;
 const MATCH_REASON_TITLE =
   "Matched on shared gameplay and atmosphere traits from your picks.";
 
@@ -61,6 +65,37 @@ const TAG_CONFLICTS: Record<string, readonly string[]> = {
   sandbox: ["linear"],
   singleplayer: ["online-pvp", "ranked", "moba", "battle-royale"],
   multiplayer: ["walking-simulator", "visual-novel"],
+};
+
+const TAG_RELATIONS: Record<string, Record<string, number>> = {
+  // "boomer-shooter": {
+  //   retro: 0.35,
+  //   fps: 0.45,
+  //   "fast-paced": 0.3,
+  //   "dungeon-crawler": 0.2,
+  //   fantasy: 0.25,
+  //   magic: 0.25,
+  // },
+  // "dungeon-crawler": {
+  //   exploration: 0.35,
+  //   backtracking: 0.35,
+  //   fantasy: 0.2,
+  // },
+  // magic: {
+  //   fantasy: 0.3,
+  //   "dark-fantasy": 0.2,
+  // },
+  // "dark-fantasy": {
+  //   fantasy: 0.25,
+  //   dark: 0.25,
+  //   horror: 0.2,
+  // },
+  // "immersive-sim": {
+  //   stealth: 0.35,
+  //   exploration: 0.25,
+  //   "choices-matter": 0.25,
+  //   "first-person": 0.2,
+  // },
 };
 
 type UserTagSignal = {
@@ -94,10 +129,69 @@ const gameWithTagsInclude = {
   },
 } as const;
 
+function cosineSimilarity(a: number[], b: number[]) {
+  let dot = 0;
+  let normA = 0;
+  let normB = 0;
+
+  for (let i = 0; i < a.length; i++) {
+    dot += a[i] * b[i];
+    normA += a[i] * a[i];
+    normB += b[i] * b[i];
+  }
+
+  return dot / (Math.sqrt(normA) * Math.sqrt(normB));
+}
+
+function debugTagSimilarity(tagA: string, tagB: string) {
+  const embeddingA = embeddings[tagA as keyof typeof embeddings];
+
+  const embeddingB = embeddings[tagB as keyof typeof embeddings];
+
+  if (!embeddingA || !embeddingB) {
+    console.log("Missing embedding");
+    return;
+  }
+
+  const similarity = cosineSimilarity(embeddingA, embeddingB);
+
+  console.log({
+    tagA,
+    tagB,
+    similarity,
+  });
+}
+
 function getTagStrengthWeight(strength?: 1 | 2 | 3) {
   if (!strength) return 1;
 
   return STRENGTH_WEIGHTS[strength];
+}
+
+
+function getTagRelationScore(sourceSlug: string, targetSlug: string) {
+  // exact manual relation ma priorytet
+  const manual = TAG_RELATIONS[sourceSlug]?.[targetSlug];
+
+  if (manual) {
+    return manual;
+  }
+
+  const sourceEmbedding = embeddings[sourceSlug as keyof typeof embeddings];
+
+  const targetEmbedding = embeddings[targetSlug as keyof typeof embeddings];
+
+  if (!sourceEmbedding || !targetEmbedding) {
+    return 0;
+  }
+
+  const similarity = cosineSimilarity(sourceEmbedding, targetEmbedding);
+
+  if (similarity < EMBEDDING_THRESHOLD) {
+    return 0;
+  }
+
+  return similarity * EMBEDDING_RELATION_SCALE;
 }
 
 function getTasteAggregationWeights(profileCount: number) {
@@ -209,8 +303,6 @@ function applyAffinityBonuses(
     selectedGames.map((game) => game.developerSlug).filter(Boolean),
   );
 
-  const hasSeriesContext = selectedSeriesSlugs.size > 0;
-
   const hasSameSeries =
     candidateGame.seriesSlug &&
     selectedSeriesSlugs.has(candidateGame.seriesSlug);
@@ -221,8 +313,6 @@ function applyAffinityBonuses(
 
   if (hasSameSeries) {
     similarity += (1 - similarity) * 0.35;
-  } else if (hasSeriesContext) {
-    similarity -= similarity * 0.02;
   }
 
   if (similarity > 0.45 && hasSameDeveloper) {
@@ -255,6 +345,7 @@ function getSelectedGameProfile(game: GameDto, totalGames: number) {
     rarity: getTagRarity(tag.gamesCount, totalGames),
     weight: getSelectedGameTagSignalWeight(tag, totalGames),
   }));
+
   const gameWeightTotal = tagWeights.reduce(
     (total, tagWeight) => total + tagWeight.weight,
     0,
@@ -432,6 +523,7 @@ function getProfileMatchBreakdown(
       rareProfileTotal += signal.score;
     }
     const matchedTag = gameTagsMap.get(signal.tag.slug);
+
     if (matchedTag) {
       matchedSignals.push(signal);
 
@@ -445,6 +537,32 @@ function getProfileMatchBreakdown(
 
       if (signal.rarity >= rareTagThreshold) {
         matchedRareProfileScore += signal.score;
+      }
+    } else {
+      let bestRelationScore = 0;
+
+      for (const candidateTag of game.tags) {
+        const relationScore = getTagRelationScore(
+          signal.tag.slug,
+          candidateTag.slug,
+        );
+
+        if (relationScore <= 0) continue;
+
+        const candidateStrength = getTagStrengthWeight(candidateTag.strength);
+
+        const partialScore =
+          relationScore * candidateStrength * PARTIAL_MATCH_SCALE;
+
+        bestRelationScore = Math.max(bestRelationScore, partialScore);
+      }
+
+      if (bestRelationScore > 0) {
+        matchedProfileScore += signal.score * bestRelationScore;
+
+        if (signal.rarity >= rareTagThreshold) {
+          matchedRareProfileScore += signal.score * bestRelationScore;
+        }
       }
     }
   }
@@ -506,12 +624,43 @@ function getActiveProfileBreakdown(
 
     const matchedTag = gameTagsMap.get(signal.tag.slug);
 
-    if (!matchedTag) continue;
+    if (matchedTag) {
+      matchedSignals.push(signal);
 
-    matchedSignals.push(signal);
-    matchedActiveScore += signal.activeScore;
-    matchedActiveStrengthScore +=
-      signal.activeScore * getTagStrengthWeight(matchedTag.strength);
+      matchedActiveScore += signal.activeScore;
+
+      matchedActiveStrengthScore +=
+        signal.activeScore * getTagStrengthWeight(matchedTag.strength);
+    } else {
+      let bestRelationScore = 0;
+
+      for (const candidateTag of game.tags) {
+        const relationScore = getTagRelationScore(
+          signal.tag.slug,
+          candidateTag.slug,
+        );
+
+        if (relationScore <= 0) {
+          continue;
+        }
+
+        const candidateStrength = getTagStrengthWeight(candidateTag.strength);
+
+        const partialScore =
+          relationScore * candidateStrength * PARTIAL_MATCH_SCALE;
+
+        bestRelationScore = Math.max(bestRelationScore, partialScore);
+      }
+
+      if (bestRelationScore > 0) {
+        matchedSignals.push(signal);
+
+        matchedActiveScore += signal.activeScore * bestRelationScore;
+
+        matchedActiveStrengthScore += signal.activeScore * bestRelationScore;
+      }
+    }
+
   }
 
   if (activeTotal === 0) {

@@ -218,7 +218,26 @@ export async function generateGameTags(
 
           11. Do not infer party-based gameplay unless the player directly controls or manages multiple party members for a substantial portion of the game.
 
-          12. Perspective and mode tags are usually supporting traits unless they fundamentally define the experience.
+          12. Perspective tags are highly important experiential traits
+          and should usually be included when clearly identifiable.
+
+          Perspective strongly affects:
+          - immersion
+          - combat feel
+          - exploration feel
+          - gameplay readability
+          - player experience
+
+          Examples:
+          - "first-person" in FPS games is usually strength 2 or 3
+          - "isometric" in CRPGs or ARPGs is usually strength 2
+          - "top-down" in tactical or roguelike games is usually strength 2
+          - "third-person" in action RPGs is usually strength 1 or 2
+
+          Perspective should only be omitted when it has minimal impact on gameplay experience.
+
+          Mode tags like "singleplayer" and "multiplayer"
+          are usually supporting traits unless central to the game's identity.
 
           Examples:
           - "first-person" in an FPS may deserve strength 2

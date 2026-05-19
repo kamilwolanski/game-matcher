@@ -42,6 +42,5 @@ next-env.d.ts
 
 /app/generated/prisma
 
-/scripts/
 /tags-from-db.json
 dump.sql
