@@ -10,7 +10,9 @@
     "postinstall": "prisma generate",
     "print-game": "tsx --env-file=.env scripts/print-game.ts",
     "add-game-tag": "tsx --env-file=.env scripts/add-game-tag.ts",
-    "remove-game-tag": "tsx --env-file=.env scripts/remove-game-tag.ts"
+    "remove-game-tag": "tsx --env-file=.env scripts/remove-game-tag.ts",
+    "db:dump": "tsx scripts/db/db-dump.ts",
+    "db:sync": "tsx scripts/db/db-sync.ts"
   },
   "dependencies": {
     "@google/genai": "^1.52.0",
