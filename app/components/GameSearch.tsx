@@ -8,6 +8,7 @@ import type { SearchGameResult } from "@/lib/dto/search-game.dto";
 import Image from "next/image";
 import { GameState } from "../hooks/useGameSelection/useGameSelection.types";
 import { MAX_GAMES } from "../hooks/useGameSelection/useGameSelection";
+import { getCloudinaryImage } from "@/lib/cloudinary";
 
 type Props = {
   pickedGames: GameState[];
@@ -226,9 +227,10 @@ export const GameSearch = ({
                         {g.image ? (
                           <div className="relative w-10 h-14 md:w-12 md:h-16 shrink-0 overflow-hidden rounded-md">
                             <Image
-                              src={g.image}
+                              src={getCloudinaryImage(g.image, 300)}
                               alt={g.name}
                               fill
+                              unoptimized
                               sizes="300px"
                               className="object-cover"
                             />
@@ -238,7 +240,9 @@ export const GameSearch = ({
                         )}
 
                         <div className="min-w-0 flex-1">
-                          <p className="text-sm md:text-base font-semibold truncate">{g.name}</p>
+                          <p className="text-sm md:text-base font-semibold truncate">
+                            {g.name}
+                          </p>
                           {g.released && (
                             <p className="text-xs text-muted-foreground">
                               {new Date(g.released).getFullYear()}
@@ -285,11 +289,11 @@ export const GameSearch = ({
                 {image ? (
                   <div className="relative w-9 h-12 shrink-0 overflow-hidden rounded-lg">
                     <Image
-                      src={image}
+                      src={getCloudinaryImage(image, 400)}
                       alt={name}
                       fill
+                      unoptimized
                       sizes="300px"
-                      quality={90}
                       className={cn(
                         "object-cover",
                         status === "analyzing" && "opacity-70",
