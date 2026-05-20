@@ -354,7 +354,8 @@ const BLOCKED_POSITIONS = new Set<string>([
   "tropico-3-gold-edition",
   "tropico-4-modern-times",
   "tropico-paradise-island",
-  "tropico-3-absolute-power"
+  "tropico-3-absolute-power",
+  "spellforce-platinum"
 ] as const);
 
 function isFutureRelease(released: string | null) {

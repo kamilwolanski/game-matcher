@@ -576,6 +576,12 @@ const BASE_TAGS: BaseTag[] = [
     name: "Flight",
     section: "Gameplay",
   },
+  {
+    slug: "npc-routines",
+    category: "mechanic",
+    name: "NPC Routines",
+    section: "Gameplay",
+  },
   // =========================================================
   // EXPERIENCE
   // =========================================================

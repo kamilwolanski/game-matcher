@@ -359,7 +359,42 @@ export async function generateGameTags(
             { "slug": "isometric", "strength": 1 }
           ]
 
-          22. Use the "mmo" tag only when the game's core identity
+          22. "npc-routines" should represent games where NPCs
+              have persistent schedules, daily routines,
+              or simulated autonomous behaviors that significantly
+              contribute to world immersion and player experience.
+
+              This includes:
+              - NPCs sleeping, working, eating, traveling
+              - time-based world behaviors
+              - persistent simulated routines
+              - reactive world schedules
+
+              Do not use it for:
+              - static NPC placement
+              - generic crowds
+              - scripted ambient behaviors
+              - simple day/night cycles without NPC simulation
+              - open-world games where NPCs mainly serve as quest markers
+
+              Examples that SHOULD usually include "npc-routines":
+              - Gothic
+              - Gothic II
+              - Kingdom Come: Deliverance
+              - Oblivion
+              - Skyrim
+              - Shenmue
+              - STALKER
+              - The Sims
+
+              Examples that SHOULD usually NOT include "npc-routines":
+              - Assassin's Creed Odyssey
+              - Horizon Zero Dawn
+              - Far Cry
+              - Diablo IV
+              - Elden Ring
+
+          23. Use the "mmo" tag only when the game's core identity
             depends on a persistent large-scale online world with
             massive player interaction, long-term progression,
             and shared online systems.
