@@ -5,7 +5,7 @@ import OpenAI from "openai";
 const client = new OpenAI();
 
 const OPENAI_MODEL = "gpt-5.4-mini";
-const DESCRIPTION_LIMIT = 600;
+const DESCRIPTION_LIMIT = 700;
 const MIN_TAGS = 7;
 const MAX_TAGS = 12;
 
@@ -212,7 +212,6 @@ export async function generateGameTags(
           9. Use ONLY slugs from the provided schema.
 
           10. Only assign tags strongly supported by:
-          - the game description
           - known gameplay
           - the game's core identity
 

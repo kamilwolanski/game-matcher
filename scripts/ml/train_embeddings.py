@@ -14,9 +14,9 @@ model = Word2Vec(
     epochs=30
 )
 
-# print(model.wv.most_similar("boomer-shooter"))
+print(model.wv.most_similar("boomer-shooter"))
 # print(model.wv.most_similar("dark-fantasy"))
-print(model.wv.most_similar("flight"))
+# print(model.wv.most_similar("flight"))
 # print(model.wv.most_similar("boomer-shooter"))
 # print(model.wv.most_similar("immersive-sim"))
 
