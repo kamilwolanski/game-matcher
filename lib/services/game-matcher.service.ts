@@ -168,7 +168,6 @@ function getTagStrengthWeight(strength?: 1 | 2 | 3) {
   return STRENGTH_WEIGHTS[strength];
 }
 
-
 function getTagRelationScore(sourceSlug: string, targetSlug: string) {
   // exact manual relation ma priorytet
   const manual = TAG_RELATIONS[sourceSlug]?.[targetSlug];
@@ -502,6 +501,44 @@ function getStrongestActiveTagCoverage(
   return strongestMatchedActiveScore / strongestActiveScore;
 }
 
+function getTasteAffinityBonus(
+  userProfile: Map<string, UserTagSignal>,
+  game: GameDto,
+) {
+  const importantSignals = Array.from(userProfile.values()).filter(
+    (signal) => signal.score >= 0.1,
+  );
+
+  if (importantSignals.length < 2) {
+    return 0;
+  }
+
+  let semanticMatches = 0;
+
+  for (const signal of importantSignals) {
+    let bestMatch = 0;
+
+    for (const candidateTag of game.tags) {
+      if (candidateTag.slug === signal.tag.slug) {
+        bestMatch = 1;
+        break;
+      }
+
+      const relationScore = getTagRelationScore(
+        signal.tag.slug,
+        candidateTag.slug,
+      );
+
+      bestMatch = Math.max(bestMatch, relationScore);
+    }
+    semanticMatches += bestMatch;
+  }
+
+  const affinityRatio = semanticMatches / importantSignals.length;
+
+  return affinityRatio * 0.06;
+}
+
 function getProfileMatchBreakdown(
   game: GameDto,
   userProfile: Map<string, UserTagSignal>,
@@ -593,11 +630,14 @@ function getProfileMatchBreakdown(
   );
   const specificMatchShare = hasRareProfileSignals ? SPECIFIC_MATCH_SHARE : 0;
   const baseShare = 1 - specificMatchShare;
-  const similarity =
+
+  let similarity =
     profileCoverage * baseShare +
     rareTagCoverage * specificMatchShare -
     conflictPenalty -
     candidateNoisePenalty;
+
+  similarity += getTasteAffinityBonus(userProfile, game);
 
   return {
     activeTagMatches: 0,
@@ -660,7 +700,6 @@ function getActiveProfileBreakdown(
         matchedActiveStrengthScore += signal.activeScore * bestRelationScore;
       }
     }
-
   }
 
   if (activeTotal === 0) {
