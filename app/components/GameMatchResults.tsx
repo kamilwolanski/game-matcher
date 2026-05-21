@@ -135,7 +135,7 @@ export function GameMatchResults({
     sort === "match"
       ? strong.length === 0
         ? "No strong matches found. Try exploring broader matches below."
-        : `${strong.length} strong match${strong.length === 1 ? "" : "es"} - ranked by how much they match your taste`
+        : `${strong.length} strong match${strong.length === 1 ? "" : "es"} · ranked by how much they match your taste`
       : `${matchedGames.length} match${matchedGames.length === 1 ? "" : "es"} ${" · "}`;
   // reset after click find
   useEffect(() => {
