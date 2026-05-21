@@ -123,7 +123,7 @@ export function GameMatchResults({
         .slice()
         .sort(
           (a, b) =>
-            (b.rating ?? 0) - (a.rating ?? 0) || b.similarity - a.similarity,
+            (b.metacritic ?? 0) - (a.metacritic ?? 0) || b.similarity - a.similarity,
         );
     }
 
