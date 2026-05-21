@@ -225,20 +225,43 @@ function getTasteAggregationWeights(profileCount: number) {
   }
 }
 
-function getActiveMatchShare(selectedGamesCount: number) {
-  if (selectedGamesCount === 0) {
-    return 1;
+function getActiveMatchShare(selectedGames: GameDto[], activeTags: ShortTag[]) {
+  if (activeTags.length === 0) {
+    return 0;
   }
 
-  if (selectedGamesCount === 1) {
-    return 0.12;
+  const gameplayOverrideCategories = new Set(["genre", "subgenre"]);
+
+  const hasGameplayOverride = activeTags.some((tag) => {
+    const config = TAGS_AS_OBJECT[tag.slug];
+
+    if (!config) return false;
+
+    // tylko gameplayowe tagi
+    if (!gameplayOverrideCategories.has(config.category)) {
+      return false;
+    }
+
+    // których nie ma w selected game
+    return !selectedGames.some((game) =>
+      game.tags.some((t) => t.slug === tag.slug),
+    );
+  });
+
+  // user zmienia typ gameplayu
+  if (hasGameplayOverride) {
+    return 0.45;
   }
 
-  if (selectedGamesCount === 2) {
-    return 0.08;
+  if (selectedGames.length === 1) {
+    return 0.2;
   }
 
-  return 0.05;
+  if (selectedGames.length === 2) {
+    return 0.15;
+  }
+
+  return 0.1;
 }
 
 const getTagCategoryWeight = (slug: string) => {
@@ -804,6 +827,7 @@ function mergeMatchedSignals(...signalGroups: UserTagSignal[][]) {
 
 function getScoreBreakdown(
   game: GameDto,
+  selectedGames: GameDto[],
   tasteProfiles: TasteProfile[],
   activeProfile: Map<string, UserTagSignal>,
   activeTags: ShortTag[],
@@ -845,7 +869,8 @@ function getScoreBreakdown(
     activeBreakdown.activeTagMatches,
   );
   const hasActiveTags = activeTags.length > 0;
-  const activeMatchShare = getActiveMatchShare(tasteProfiles.length);
+  const activeMatchShare = getActiveMatchShare(selectedGames, activeTags);
+
   const similarity =
     tasteSimilarity * (hasActiveTags ? 1 - activeMatchShare : 1) +
     activeBreakdown.similarity * (hasActiveTags ? activeMatchShare : 0) -
@@ -972,6 +997,7 @@ export async function findMatchingGames(
       const dto = toGameDto(game);
       const breakdown = getScoreBreakdown(
         dto,
+        selectedGames,
         tasteProfiles,
         activeProfile,
         activeTags,

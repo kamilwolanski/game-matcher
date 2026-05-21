@@ -65,7 +65,7 @@ export const getBaseTags = unstable_cache(
   },
   ["base-tags"],
   {
-    revalidate: 60, // 24h
+    revalidate: 60 * 60 * 24, // 24h
   },
 );
 
