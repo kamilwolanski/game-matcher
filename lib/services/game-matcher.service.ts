@@ -1,9 +1,9 @@
 import "server-only";
 
+import type { Prisma } from "@/app/generated/prisma/client";
 import type { GameDto } from "@/lib/dto/game.dto";
 import type { GameMatchDto } from "@/lib/dto/game-match.dto";
 import type { ShortTag } from "@/lib/dto/tag.dto";
-import { toGameDto } from "@/lib/mappers/game.mapper";
 import embeddings from "@/data/embeddings.json";
 import prisma from "@/lib/prisma";
 import { CATEGORY_WEIGHTS, TAGS_AS_OBJECT } from "@/consts/tags";
@@ -109,25 +109,103 @@ type TasteProfile = {
   signals: Map<string, UserTagSignal>;
 };
 
+type MatchScoringGame = Pick<
+  GameDto,
+  | "id"
+  | "slug"
+  | "metacritic"
+  | "rating"
+  | "added"
+  | "developerSlug"
+  | "seriesSlug"
+  | "tags"
+>;
+
 type ProfileScoreBreakdown = {
   activeTagMatches: number;
   matchedSignals: UserTagSignal[];
   similarity: number;
 };
 
-type ScoredGame = GameDto & {
-  activeTagMatches: number;
+type GameMatchResultPayload = Prisma.GameGetPayload<{
+  select: typeof gameMatchResultSelect;
+}>;
+
+type ScoredGameMatchResult = GameMatchResultPayload & {
   similarity: number;
   matchReason: GameMatchDto["matchReason"];
 };
 
-const gameWithTagsInclude = {
+const tagForMatchSelect = {
+  name: true,
+  slug: true,
+  gamesCount: true,
+} as const;
+
+const scoringGameSelect = {
+  id: true,
+  slug: true,
+  metacritic: true,
+  rating: true,
+  added: true,
+  developerSlug: true,
+  seriesSlug: true,
   tags: {
-    include: {
-      tag: true,
+    select: {
+      strength: true,
+      tag: {
+        select: tagForMatchSelect,
+      },
     },
   },
 } as const;
+
+const gameMatchResultSelect = {
+  id: true,
+  name: true,
+  slug: true,
+  description: true,
+  image: true,
+  metacritic: true,
+  rating: true,
+  added: true,
+  platforms: true,
+  released: true,
+  tags: {
+    select: {
+      strength: true,
+      tag: {
+        select: tagForMatchSelect,
+      },
+    },
+  },
+} as const;
+
+type ScoringGamePayload = Prisma.GameGetPayload<{
+  select: typeof scoringGameSelect;
+}>;
+
+function toShortTags(game: ScoringGamePayload | GameMatchResultPayload) {
+  return game.tags.map((t) => ({
+    name: t.tag.name,
+    slug: t.tag.slug,
+    gamesCount: t.tag.gamesCount,
+    strength: t.strength as 1 | 2 | 3,
+  }));
+}
+
+function toMatchScoringGame(game: ScoringGamePayload): MatchScoringGame {
+  return {
+    id: game.id,
+    slug: game.slug,
+    metacritic: game.metacritic,
+    rating: game.rating,
+    added: game.added,
+    developerSlug: game.developerSlug,
+    seriesSlug: game.seriesSlug,
+    tags: toShortTags(game),
+  };
+}
 
 function cosineSimilarity(a: number[], b: number[]) {
   let dot = 0;
@@ -141,25 +219,6 @@ function cosineSimilarity(a: number[], b: number[]) {
   }
 
   return dot / (Math.sqrt(normA) * Math.sqrt(normB));
-}
-
-function debugTagSimilarity(tagA: string, tagB: string) {
-  const embeddingA = embeddings[tagA as keyof typeof embeddings];
-
-  const embeddingB = embeddings[tagB as keyof typeof embeddings];
-
-  if (!embeddingA || !embeddingB) {
-    console.log("Missing embedding");
-    return;
-  }
-
-  const similarity = cosineSimilarity(embeddingA, embeddingB);
-
-  console.log({
-    tagA,
-    tagB,
-    similarity,
-  });
 }
 
 function getTagStrengthWeight(strength?: 1 | 2 | 3) {
@@ -314,7 +373,7 @@ const getTagRarity = (count: number, totalGames: number) => {
 
 function applyAffinityBonuses(
   similarity: number,
-  candidateGame: GameDto,
+  candidateGame: MatchScoringGame,
   selectedGames: GameDto[],
 ) {
   const selectedSeriesSlugs = new Set(
@@ -479,7 +538,7 @@ function getMissingActiveTagPenalty(
 }
 
 function getCandidateNoisePenalty(
-  game: GameDto,
+  game: MatchScoringGame,
   userProfile: Map<string, UserTagSignal>,
   matchedSignals: UserTagSignal[],
   totalGames: number,
@@ -526,7 +585,7 @@ function getStrongestActiveTagCoverage(
 
 function getTasteAffinityBonus(
   userProfile: Map<string, UserTagSignal>,
-  game: GameDto,
+  game: MatchScoringGame,
 ) {
   const importantSignals = Array.from(userProfile.values()).filter(
     (signal) => signal.score >= 0.1,
@@ -563,7 +622,7 @@ function getTasteAffinityBonus(
 }
 
 function getProfileMatchBreakdown(
-  game: GameDto,
+  game: MatchScoringGame,
   userProfile: Map<string, UserTagSignal>,
   rareTagThreshold: number,
   totalGames: number,
@@ -670,7 +729,7 @@ function getProfileMatchBreakdown(
 }
 
 function getActiveProfileBreakdown(
-  game: GameDto,
+  game: MatchScoringGame,
   activeProfile: Map<string, UserTagSignal>,
   activeTags: ShortTag[],
   totalGames: number,
@@ -826,7 +885,7 @@ function mergeMatchedSignals(...signalGroups: UserTagSignal[][]) {
 }
 
 function getScoreBreakdown(
-  game: GameDto,
+  game: MatchScoringGame,
   selectedGames: GameDto[],
   tasteProfiles: TasteProfile[],
   activeProfile: Map<string, UserTagSignal>,
@@ -886,7 +945,10 @@ function getScoreBreakdown(
   };
 }
 
-function getActiveTagMatchCount(game: GameDto, activeTags: ShortTag[]) {
+function getActiveTagMatchCount(
+  game: MatchScoringGame,
+  activeTags: ShortTag[],
+) {
   if (activeTags.length === 0) return 0;
 
   const gameTagSlugs = new Set(game.tags.map((tag) => tag.slug));
@@ -921,7 +983,7 @@ async function getCandidateGames(tagSlugs: string[], selectedGames: GameDto[]) {
       notIn: excludedSlugs,
     },
   };
-
+  const start = performance.now();
   const tagMatchGames =
     tagSlugs.length > 0
       ? await prisma.game.findMany({
@@ -937,19 +999,27 @@ async function getCandidateGames(tagSlugs: string[], selectedGames: GameDto[]) {
               },
             },
           },
-          include: gameWithTagsInclude,
+          select: scoringGameSelect,
         })
       : [];
+  const end = performance.now();
 
+  const payloadSizeMB =
+    Buffer.byteLength(JSON.stringify(tagMatchGames)) / 1024 / 1024;
+
+  console.log({
+    gamesCount: tagMatchGames.length,
+    durationMs: Math.round(end - start),
+    payloadSizeMB: payloadSizeMB.toFixed(2),
+  });
   return Array.from(
     new Map([...tagMatchGames].map((game) => [game.slug, game])).values(),
-  );
+  ).map(toMatchScoringGame);
 }
 
-function toGameMatchDto(game: ScoredGame): GameMatchDto {
+function toGameMatchDto(game: ScoredGameMatchResult): GameMatchDto {
   return {
     id: game.id,
-    rawgId: game.rawgId,
     name: game.name,
     slug: game.slug,
     description: game.description,
@@ -959,16 +1029,9 @@ function toGameMatchDto(game: ScoredGame): GameMatchDto {
     added: game.added,
     platforms: game.platforms,
     released: game.released,
-    createdAt: game.createdAt,
-    updatedAt: game.updatedAt,
-    tags: game.tags,
+    tags: toShortTags(game),
     similarity: game.similarity,
     matchReason: game.matchReason,
-    developerSlug: game.developerSlug,
-    developerName: game.developerName,
-    developerGamesCount: game.developerGamesCount,
-    seriesName: game.seriesName,
-    seriesSlug: game.seriesSlug,
   };
 }
 
@@ -992,11 +1055,10 @@ export async function findMatchingGames(
     activeProfile,
   ]);
 
-  return games
+  const topScoredGames = games
     .map((game) => {
-      const dto = toGameDto(game);
       const breakdown = getScoreBreakdown(
-        dto,
+        game,
         selectedGames,
         tasteProfiles,
         activeProfile,
@@ -1007,12 +1069,12 @@ export async function findMatchingGames(
 
       const similarity = applyAffinityBonuses(
         breakdown.similarity,
-        dto,
+        game,
         selectedGames,
       );
 
       return {
-        ...dto,
+        ...game,
         activeTagMatches: breakdown.activeTagMatches,
         similarity: similarity,
         matchReason: {
@@ -1042,6 +1104,42 @@ export async function findMatchingGames(
       return (b.added ?? 0) - (a.added ?? 0);
     })
     .filter((g) => g.similarity > 0.1)
-    .slice(0, RESULTS_LIMIT)
-    .map(toGameMatchDto);
+    .slice(0, RESULTS_LIMIT);
+
+  if (topScoredGames.length === 0) {
+    return [];
+  }
+  const start = performance.now();
+
+  const resultGames = await prisma.game.findMany({
+    where: {
+      id: {
+        in: topScoredGames.map((game) => game.id),
+      },
+    },
+    select: gameMatchResultSelect,
+  });
+    const end = performance.now();
+
+  const payloadSizeMB =
+    Buffer.byteLength(JSON.stringify(resultGames)) / 1024 / 1024;
+
+  console.log({
+    gamesCount: resultGames.length,
+    durationMs: Math.round(end - start),
+    payloadSizeMB: payloadSizeMB.toFixed(2),
+  });
+  const resultGamesById = new Map(resultGames.map((game) => [game.id, game]));
+
+  return topScoredGames.flatMap((scoredGame) => {
+    const resultGame = resultGamesById.get(scoredGame.id);
+
+    if (!resultGame) return [];
+
+    return toGameMatchDto({
+      ...resultGame,
+      similarity: scoredGame.similarity,
+      matchReason: scoredGame.matchReason,
+    });
+  });
 }
