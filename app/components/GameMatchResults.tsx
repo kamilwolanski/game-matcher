@@ -190,7 +190,11 @@ export function GameMatchResults({
                   </div>
                 </div>
                 <div className="flex w-full items-center gap-2 flex-wrap sm:w-auto">
-                  <DropdownMenu open={sortOpen} onOpenChange={setSortOpen}>
+                  <DropdownMenu
+                    open={sortOpen}
+                    onOpenChange={setSortOpen}
+                    modal={false}
+                  >
                     <DropdownMenuTrigger asChild>
                       <button
                         className={cn(
