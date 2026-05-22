@@ -16,8 +16,15 @@ import { extractSeriesCandidate, GameSeries } from "../series/game-series";
 
 const gameWithTagsInclude = {
   tags: {
-    include: {
-      tag: true,
+    select: {
+      strength: true,
+      tag: {
+        select: {
+          name: true,
+          slug: true,
+          gamesCount: true,
+        },
+      },
     },
   },
 } as const;

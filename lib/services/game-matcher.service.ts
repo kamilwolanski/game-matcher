@@ -105,6 +105,8 @@ type UserTagSignal = {
   activeScore: number;
 };
 
+type ScoringTag = Pick<ShortTag, "slug" | "gamesCount" | "strength">;
+
 type TasteProfile = {
   signals: Map<string, UserTagSignal>;
 };
@@ -118,8 +120,9 @@ type MatchScoringGame = Pick<
   | "added"
   | "developerSlug"
   | "seriesSlug"
-  | "tags"
->;
+> & {
+  tags: ScoringTag[];
+};
 
 type ProfileScoreBreakdown = {
   activeTagMatches: number;
@@ -136,10 +139,14 @@ type ScoredGameMatchResult = GameMatchResultPayload & {
   matchReason: GameMatchDto["matchReason"];
 };
 
-const tagForMatchSelect = {
-  name: true,
+const tagForScoringSelect = {
   slug: true,
   gamesCount: true,
+} as const;
+
+const tagForResultSelect = {
+  name: true,
+  ...tagForScoringSelect,
 } as const;
 
 const scoringGameSelect = {
@@ -154,7 +161,7 @@ const scoringGameSelect = {
     select: {
       strength: true,
       tag: {
-        select: tagForMatchSelect,
+        select: tagForScoringSelect,
       },
     },
   },
@@ -175,7 +182,7 @@ const gameMatchResultSelect = {
     select: {
       strength: true,
       tag: {
-        select: tagForMatchSelect,
+        select: tagForResultSelect,
       },
     },
   },
@@ -185,7 +192,15 @@ type ScoringGamePayload = Prisma.GameGetPayload<{
   select: typeof scoringGameSelect;
 }>;
 
-function toShortTags(game: ScoringGamePayload | GameMatchResultPayload) {
+function toScoringTags(game: ScoringGamePayload): ScoringTag[] {
+  return game.tags.map((t) => ({
+    slug: t.tag.slug,
+    gamesCount: t.tag.gamesCount,
+    strength: t.strength as 1 | 2 | 3,
+  }));
+}
+
+function toShortTags(game: GameMatchResultPayload) {
   return game.tags.map((t) => ({
     name: t.tag.name,
     slug: t.tag.slug,
@@ -203,7 +218,7 @@ function toMatchScoringGame(game: ScoringGamePayload): MatchScoringGame {
     added: game.added,
     developerSlug: game.developerSlug,
     seriesSlug: game.seriesSlug,
-    tags: toShortTags(game),
+    tags: toScoringTags(game),
   };
 }
 
@@ -331,7 +346,7 @@ const getTagCategoryWeight = (slug: string) => {
   return CATEGORY_WEIGHTS[tag.category];
 };
 
-const getTagSignalWeight = (tag: ShortTag, totalGames: number) => {
+const getTagSignalWeight = (tag: ScoringTag, totalGames: number) => {
   return (
     getTagRarity(tag.gamesCount, totalGames) *
     getTagCategoryWeight(tag.slug) *
@@ -501,7 +516,7 @@ function getProfileRareTagThreshold(profiles: Map<string, UserTagSignal>[]) {
 
 function getConflictPenalty(
   userProfile: Map<string, UserTagSignal>,
-  gameTagsMap: Map<string, ShortTag>,
+  gameTagsMap: Map<string, ScoringTag>,
   profileTotal: number,
 ) {
   if (profileTotal === 0) return 0;

@@ -20,6 +20,41 @@ function similarity(a: string, b: string) {
   return intersection / Math.max(aWords.size, bWords.size);
 }
 
+function getSearchCandidateFilters(query: string) {
+  const normalizedQuery = normalize(query);
+  const slugQuery = normalizedQuery.replace(/\s+/g, "-");
+  const queryWords = normalizedQuery.split(" ").filter(Boolean);
+
+  return [
+    {
+      name: {
+        contains: normalizedQuery,
+        mode: "insensitive" as const,
+      },
+    },
+    {
+      slug: {
+        contains: slugQuery,
+        mode: "insensitive" as const,
+      },
+    },
+    ...queryWords.flatMap((word) => [
+      {
+        name: {
+          contains: word,
+          mode: "insensitive" as const,
+        },
+      },
+      {
+        slug: {
+          contains: word,
+          mode: "insensitive" as const,
+        },
+      },
+    ]),
+  ];
+}
+
 async function main() {
   const query = process.argv.slice(2).join(" ").trim();
 
@@ -30,6 +65,9 @@ async function main() {
   const normalizedQuery = normalize(query);
 
   const games = await prisma.game.findMany({
+    where: {
+      OR: getSearchCandidateFilters(query),
+    },
     select: {
       id: true,
       rawgId: true,

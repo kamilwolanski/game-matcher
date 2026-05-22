@@ -4,8 +4,15 @@ import type { GameDto } from "../dto/game.dto";
 type GameWithRelations = Prisma.GameGetPayload<{
   include: {
     tags: {
-      include: {
-        tag: true;
+      select: {
+        strength: true;
+        tag: {
+          select: {
+            name: true;
+            slug: true;
+            gamesCount: true;
+          };
+        };
       };
     };
   };
