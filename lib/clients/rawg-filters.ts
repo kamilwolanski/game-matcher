@@ -404,6 +404,10 @@ const BLOCKED_POSITIONS = new Set<string>([
   "stoneshard-prologue",
   "epigenesis",
   "builders-of-egypt-prologue",
+
+  "dying-light-hellraid",
+  "dying-light-the-following",
+  "dying-light-the-bozak-horde",
 ] as const);
 
 function isFutureRelease(released: string | null) {
