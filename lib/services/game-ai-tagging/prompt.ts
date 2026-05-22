@@ -1,6 +1,6 @@
 import { CATEGORY_WEIGHTS } from "@/consts/tags";
 
-const DESCRIPTION_LIMIT = 700;
+const DESCRIPTION_LIMIT = 800;
 const MIN_TAGS = 7;
 const MAX_TAGS = 12;
 

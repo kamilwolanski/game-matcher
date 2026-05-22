@@ -65,6 +65,9 @@ const TAG_CONFLICTS: Record<string, readonly string[]> = {
   sandbox: ["linear"],
   singleplayer: ["online-pvp", "ranked", "moba", "battle-royale"],
   multiplayer: ["walking-simulator", "visual-novel"],
+  medieval: ["sci-fi", "futuristic"],
+  "sci-fi": ["medieval"],
+  futuristic: ["medieval"],
 };
 
 const TAG_RELATIONS: Record<string, Record<string, number>> = {
@@ -1134,7 +1137,7 @@ export async function findMatchingGames(
     },
     select: gameMatchResultSelect,
   });
-    const end = performance.now();
+  const end = performance.now();
 
   const payloadSizeMB =
     Buffer.byteLength(JSON.stringify(resultGames)) / 1024 / 1024;
