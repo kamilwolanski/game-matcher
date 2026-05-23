@@ -337,6 +337,44 @@ const SYSTEM_PROMPT = `
             - melee combat alone
             - swords alone
             - fantasy combat without medieval setting
+
+            25. "real-time-combat" should represent games where
+            real-time combat is a major and recurring gameplay pillar.
+
+            Use it when:
+            - combat is frequent and central to the gameplay loop
+            - combat execution strongly affects player experience
+            - timing, reactions, positioning, aggression, or combat skill matter regularly
+
+            Examples that SHOULD usually include "real-time-combat":
+            - Dark Souls
+            - Sekiro
+            - Hades
+            - Doom Eternal
+            - Ghostrunner
+            - Diablo IV
+            - Warcraft III
+
+            Do NOT use it for:
+            - puzzle games
+            - walking simulators
+            - exploration-focused games
+            - narrative adventures
+            - games with only occasional combat
+            - games where traversal or narrative dominate over combat
+
+            Examples that SHOULD usually NOT include it:
+            - Journey
+            - Firewatch
+            - Cocoon
+            - Jusant
+            - Fort Solis
+            - Chants of Sennaar
+
+            IMPORTANT:
+            "real-time-combat" is NOT a synonym for:
+            - "action"
+            - "real-time gameplay"
           `;
 
 export function createGameTaggingMessages(
