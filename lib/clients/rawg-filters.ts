@@ -123,7 +123,6 @@ const BLOCKED_POSITIONS = new Set<string>([
   "blackgate-deluxe-ed",
   "portal-2-sixense-perceptual-pack",
   "the-witcher-3-game-of-the-year",
-  "heroes-of-might-and-magic-3-complete",
   "age-of-mythology-extended-edition",
   "arma-gold-edition",
   "dead-rising-3-apocalypse-edition",
