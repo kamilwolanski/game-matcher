@@ -4,7 +4,6 @@
     "choices-matter",
     "narrative-driven",
     "action",
-    "medieval",
     "dark",
     "vampires",
     "urban-fantasy",
@@ -479,7 +478,8 @@
     "historical",
     "war",
     "military",
-    "crime"
+    "crime",
+    "ww2"
   ],
   [
     "shooter",
@@ -581,7 +581,6 @@
     "high-reflex",
     "challenging",
     "arcade",
-    "medieval",
     "singleplayer"
   ],
   [
@@ -1173,7 +1172,8 @@
     "chill",
     "funny",
     "singleplayer",
-    "casual"
+    "casual",
+    "cozy"
   ],
   [
     "srpg",
@@ -1211,7 +1211,8 @@
     "mythology",
     "greek-mythology",
     "narrative-driven",
-    "character-customization"
+    "buildcraft-heavy",
+    "fast-paced"
   ],
   [
     "tower-defense",
@@ -2124,7 +2125,6 @@
   ],
   [
     "srpg",
-    "rpg",
     "sci-fi",
     "tactical-shooter",
     "shooter",
@@ -2136,7 +2136,10 @@
     "singleplayer",
     "strategy",
     "tactical",
-    "turn-based"
+    "turn-based",
+    "methodical",
+    "challenging",
+    "rpg"
   ],
   [
     "action",
@@ -2292,9 +2295,9 @@
     "roguelite",
     "procedural",
     "permadeath",
-    "medieval",
     "sci-fi",
-    "aliens"
+    "aliens",
+    "methodical"
   ],
   [
     "action",
@@ -2590,6 +2593,7 @@
     "dark"
   ],
   [
+    "funny",
     "tcg",
     "turn-based",
     "match-based",
@@ -3046,7 +3050,6 @@
   ],
   [
     "action",
-    "battle-royale",
     "multiplayer",
     "online-pvp",
     "match-based",
@@ -4467,7 +4470,8 @@
     "party-game",
     "cozy",
     "online-pvp",
-    "first-person"
+    "first-person",
+    "funny"
   ],
   [
     "simulation",
@@ -5622,7 +5626,14 @@
     "top-down"
   ],
   [
-    "shooter"
+    "shooter",
+    "bullet-hell",
+    "arcade",
+    "fast-paced",
+    "high-reflex",
+    "sci-fi",
+    "challenging",
+    "retro"
   ],
   [
     "action",
@@ -5736,8 +5747,7 @@
     "fast-paced",
     "high-reflex",
     "team-based",
-    "futuristic",
-    "medieval"
+    "futuristic"
   ],
   [
     "puzzle",
@@ -6210,7 +6220,10 @@
     "adventure",
     "puzzle-solving",
     "narrative-driven",
-    "competitive"
+    "funny",
+    "dialogue-heavy",
+    "stylized",
+    "casual"
   ],
   [
     "party-game",
@@ -6220,7 +6233,8 @@
     "family-friendly",
     "arcade",
     "coop",
-    "competitive"
+    "competitive",
+    "funny"
   ],
   [
     "point-and-click",
@@ -6852,7 +6866,6 @@
     "open-world",
     "horror",
     "action",
-    "medieval",
     "exploration",
     "first-person",
     "singleplayer",
@@ -8263,7 +8276,8 @@
     "puzzle-solving",
     "fast-paced",
     "challenging",
-    "stylized"
+    "stylized",
+    "funny"
   ],
   [
     "platformer",
@@ -9220,7 +9234,9 @@
     "puzzle-solving",
     "minimalist",
     "chill",
-    "singleplayer"
+    "singleplayer",
+    "casual",
+    "relaxing"
   ],
   [
     "arpg",
@@ -10175,6 +10191,18 @@
     "first-person"
   ],
   [
+    "point-and-click",
+    "adventure",
+    "puzzle-solving",
+    "narrative-driven",
+    "dialogue-heavy",
+    "mystery",
+    "detective",
+    "choices-matter",
+    "singleplayer",
+    "stylized"
+  ],
+  [
     "visual-novel",
     "narrative-driven",
     "dialogue-heavy",
@@ -10199,6 +10227,17 @@
     "stylized",
     "third-person",
     "dialogue-heavy"
+  ],
+  [
+    "rts",
+    "strategy",
+    "real-time-combat",
+    "army-management",
+    "resource-management",
+    "fantasy",
+    "war",
+    "singleplayer",
+    "mission-based"
   ],
   [
     "action",
@@ -10355,6 +10394,18 @@
     "sideview"
   ],
   [
+    "point-and-click",
+    "adventure",
+    "puzzle-solving",
+    "narrative-driven",
+    "dialogue-heavy",
+    "choices-matter",
+    "mystery",
+    "crime",
+    "singleplayer",
+    "stylized"
+  ],
+  [
     "shooter",
     "fps",
     "online-pve",
@@ -10377,6 +10428,20 @@
     "cozy",
     "funny",
     "stylized"
+  ],
+  [
+    "rts",
+    "strategy",
+    "rpg",
+    "party-based",
+    "real-time-combat",
+    "buildcraft-heavy",
+    "army-management",
+    "fantasy",
+    "character-customization",
+    "skill-tree",
+    "top-down",
+    "singleplayer"
   ],
   [
     "battle-royale",
@@ -10765,7 +10830,6 @@
     "arpg",
     "rpg",
     "real-time-combat",
-    "battle-royale",
     "multiplayer",
     "online-pvp",
     "match-based",
@@ -11183,7 +11247,6 @@
     "arpg",
     "rpg",
     "real-time-combat",
-    "battle-royale",
     "multiplayer",
     "online-pvp",
     "match-based",
@@ -11577,7 +11640,8 @@
     "arcade",
     "fast-paced",
     "challenging",
-    "family-friendly"
+    "family-friendly",
+    "funny"
   ],
   [
     "survival",
@@ -12715,7 +12779,6 @@
     "sandbox",
     "simulation",
     "strategy",
-    "battle-royale",
     "multiplayer",
     "online-pvp",
     "match-based",
@@ -12772,7 +12835,6 @@
     "stealth",
     "hunting",
     "survival-crafting",
-    "medieval",
     "historical",
     "singleplayer"
   ],
@@ -13331,11 +13393,16 @@
     "singleplayer"
   ],
   [
-    "puzzle",
     "physics",
     "singleplayer",
     "narrative-driven",
-    "competitive"
+    "puzzle",
+    "funny",
+    "casual",
+    "chill",
+    "stylized",
+    "cozy",
+    "puzzle-solving"
   ],
   [
     "party-game",
@@ -13509,7 +13576,6 @@
     "fighting",
     "action",
     "sideview",
-    "battle-royale",
     "multiplayer",
     "online-pvp",
     "match-based",
@@ -13817,7 +13883,10 @@
     "adventure",
     "puzzle-solving",
     "narrative-driven",
-    "competitive"
+    "funny",
+    "dialogue-heavy",
+    "stylized",
+    "casual"
   ],
   [
     "horror",
@@ -15436,6 +15505,7 @@
     "sports"
   ],
   [
+    "cozy",
     "puzzle",
     "puzzle-solving",
     "building",
@@ -15724,11 +15794,9 @@
     "action",
     "adventure",
     "third-person",
-    "medieval",
     "historical",
     "military",
     "crime",
-    "battle-royale",
     "multiplayer",
     "online-pvp",
     "match-based"
@@ -16074,7 +16142,6 @@
     "fps",
     "action",
     "mission-based",
-    "battle-royale",
     "multiplayer",
     "online-pvp",
     "match-based",
@@ -16489,6 +16556,7 @@
     "npc-routines"
   ],
   [
+    "funny",
     "sports",
     "multiplayer",
     "party-game",
@@ -16822,8 +16890,7 @@
     "competitive",
     "arena-shooter",
     "physics",
-    "sci-fi",
-    "medieval"
+    "sci-fi"
   ],
   [
     "fighting",
@@ -16873,6 +16940,7 @@
     "historical"
   ],
   [
+    "cozy",
     "puzzle-solving",
     "point-and-click",
     "adventure",
@@ -16979,6 +17047,7 @@
     "arcade"
   ],
   [
+    "cozy",
     "puzzle",
     "physics",
     "relaxing",
@@ -17211,6 +17280,21 @@
     "singleplayer"
   ],
   [
+    "open-world",
+    "exploration",
+    "mission-based",
+    "multiplayer",
+    "action",
+    "shooter",
+    "third-person",
+    "sandbox",
+    "online-pvp",
+    "coop",
+    "crime",
+    "modern",
+    "shared-world"
+  ],
+  [
     "puzzle",
     "puzzle-solving",
     "point-and-click",
@@ -17329,6 +17413,20 @@
     "sci-fi",
     "aliens",
     "first-person",
+    "singleplayer"
+  ],
+  [
+    "mmo",
+    "multiplayer",
+    "shared-world",
+    "rpg",
+    "grind-heavy",
+    "fantasy",
+    "top-down",
+    "online-pve",
+    "loot-driven",
+    "skill-tree",
+    "character-customization",
     "singleplayer"
   ],
   [
@@ -17727,7 +17825,6 @@
     "war",
     "military",
     "steampunk",
-    "medieval",
     "third-person",
     "singleplayer"
   ],
@@ -19051,12 +19148,12 @@
     "military",
     "war",
     "team-based",
-    "online-pve",
     "multiplayer",
     "real-world",
     "ww2",
     "historical",
-    "first-person"
+    "first-person",
+    "online-pvp"
   ],
   [
     "shooter",
@@ -20294,7 +20391,13 @@
     "survival",
     "open-world",
     "exploration",
-    "economy"
+    "challenging",
+    "crafting",
+    "atmospheric",
+    "methodical",
+    "real-world",
+    "sandbox",
+    "historical"
   ],
   [
     "crpg",
@@ -20642,7 +20745,6 @@
     "action",
     "tps",
     "shooter",
-    "battle-royale",
     "multiplayer",
     "online-pvp",
     "match-based",
@@ -22358,12 +22460,6 @@
     "multiplayer"
   ],
   [
-    "simulation",
-    "resource-management",
-    "building",
-    "singleplayer"
-  ],
-  [
     "srpg",
     "rpg",
     "strategy",
@@ -22905,7 +23001,12 @@
     "shooter",
     "fps",
     "horror",
-    "survival"
+    "survival",
+    "coop",
+    "funny",
+    "multiplayer",
+    "arcade",
+    "fast-paced"
   ],
   [
     "fps",
@@ -24430,7 +24531,8 @@
     "competitive",
     "party-game",
     "building",
-    "stylized"
+    "stylized",
+    "funny"
   ],
   [
     "racing",
@@ -24613,10 +24715,16 @@
   ],
   [
     "action",
-    "battle-royale",
-    "multiplayer",
-    "online-pvp",
-    "match-based"
+    "narrative-driven",
+    "organized-crime",
+    "adventure",
+    "exploration",
+    "real-time-combat",
+    "crime",
+    "hub-based",
+    "funny",
+    "modern",
+    "singleplayer"
   ],
   [
     "rts",
@@ -25145,6 +25253,16 @@
     "narrative-driven"
   ],
   [
+    "action",
+    "platformer",
+    "sideview",
+    "linear",
+    "fantasy",
+    "dark-fantasy",
+    "singleplayer",
+    "narrative-driven"
+  ],
+  [
     "rpg",
     "open-world",
     "action",
@@ -25518,7 +25636,14 @@
     "choices-matter"
   ],
   [
-    "shooter"
+    "shooter",
+    "bullet-hell",
+    "fast-paced",
+    "high-reflex",
+    "arcade",
+    "sci-fi",
+    "challenging",
+    "retro"
   ],
   [
     "action",
@@ -25953,7 +26078,6 @@
   [
     "fighting",
     "action",
-    "medieval",
     "third-person",
     "multiplayer",
     "coop",
@@ -25985,6 +26109,19 @@
     "hand-drawn",
     "atmospheric",
     "singleplayer"
+  ],
+  [
+    "racing",
+    "driving",
+    "futuristic",
+    "sci-fi",
+    "fast-paced",
+    "high-reflex",
+    "challenging",
+    "arcade",
+    "competitive",
+    "singleplayer",
+    "multiplayer"
   ],
   [
     "point-and-click",
@@ -26076,6 +26213,19 @@
     "singleplayer"
   ],
   [
+    "coop",
+    "action",
+    "adventure",
+    "puzzle-solving",
+    "platformer",
+    "third-person",
+    "narrative-driven",
+    "fantasy",
+    "sci-fi",
+    "branching",
+    "singleplayer"
+  ],
+  [
     "platformer",
     "puzzle-solving",
     "physics",
@@ -26120,6 +26270,16 @@
     "chill",
     "singleplayer",
     "resource-management"
+  ],
+  [
+    "strategy",
+    "tactical",
+    "turn-based",
+    "competitive",
+    "multiplayer",
+    "singleplayer",
+    "family-friendly",
+    "real-world"
   ],
   [
     "action",
@@ -26200,6 +26360,34 @@
     "narrative-driven",
     "singleplayer",
     "hand-drawn"
+  ],
+  [
+    "mmo",
+    "multiplayer",
+    "shared-world",
+    "rpg",
+    "online-pve",
+    "online-pvp",
+    "sandbox",
+    "fantasy",
+    "medieval",
+    "crafting",
+    "trading",
+    "isometric",
+    "singleplayer"
+  ],
+  [
+    "strategy",
+    "turn-based",
+    "tactical",
+    "war",
+    "ww2",
+    "military",
+    "historical",
+    "simulation",
+    "resource-management",
+    "army-management",
+    "singleplayer"
   ],
   [
     "puzzle",
@@ -26285,6 +26473,18 @@
     "competitive"
   ],
   [
+    "strategy",
+    "turn-based",
+    "tactical",
+    "ww2",
+    "war",
+    "military",
+    "historical",
+    "singleplayer",
+    "mission-based",
+    "top-down"
+  ],
+  [
     "shooter",
     "fps",
     "hunting",
@@ -26333,6 +26533,21 @@
     "fantasy"
   ],
   [
+    "rts",
+    "strategy",
+    "city-builder",
+    "simulation",
+    "building",
+    "resource-management",
+    "medieval",
+    "war",
+    "military",
+    "real-time-combat",
+    "singleplayer",
+    "multiplayer"
+  ],
+  [
+    "funny",
     "racing",
     "arcade",
     "multiplayer",
@@ -26363,7 +26578,8 @@
     "multiplayer",
     "party-game",
     "modern",
-    "singleplayer"
+    "singleplayer",
+    "funny"
   ],
   [
     "platformer",
@@ -26410,7 +26626,8 @@
     "sci-fi",
     "futuristic",
     "stylized",
-    "singleplayer"
+    "singleplayer",
+    "funny"
   ],
   [
     "city-builder",
@@ -26597,6 +26814,18 @@
     "chill"
   ],
   [
+    "shooter",
+    "action",
+    "tps",
+    "team-based",
+    "online-pvp",
+    "multiplayer",
+    "sci-fi",
+    "futuristic",
+    "competitive",
+    "fast-paced"
+  ],
+  [
     "visual-novel",
     "narrative-driven",
     "dialogue-heavy",
@@ -26641,6 +26870,33 @@
     "dark",
     "lovecraftian",
     "singleplayer"
+  ],
+  [
+    "shooter",
+    "fps",
+    "action",
+    "fast-paced",
+    "arcade",
+    "level-based",
+    "singleplayer",
+    "multiplayer",
+    "sci-fi",
+    "space",
+    "historical",
+    "western"
+  ],
+  [
+    "roguelite",
+    "procedural",
+    "permadeath",
+    "turn-based",
+    "strategy",
+    "party-based",
+    "buildcraft-heavy",
+    "skill-tree",
+    "loot-driven",
+    "singleplayer",
+    "fantasy"
   ],
   [
     "tcg",
@@ -26731,16 +26987,17 @@
     "singleplayer"
   ],
   [
+    "dark-fantasy",
+    "dialogue-heavy",
+    "hack-and-slash",
     "rpg",
     "action",
     "choices-matter",
     "third-person",
     "fantasy",
     "medieval",
-    "sci-fi",
     "narrative-driven",
     "singleplayer",
-    "hack-and-slash",
     "npc-routines"
   ],
   [
@@ -26965,6 +27222,34 @@
     "linear"
   ],
   [
+    "shooter",
+    "fps",
+    "action",
+    "stealth",
+    "mission-based",
+    "singleplayer",
+    "narrative-driven",
+    "space",
+    "sci-fi",
+    "retro",
+    "futuristic",
+    "first-person"
+  ],
+  [
+    "shooter",
+    "fps",
+    "action",
+    "mission-based",
+    "arcade",
+    "fast-paced",
+    "high-reflex",
+    "sci-fi",
+    "singleplayer",
+    "multiplayer",
+    "competitive",
+    "futuristic"
+  ],
+  [
     "survival",
     "survival-crafting",
     "crafting",
@@ -26999,6 +27284,18 @@
     "linear",
     "fantasy",
     "narrative-driven",
+    "singleplayer"
+  ],
+  [
+    "platformer",
+    "sideview",
+    "level-based",
+    "action",
+    "arcade",
+    "multiplayer",
+    "coop",
+    "family-friendly",
+    "fantasy",
     "singleplayer"
   ],
   [
@@ -27069,6 +27366,16 @@
     "character-customization"
   ],
   [
+    "simulation",
+    "strategy",
+    "resource-management",
+    "real-world",
+    "politics",
+    "singleplayer",
+    "turn-based",
+    "modern"
+  ],
+  [
     "point-and-click",
     "adventure",
     "puzzle-solving",
@@ -27122,6 +27429,47 @@
     "strategy"
   ],
   [
+    "action",
+    "hack-and-slash",
+    "combos",
+    "fast-paced",
+    "high-reflex",
+    "singleplayer",
+    "fantasy",
+    "magic",
+    "stylized",
+    "third-person"
+  ],
+  [
+    "survival-horror",
+    "horror",
+    "survival",
+    "action",
+    "first-person",
+    "open-world",
+    "exploration",
+    "crafting",
+    "zombies",
+    "parry",
+    "gear-progression",
+    "singleplayer",
+    "post-apocalyptic"
+  ],
+  [
+    "strategy",
+    "rts",
+    "grand-strategy",
+    "tactical",
+    "turn-based",
+    "real-time-combat",
+    "fantasy",
+    "war",
+    "magic",
+    "singleplayer",
+    "multiplayer",
+    "army-management"
+  ],
+  [
     "sandbox",
     "building",
     "crafting",
@@ -27168,6 +27516,18 @@
     "dystopian",
     "automation",
     "singleplayer"
+  ],
+  [
+    "racing",
+    "driving",
+    "simulation",
+    "sports",
+    "competitive",
+    "singleplayer",
+    "multiplayer",
+    "real-world",
+    "methodical",
+    "gear-progression"
   ],
   [
     "roguelite",
@@ -27351,7 +27711,6 @@
     "tactical",
     "rpg",
     "sci-fi",
-    "medieval",
     "resource-management",
     "party-based",
     "gear-progression",
@@ -27403,6 +27762,19 @@
     "team-based",
     "fast-paced",
     "real-time-combat"
+  ],
+  [
+    "strategy",
+    "grand-strategy",
+    "turn-based",
+    "tactical",
+    "army-management",
+    "resource-management",
+    "sandbox",
+    "historical",
+    "war",
+    "singleplayer",
+    "top-down"
   ],
   [
     "tactical",
@@ -27610,7 +27982,6 @@
     "team-based",
     "online-pvp",
     "sci-fi",
-    "medieval",
     "multiplayer"
   ],
   [
@@ -27910,7 +28281,6 @@
     "survival",
     "zombies",
     "action",
-    "medieval",
     "competitive",
     "third-person",
     "open-world",
@@ -28062,6 +28432,20 @@
     "dark"
   ],
   [
+    "visual-novel",
+    "narrative-driven",
+    "dialogue-heavy",
+    "mystery",
+    "detective",
+    "cinematic",
+    "singleplayer",
+    "point-and-click",
+    "adventure",
+    "puzzle-solving",
+    "philosophical",
+    "surreal"
+  ],
+  [
     "platformer",
     "puzzle-solving",
     "physics",
@@ -28081,6 +28465,36 @@
     "narrative-driven",
     "singleplayer",
     "stylized"
+  ],
+  [
+    "jrpg",
+    "rpg",
+    "party-based",
+    "real-time-combat",
+    "open-world",
+    "exploration",
+    "fantasy",
+    "sci-fi",
+    "narrative-driven",
+    "singleplayer",
+    "third-person",
+    "emotional",
+    "anime"
+  ],
+  [
+    "strategy",
+    "turn-based",
+    "tactical",
+    "team-based",
+    "mission-based",
+    "exploration",
+    "third-person",
+    "singleplayer",
+    "sci-fi",
+    "fantasy",
+    "funny",
+    "stylized",
+    "family-friendly"
   ],
   [
     "strategy",
@@ -28119,6 +28533,20 @@
     "modern",
     "multiplayer",
     "fast-paced"
+  ],
+  [
+    "platformer",
+    "action",
+    "exploration",
+    "level-based",
+    "singleplayer",
+    "third-person",
+    "family-friendly",
+    "fantasy",
+    "post-apocalyptic",
+    "puzzle-solving",
+    "cozy",
+    "funny"
   ],
   [
     "battle-royale",
@@ -28199,6 +28627,19 @@
     "third-person"
   ],
   [
+    "platformer",
+    "exploration",
+    "puzzle-solving",
+    "singleplayer",
+    "third-person",
+    "adventure",
+    "family-friendly",
+    "stylized",
+    "fantasy",
+    "cozy",
+    "casual"
+  ],
+  [
     "puzzle-solving",
     "platformer",
     "sideview",
@@ -28250,6 +28691,7 @@
     "loot-driven"
   ],
   [
+    "cozy",
     "farming-sim",
     "simulation",
     "sandbox",
@@ -28318,6 +28760,18 @@
     "military",
     "aliens",
     "linear"
+  ],
+  [
+    "platformer",
+    "action",
+    "open-world",
+    "exploration",
+    "fast-paced",
+    "third-person",
+    "singleplayer",
+    "sci-fi",
+    "fantasy",
+    "arcade"
   ],
   [
     "shooter",
@@ -28581,6 +29035,37 @@
     "singleplayer"
   ],
   [
+    "rpg",
+    "action",
+    "turn-based",
+    "open-world",
+    "exploration",
+    "singleplayer",
+    "fantasy",
+    "third-person",
+    "mission-based",
+    "adventure",
+    "stylized",
+    "family-friendly"
+  ],
+  [
+    "action",
+    "arpg",
+    "rpg",
+    "real-time-combat",
+    "hack-and-slash",
+    "precision-combat",
+    "challenging",
+    "fantasy",
+    "dark-fantasy",
+    "third-person",
+    "singleplayer",
+    "party-based",
+    "loot-driven",
+    "gear-progression",
+    "souls-like"
+  ],
+  [
     "simulation",
     "sandbox",
     "building",
@@ -28714,6 +29199,19 @@
     "local-multiplayer",
     "stylized",
     "retro"
+  ],
+  [
+    "racing",
+    "driving",
+    "sports",
+    "competitive",
+    "arcade",
+    "fast-paced",
+    "mission-based",
+    "singleplayer",
+    "multiplayer",
+    "cinematic",
+    "casual"
   ],
   [
     "platformer",
@@ -28851,7 +29349,6 @@
     "sci-fi",
     "futuristic",
     "aliens",
-    "medieval",
     "third-person"
   ],
   [
@@ -28875,6 +29372,49 @@
     "fantasy",
     "superhero",
     "singleplayer",
+    "narrative-driven"
+  ],
+  [
+    "singleplayer",
+    "narrative-driven",
+    "real-time-combat",
+    "adventure",
+    "exploration",
+    "funny",
+    "modern",
+    "action",
+    "buildcraft-heavy",
+    "organized-crime",
+    "crime",
+    "fighting",
+    "mission-based",
+    "third-person"
+  ],
+  [
+    "jrpg",
+    "rpg",
+    "turn-based",
+    "exploration",
+    "party-based",
+    "fantasy",
+    "magic",
+    "sideview",
+    "singleplayer",
+    "stylized",
+    "narrative-driven"
+  ],
+  [
+    "action",
+    "rpg",
+    "hack-and-slash",
+    "third-person",
+    "medieval",
+    "historical",
+    "samurai",
+    "real-world",
+    "choices-matter",
+    "singleplayer",
+    "real-time-combat",
     "narrative-driven"
   ],
   [
@@ -28913,6 +29453,20 @@
     "atmospheric",
     "dark",
     "linear"
+  ],
+  [
+    "fighting",
+    "action",
+    "competitive",
+    "arcade",
+    "singleplayer",
+    "multiplayer",
+    "online-pvp",
+    "character-customization",
+    "narrative-driven",
+    "combos",
+    "high-reflex",
+    "challenging"
   ],
   [
     "shooter",
@@ -29227,6 +29781,22 @@
     "modern",
     "singleplayer",
     "stylized"
+  ],
+  [
+    "srpg",
+    "rpg",
+    "strategy",
+    "tactical",
+    "turn-based",
+    "party-based",
+    "choices-matter",
+    "branching",
+    "military",
+    "top-down",
+    "singleplayer",
+    "narrative-driven",
+    "methodical",
+    "resource-management"
   ],
   [
     "rpg",
@@ -30117,6 +30687,7 @@
     "arcade"
   ],
   [
+    "funny",
     "party-game",
     "trading",
     "competitive",
@@ -30147,7 +30718,8 @@
     "building",
     "strategy",
     "party-game",
-    "singleplayer"
+    "singleplayer",
+    "funny"
   ],
   [
     "sports",
@@ -31724,7 +32296,6 @@
     "arpg",
     "rpg",
     "real-time-combat",
-    "battle-royale",
     "multiplayer",
     "online-pvp",
     "match-based",
@@ -31776,7 +32347,6 @@
     "shooter",
     "fps",
     "multiplayer",
-    "medieval",
     "action",
     "team-based",
     "gear-progression",
@@ -32239,7 +32809,8 @@
     "mission-based",
     "party-game",
     "competitive",
-    "arcade"
+    "arcade",
+    "funny"
   ],
   [
     "survival",
@@ -32679,6 +33250,7 @@
     "exploration"
   ],
   [
+    "cozy",
     "platformer",
     "exploration",
     "level-based",
@@ -33348,7 +33920,8 @@
     "multiplayer",
     "singleplayer",
     "cinematic",
-    "stylized"
+    "stylized",
+    "funny"
   ],
   [
     "strategy",
@@ -34024,7 +34597,8 @@
     "third-person",
     "family-friendly",
     "stylized",
-    "chill"
+    "chill",
+    "funny"
   ],
   [
     "horror",
@@ -34203,6 +34777,7 @@
     "singleplayer"
   ],
   [
+    "cozy",
     "puzzle",
     "singleplayer",
     "casual",
@@ -35436,5 +36011,245 @@
     "survival",
     "space",
     "tense"
+  ],
+  [
+    "multiplayer",
+    "shooter",
+    "fps",
+    "team-based",
+    "military",
+    "ww2",
+    "war",
+    "historical",
+    "online-pvp",
+    "tactical",
+    "real-time-combat",
+    "singleplayer"
+  ],
+  [
+    "arpg",
+    "rpg",
+    "action",
+    "real-time-combat",
+    "hack-and-slash",
+    "loot-driven",
+    "skill-tree",
+    "buildcraft-heavy",
+    "dungeon-crawler",
+    "grind-heavy",
+    "singleplayer",
+    "fantasy",
+    "dark-fantasy",
+    "top-down"
+  ],
+  [
+    "platformer",
+    "action",
+    "exploration",
+    "level-based",
+    "third-person",
+    "singleplayer",
+    "family-friendly",
+    "chill",
+    "stylized",
+    "casual"
+  ],
+  [
+    "shooter",
+    "fps",
+    "action",
+    "fast-paced",
+    "high-reflex",
+    "hack-and-slash",
+    "combos",
+    "fantasy",
+    "singleplayer",
+    "linear",
+    "arcade"
+  ],
+  [
+    "horror",
+    "third-person",
+    "survival",
+    "narrative-driven",
+    "exploration",
+    "singleplayer",
+    "choices-matter",
+    "mystery",
+    "lovecraftian",
+    "dark",
+    "atmospheric",
+    "action",
+    "tense"
+  ],
+  [
+    "rpg",
+    "jrpg",
+    "turn-based",
+    "party-based",
+    "choices-matter",
+    "narrative-driven",
+    "skill-tree",
+    "gear-progression",
+    "exploration",
+    "third-person",
+    "singleplayer",
+    "modern",
+    "funny",
+    "casual"
+  ],
+  [
+    "jrpg",
+    "rpg",
+    "party-based",
+    "real-time-combat",
+    "action",
+    "open-world",
+    "exploration",
+    "skill-tree",
+    "choices-matter",
+    "singleplayer",
+    "fantasy",
+    "sci-fi",
+    "narrative-driven"
+  ],
+  [
+    "action",
+    "shooter",
+    "third-person",
+    "tps",
+    "mission-based",
+    "buildcraft-heavy",
+    "gear-progression",
+    "fast-paced",
+    "high-reflex",
+    "challenging",
+    "sci-fi",
+    "precision-combat"
+  ],
+  [
+    "action",
+    "shooter",
+    "third-person",
+    "sci-fi",
+    "futuristic",
+    "mission-based",
+    "singleplayer",
+    "high-reflex",
+    "fast-paced"
+  ],
+  [
+    "action",
+    "shooter",
+    "third-person",
+    "fast-paced",
+    "mission-based",
+    "high-reflex",
+    "buildcraft-heavy",
+    "gear-progression",
+    "sci-fi",
+    "futuristic"
+  ],
+  [
+    "strategy",
+    "turn-based",
+    "grand-strategy",
+    "army-management",
+    "resource-management",
+    "building",
+    "tactical",
+    "medieval",
+    "historical",
+    "singleplayer",
+    "real-time-combat",
+    "methodical"
+  ],
+  [
+    "rts",
+    "strategy",
+    "real-time-combat",
+    "resource-management",
+    "army-management",
+    "mythology",
+    "fantasy",
+    "singleplayer",
+    "multiplayer",
+    "online-pvp"
+  ],
+  [
+    "roguelite",
+    "procedural",
+    "permadeath",
+    "turn-based",
+    "choices-matter",
+    "horror",
+    "narrative-driven",
+    "branching",
+    "lovecraftian",
+    "dark",
+    "singleplayer",
+    "top-down",
+    "pixel-art",
+    "rpg",
+    "deckbuilder",
+    "methodical",
+    "atmospheric",
+    "mystery"
+  ],
+  [
+    "fighting",
+    "action",
+    "combos",
+    "competitive",
+    "singleplayer",
+    "multiplayer",
+    "online-pvp",
+    "arcade",
+    "fantasy",
+    "dark",
+    "precision-combat",
+    "challenging",
+    "fast-paced",
+    "high-reflex"
+  ],
+  [
+    "simulation",
+    "sports",
+    "strategy",
+    "resource-management",
+    "tactical",
+    "team-based",
+    "singleplayer",
+    "real-world",
+    "economy",
+    "choices-matter",
+    "linear",
+    "methodical"
+  ],
+  [
+    "simulation",
+    "strategy",
+    "resource-management",
+    "racing",
+    "sports",
+    "driving",
+    "singleplayer",
+    "real-world",
+    "team-based",
+    "methodical"
+  ],
+  [
+    "puzzle-solving",
+    "exploration",
+    "adventure",
+    "singleplayer",
+    "sci-fi",
+    "mystery",
+    "atmospheric",
+    "surreal",
+    "puzzle",
+    "third-person",
+    "stylized",
+    "minimalist"
   ]
 ]
