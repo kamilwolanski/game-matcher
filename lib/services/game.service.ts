@@ -46,6 +46,17 @@ export async function getGameByRawgId(rawgId: number) {
   return toGameDto(game);
 }
 
+export async function getGameBySlug(slug: string) {
+  const game = await prisma.game.findUnique({
+    where: { slug },
+    include: gameWithTagsInclude,
+  });
+
+  if (!game) return null;
+
+  return toGameDto(game);
+}
+
 
 export const getBaseTags = unstable_cache(
   async (): Promise<ShortTag[]> => {
