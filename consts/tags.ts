@@ -990,6 +990,12 @@ const BASE_TAGS: BaseTag[] = [
     name: "Surreal",
     section: "Style & Theme",
   },
+  {
+    slug: "ancient",
+    category: "theme",
+    name: "Ancient",
+    section: "Style & Theme",
+  },
 
   // =========================================================
   // PERSPECTIVE & MODE
