@@ -10,7 +10,7 @@ import NavLink from "./NavLink";
 
 const links = [
   { href: "/", label: "Discover", exact: true },
-  { href: "/games-like", label: "Games Like" },
+  { href: "/games-like/gothic", label: "Games Like" },
 ];
 
 export default function Navbar() {

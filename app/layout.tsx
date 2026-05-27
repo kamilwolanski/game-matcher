@@ -1,8 +1,12 @@
 import type { Metadata } from "next";
-import { Analytics } from "@vercel/analytics/next"
+import Link from "next/link";
+import Image from "next/image";
+import { Analytics } from "@vercel/analytics/next";
 import { Inter, Geist } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
+import { Orbit } from "lucide-react";
+import Navbar from "./components/Nav/Navbar";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -79,10 +83,7 @@ export default function RootLayout({
       )}
     >
       <body className="min-h-full">
-        <div aria-hidden className="app-background pointer-events-none fixed inset-0 z-0" />
-        <div className="relative z-10 max-w-7xl mx-auto px-6 xl:px-0">
-          {children}
-        </div>
+        {children}
         <Analytics />
       </body>
     </html>

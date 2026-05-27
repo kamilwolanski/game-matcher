@@ -7,6 +7,7 @@ import type { ShortTag } from "@/lib/dto/tag.dto";
 import embeddings from "@/data/embeddings.json";
 import prisma from "@/lib/prisma";
 import { CATEGORY_WEIGHTS, TAGS_AS_OBJECT } from "@/consts/tags";
+import { getGameBySlug } from "./game.service";
 
 const SELECTED_GAME_TAG_WEIGHT = 1;
 const ACTIVE_TAG_WEIGHT = 2;
@@ -68,6 +69,14 @@ const TAG_CONFLICTS: Record<string, readonly string[]> = {
   medieval: ["sci-fi", "futuristic"],
   "sci-fi": ["medieval"],
   futuristic: ["medieval"],
+};
+
+const DEVELOPER_AFFINITY_BONUSES: Record<string, number> = {
+  "piranha-bytes": 0.24,
+  fromsoftware: 0.22,
+  "larian-studios": 0.18,
+  "bethesda-game-studios": 0.15,
+  "cd-projekt-red": 0.12,
 };
 
 const TAG_RELATIONS: Record<string, Record<string, number>> = {
@@ -415,7 +424,10 @@ function applyAffinityBonuses(
   }
 
   if (similarity > 0.45 && hasSameDeveloper) {
-    similarity += (1 - similarity) * 0.08;
+    const developerBonus =
+      DEVELOPER_AFFINITY_BONUSES[candidateGame.developerSlug!] ?? 0.08;
+
+    similarity += (1 - similarity) * developerBonus;
   }
 
   return clampSimilarity(similarity);
@@ -994,13 +1006,24 @@ function getSharedTraits(matchedSignals: UserTagSignal[], totalGames: number) {
     .map((signal) => signal.tag);
 }
 
-async function getCandidateGames(tagSlugs: string[], selectedGames: GameDto[]) {
+async function getCandidateGames(
+  tagSlugs: string[],
+  selectedGames: GameDto[],
+  forGames?: string[],
+) {
   const excludedSlugs = selectedGames.map((game) => game.slug);
-  const baseWhere = {
-    slug: {
-      notIn: excludedSlugs,
-    },
-  };
+  const baseWhere = forGames
+    ? {
+        slug: {
+          in: forGames,
+          notIn: excludedSlugs,
+        },
+      }
+    : {
+        slug: {
+          notIn: excludedSlugs,
+        },
+      };
   const start = performance.now();
   const tagMatchGames =
     tagSlugs.length > 0
@@ -1053,9 +1076,52 @@ function toGameMatchDto(game: ScoredGameMatchResult): GameMatchDto {
   };
 }
 
+export async function getMatchingGamesForGame(
+  gameSlug: string,
+  forGames?: string[],
+) {
+  const game = await getGameBySlug(gameSlug);
+
+  if (!game) {
+    throw new Error("Game not found");
+  }
+
+  const results = await findMatchingGames([game], [], forGames);
+
+  return results;
+}
+
+export async function getGameMatchGroupsForGame<
+  const TGroups extends Record<string, readonly string[]>,
+>(gameSlug: string, groups: TGroups) {
+  const game = await getGameBySlug(gameSlug);
+
+  if (!game) {
+    return null;
+  }
+
+  const entries = Object.entries(groups) as [
+    keyof TGroups,
+    readonly string[],
+  ][];
+  const results = await Promise.all(
+    entries.map(async ([key, slugs]) => {
+      const games = await findMatchingGames([game], [], [...slugs]);
+      return [key, games] as const;
+    }),
+  );
+
+  return {
+    game,
+    groups: Object.fromEntries(results) as {
+      [K in keyof TGroups]: GameMatchDto[];
+    },
+  };
+}
 export async function findMatchingGames(
   selectedGames: GameDto[],
   activeTags: ShortTag[],
+  forGames?: string[],
 ) {
   const tagSlugSet = new Set<string>([
     ...selectedGames.flatMap((game) => game.tags).map((tag) => tag.slug),
@@ -1063,7 +1129,7 @@ export async function findMatchingGames(
   ]);
   const tagSlugs = Array.from(tagSlugSet);
   const [games, totalGames] = await Promise.all([
-    getCandidateGames(tagSlugs, selectedGames),
+    getCandidateGames(tagSlugs, selectedGames, forGames),
     prisma.game.count(),
   ]);
   const tasteProfiles = getTasteProfiles(selectedGames, totalGames);

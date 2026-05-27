@@ -13,6 +13,8 @@ type Props = {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   game: GameMatchDto | null;
+  showSimilarity?: boolean;
+  showWhyMatch?: boolean;
 };
 
 export const PLATFORM_SHORT_NAMES: Record<string, string> = {
@@ -86,7 +88,13 @@ function compactDescription(description: string | null): string {
   return firstParagraph;
 }
 
-export const GameDetailsModal = ({ open, onOpenChange, game }: Props) => {
+export const GameDetailsModal = ({
+  open,
+  onOpenChange,
+  game,
+  showSimilarity = true,
+  showWhyMatch = true,
+}: Props) => {
   if (!game) return null;
 
   const releasedYear = game.released
@@ -164,14 +172,16 @@ export const GameDetailsModal = ({ open, onOpenChange, game }: Props) => {
                   </p>
                 )}
               </div>
-              <div className="flex items-center gap-2 px-3.5 py-2 rounded-full glass">
-                <span className="gradient-text text-xl font-bold leading-none">
-                  {(game.similarity * 100).toFixed()}%
-                </span>
-                <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                  match
-                </span>
-              </div>
+              {showSimilarity && (
+                <div className="flex items-center gap-2 px-3.5 py-2 rounded-full glass">
+                  <span className="gradient-text text-xl font-bold leading-none">
+                    {(game.similarity * 100).toFixed()}%
+                  </span>
+                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                    match
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -181,11 +191,13 @@ export const GameDetailsModal = ({ open, onOpenChange, game }: Props) => {
             {description}
           </p>
 
-          {game.matchReason.tags.length > 0 && (
+          {showWhyMatch && game.matchReason.tags.length > 0 && (
             <div className="rounded-2xl border border-secondary/40 bg-linear-to-br from-primary/10 via-card to-secondary/10 p-5 shadow-[0_8px_30px_-12px_color-mix(in_srgb,var(--color-primary)_35%,transparent)]">
               <div className="mb-3 flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-secondary" />
-                <h3 className="text-sm md:text-base font-semibold">Why this game?</h3>
+                <h3 className="text-sm md:text-base font-semibold">
+                  Why this game?
+                </h3>
               </div>
               <p className="mb-4 text-xs md:text-sm text-muted-foreground">
                 {game.matchReason.title}
