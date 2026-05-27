@@ -48,7 +48,7 @@ export function TopMatchesCarousel({ baseGameName, games }: Props) {
               {games.map((game, index) => (
                 <CarouselItem
                   key={game.id}
-                  className="basis-[72vw] pl-4 sm:basis-65 md:pl-5"
+                  className="basis-1/2 pl-4 sm:basis-65 md:pl-5"
                 >
                   <GameCard
                     game={game}
@@ -63,8 +63,8 @@ export function TopMatchesCarousel({ baseGameName, games }: Props) {
                 </CarouselItem>
               ))}
             </CarouselContent>
-            <CarouselPrevious className="left-2 hidden h-10 w-10 border-border/60 bg-background/80 backdrop-blur-md hover:bg-background md:inline-flex" />
-            <CarouselNext className="right-2 hidden h-10 w-10 border-border/60 bg-background/80 backdrop-blur-md hover:bg-background md:inline-flex" />
+            <CarouselPrevious className="left-2 h-10 w-10 border-border/60 bg-background/80 backdrop-blur-md hover:bg-background md:inline-flex" />
+            <CarouselNext className="right-2 h-10 w-10 border-border/60 bg-background/80 backdrop-blur-md hover:bg-background md:inline-flex" />
           </Carousel>
         </div>
       </section>

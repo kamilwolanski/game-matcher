@@ -26,7 +26,7 @@ export function MatchCategoryColumns({ columns }: Props) {
         {columns.map((col) => (
           <div
             key={col.title}
-            className="md:mx-0 rounded-2xl border border-border/50 bg-card/40 p-4 backdrop-blur-sm"
+            className="min-w-0 md:mx-0 rounded-2xl border border-border/50 bg-card/40 p-4 backdrop-blur-sm"
           >
             <div className="mb-4 flex items-center justify-between gap-3">
               <h3 className="text-sm font-bold leading-tight md:text-base">
@@ -35,13 +35,13 @@ export function MatchCategoryColumns({ columns }: Props) {
             </div>
             <Carousel
               opts={{ align: "start", dragFree: true }}
-              className="relative"
+              className="relative overflow-hidden"
             >
-              <CarouselContent className="-ml-2.5">
+              <CarouselContent>
                 {col.games.map((game, index) => (
                   <CarouselItem
                     key={game.id}
-                    className="basis-1/2 pl-2.5 sm:basis-1/3 lg:basis-1/2 xl:basis-1/3"
+                    className="basis-1/2 pl-4 sm:basis-1/3 lg:basis-1/2 xl:basis-1/3"
                   >
                     <GameCard
                       game={game}

@@ -29,7 +29,7 @@ export default function RootLayout({
         <main className="grow">
           <section className="h-full w-full ">{children}</section>
         </main>
-        <footer className="border-t border-border/50 mt-4 md:mt-8  ">
+        <footer className="border-t border-border/50 mt-4 md:mt-8 px-6 ">
           <div className="container max-w-7xl mx-auto py-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4 text-xs text-muted-foreground">
             <div className="space-y-0.5">
               <div className="font-semibold text-foreground/90 tracking-tight">
