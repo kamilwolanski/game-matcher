@@ -428,7 +428,7 @@ export function shouldHideGame(
     return true;
   }
 
-  if (game.added < 10) {
+  if (game.added < 5) {
     return true;
   }
 
