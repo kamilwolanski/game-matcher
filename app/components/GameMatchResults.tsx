@@ -19,6 +19,7 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { trackEvent } from "@/lib/analytics";
 
 const SKELETON_COUNT = 8;
 
@@ -156,6 +157,7 @@ export function GameMatchResults({
   ]);
 
   const handleSortChange = (nextSort: SortMode) => {
+    trackEvent("results_sorted", { sort: nextSort });
     setSort(nextSort);
     setSortOpen(false);
   };
@@ -290,6 +292,8 @@ export function GameMatchResults({
                 <MatchGrid
                   games={sort === "match" ? visibleStrongGames : sortedGames}
                   onGameClick={onGameClick}
+                  sort={sort}
+                  section={sort === "match" ? "strong" : "all"}
                 />
               </div>
             </div>
@@ -342,6 +346,8 @@ export function GameMatchResults({
                       <MatchGrid
                         games={visibleBroaderGames}
                         onGameClick={onGameClick}
+                        sort={sort}
+                        section="broader"
                       />
                     </div>
 
@@ -380,9 +386,11 @@ function MatchSkeleton() {
 type MatchGridProps = {
   games: GameMatchDto[];
   onGameClick: (game: GameMatchDto) => void;
+  sort: SortMode;
+  section: "strong" | "broader" | "all";
 };
 
-function MatchGrid({ games, onGameClick }: MatchGridProps) {
+function MatchGrid({ games, onGameClick, sort, section }: MatchGridProps) {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
       {games.map((game, index) => (
@@ -390,7 +398,17 @@ function MatchGrid({ games, onGameClick }: MatchGridProps) {
           key={game.id}
           game={game}
           index={index % PAGE_SIZE}
-          onClick={() => onGameClick(game)}
+          onClick={() => {
+            trackEvent("recommendation_clicked", {
+              game_id: game.id,
+              game_name: game.name,
+              position: index + 1,
+              similarity: game.similarity,
+              sort,
+              section,
+            });
+            onGameClick(game);
+          }}
         />
       ))}
     </div>

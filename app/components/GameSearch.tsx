@@ -9,6 +9,7 @@ import Image from "next/image";
 import { GameState } from "../hooks/useGameSelection/useGameSelection.types";
 import { MAX_GAMES } from "../hooks/useGameSelection/useGameSelection";
 import { getCloudinaryImage } from "@/lib/cloudinary";
+import { trackEvent } from "@/lib/analytics";
 
 type Props = {
   pickedGames: GameState[];
@@ -59,6 +60,20 @@ export const GameSearch = ({
   const [hasSearched, setHasSearched] = useState(false);
   const [results, setResults] = useState<SearchGameResult[]>([]);
   const debouncedQuery = useDebounce(query, 300);
+  const searchDuration = useRef(0);
+
+  useEffect(() => {
+    if (!query.trim() || query !== debouncedQuery || isSearching || !hasSearched) return;
+    const timer = setTimeout(() => {
+      if (searchDuration.current < 0) return;
+      trackEvent("search_completed", {
+        query: query.trim().slice(0, 200),
+        result_count: results.length,
+        duration_ms: searchDuration.current,
+      });
+    }, 1200);
+    return () => clearTimeout(timer);
+  }, [query, debouncedQuery, isSearching, hasSearched, results]);
 
   useEffect(() => {
     const trimmedQuery = debouncedQuery.trim();
@@ -73,6 +88,8 @@ export const GameSearch = ({
     const controller = new AbortController();
 
     const search = async () => {
+      const startedAt = performance.now();
+      searchDuration.current = -1;
       try {
         setIsSearching(true);
         setHasSearched(false);
@@ -91,12 +108,19 @@ export const GameSearch = ({
           results?: SearchGameResult[];
         };
 
+        if (controller.signal.aborted) return;
+        searchDuration.current = Math.round(performance.now() - startedAt);
         setResults(data.results ?? []);
       } catch (err) {
         if (err instanceof DOMException && err.name === "AbortError") {
           return;
         }
 
+        if (controller.signal.aborted) return;
+        trackEvent("search_failed", {
+          query: trimmedQuery.slice(0, 200),
+          duration_ms: Math.round(performance.now() - startedAt),
+        });
         console.error(err);
         setResults([]);
       } finally {
@@ -212,6 +236,12 @@ export const GameSearch = ({
                     <li key={g.rawgId}>
                       <button
                         onClick={() => {
+                          trackEvent("game_selected", {
+                            game_id: g.rawgId,
+                            game_name: g.name,
+                            query: query.trim().slice(0, 200),
+                            position: results.indexOf(g) + 1,
+                          });
                           onAdd(g);
                           setQuery("");
                           setResults([]);

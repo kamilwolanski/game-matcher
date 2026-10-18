@@ -8,6 +8,7 @@ import {
   type BaseTagSection,
 } from "@/consts/tags";
 import { GameState, TagWithCount } from "./useGameSelection.types";
+import { trackEvent } from "@/lib/analytics";
 
 function getSuggestedTags(
   selectedGames: GameDto[],
@@ -150,6 +151,7 @@ function useGameSelection(availableTags: ShortTag[]): GameSelectionState {
           return newState;
         });
       } catch (error) {
+        trackEvent("game_analysis_failed", { game_id: game.rawgId, game_name: game.name });
         console.error("Error selecting game:", error);
         setPickedGames((prev) => {
           const filtered = prev.filter((g) => g.rawgId !== game.rawgId);
@@ -169,6 +171,7 @@ function useGameSelection(availableTags: ShortTag[]): GameSelectionState {
   };
 
   const removeGame = (id: number) => {
+    trackEvent("game_removed", { game_id: id });
     setPickedGames((prev) => {
       const nextPickedGames = prev.filter((g) => g.rawgId !== id);
       const nextReadyGames = nextPickedGames
