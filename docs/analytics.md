@@ -8,7 +8,8 @@ does not send events. Existing Vercel Analytics remains enabled.
 
 Page views include client-side navigation. Autocapture and session replay are
 disabled. Custom properties contain game searches (trimmed, up to 200 characters),
-game IDs/names, selected tags, result counts, positions, and durations. No user
+game IDs/names, selected tags, result counts, positions, durations, feedback
+ratings/reasons, and explicitly submitted feedback comments. No user
 identification is performed; the SDK uses its anonymous browser identity.
 
 | Event | When / useful properties |
@@ -23,6 +24,37 @@ identification is performed; the SDK uses its anonymous browser identity.
 | `matching_failed` | Matching request fails; same inputs, duration_ms. |
 | `recommendation_clicked` | Matcher result opened by mouse or keyboard; game_id, game_name, similarity, position within section (1-based), section, sort. |
 | `results_sorted` | Sort selected; sort. |
+| `match_feedback_shown` | At least half of the inline feedback panel enters the viewport in a visible tab, or a rating is clicked; once per completed matching request. |
+| `match_feedback_rated` | Immediate Yes / Not sure / No answer; rating (`yes`, `unsure`, `no`). One answer per completed request. |
+| `match_feedback_details_submitted` | Optional follow-up explicitly submitted after Not sure / No; rating, reason, comment (trimmed, max 500 characters). Skipping does not discard the initial rating. |
+
+Matching events include a `match_id`. All feedback events include this same ID,
+the original `game_names`, `game_count`, `tags`, `result_count`, and
+`strong_result_count`. These are snapshots from the completed request, so editing
+the inputs afterwards does not change the feedback context. New successful
+requests allow a new rating; sorting and loading more results preserve the rating.
+Feedback is also available for completed requests with no results. No database
+or additional API is used; feedback follows the existing PostHog production-only
+configuration. Comments are sent only on explicit submission, never while typing.
+
+## Feedback dashboard
+
+- Rating distribution: Trends, `match_feedback_rated`, Total count, breakdown by
+  `rating`, total-value bar chart. This measures answers, not all visitors.
+- Response rate: a funnel from `match_feedback_shown` to `match_feedback_rated`.
+  Match `match_id` across steps to keep each response tied to its exposure.
+- Causes of dissatisfaction: `match_feedback_details_submitted`, breakdown by
+  `reason`. Filter out empty reasons (comment-only submissions).
+- Written feedback: inspect `match_feedback_details_submitted` events and their
+  `comment`, alongside `game_names` and `tags`.
+
+For manual verification, complete a match, scroll to the panel after the first
+five cards, and rate it. Check that the exposure fires once, the rating fires
+immediately, and details fire only after Send feedback. Sort or load more results:
+the answer must remain saved without new exposure/rating events. Change the input
+tags without matching again: feedback must still carry the old input snapshot.
+Run matching again to see a fresh panel with a new `match_id`. Also check the
+no-results state, Skip, whitespace-only comments, and the 500-character limit.
 
 ## Verify after deployment
 

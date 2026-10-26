@@ -2,7 +2,7 @@
 
 import { type GameMatchDto } from "@/lib/dto/game-match.dto";
 import { GameCard, GameCardSkeleton } from "./GameCard";
-import { RefObject, useEffect, useMemo, useState } from "react";
+import { RefObject, useEffect, useMemo, useState, type ReactNode } from "react";
 import {
   CalendarClock,
   CalendarPlus,
@@ -20,10 +20,13 @@ import {
 } from "./ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { trackEvent } from "@/lib/analytics";
+import { MatchFeedback } from "./MatchFeedback";
+import { type MatchFeedbackContext } from "@/lib/match-feedback";
 
 const SKELETON_COUNT = 8;
 
 type Props = {
+  feedbackContext: MatchFeedbackContext | null;
   matchedGames: GameMatchDto[];
   isMatchingPending: boolean;
   resultsRef: RefObject<HTMLDivElement | null>;
@@ -68,6 +71,7 @@ const SORT_OPTIONS: {
 ];
 
 export function GameMatchResults({
+  feedbackContext,
   matchedGames,
   isMatchingPending,
   resultsRef,
@@ -162,7 +166,23 @@ export function GameMatchResults({
     setSortOpen(false);
   };
 
-  if (!isMatchingPending && matchedGames.length === 0) return null;
+  if (!isMatchingPending && matchedGames.length === 0 && !feedbackContext) return null;
+
+  const feedback = feedbackContext ? (
+    <MatchFeedback key={feedbackContext.match_id} context={feedbackContext} />
+  ) : null;
+
+  if (!isMatchingPending && matchedGames.length === 0) {
+    return (
+      <section ref={resultsRef} className="mt-10 space-y-5 pb-32 md:mt-0">
+        <div className="rounded-2xl border border-border bg-card p-6">
+          <h2 className="text-xl font-semibold">No matches this time</h2>
+          <p className="mt-2 text-sm text-muted-foreground">Try fewer tags or a different combination of games.</p>
+        </div>
+        {feedback}
+      </section>
+    );
+  }
 
   return (
     <section className="pb-32 scroll-mt-8 mt-10 md:mt-0">
@@ -290,6 +310,7 @@ export function GameMatchResults({
                   </DropdownMenu>
                 </div>
                 <MatchGrid
+                  feedback={feedback}
                   games={sort === "match" ? visibleStrongGames : sortedGames}
                   onGameClick={onGameClick}
                   sort={sort}
@@ -384,16 +405,17 @@ function MatchSkeleton() {
 }
 
 type MatchGridProps = {
+  feedback?: ReactNode;
   games: GameMatchDto[];
   onGameClick: (game: GameMatchDto) => void;
   sort: SortMode;
   section: "strong" | "broader" | "all";
 };
 
-function MatchGrid({ games, onGameClick, sort, section }: MatchGridProps) {
+function MatchGrid({ games, onGameClick, sort, section, feedback }: MatchGridProps) {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
-      {games.map((game, index) => (
+      {games.flatMap((game, index) => [
         <GameCard
           key={game.id}
           game={game}
@@ -409,8 +431,10 @@ function MatchGrid({ games, onGameClick, sort, section }: MatchGridProps) {
             });
             onGameClick(game);
           }}
-        />
-      ))}
+        />,
+        index === Math.min(4, games.length - 1) ? feedback : null,
+      ])}
+      {games.length === 0 && feedback}
     </div>
   );
 }

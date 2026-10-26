@@ -11,6 +11,9 @@ type AnalyticsEvent =
   | "matching_started"
   | "matching_completed"
   | "matching_failed"
+  | "match_feedback_shown"
+  | "match_feedback_rated"
+  | "match_feedback_details_submitted"
   | "recommendation_clicked"
   | "results_sorted";
 

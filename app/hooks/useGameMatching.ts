@@ -5,9 +5,11 @@ import { type GameMatchDto } from "@/lib/dto/game-match.dto";
 import { type ShortTag } from "@/lib/dto/tag.dto";
 import { useState } from "react";
 import { trackEvent } from "@/lib/analytics";
+import { type MatchFeedbackContext } from "@/lib/match-feedback";
 
 export interface GameMatchingState {
   matchedGames: GameMatchDto[];
+  feedbackContext: MatchFeedbackContext | null;
   isMatchingPending: boolean;
   resultsRef: RefObject<HTMLDivElement | null>;
   findMatches: () => void;
@@ -18,11 +20,12 @@ export function useGameMatching(
   activeTags: ShortTag[],
 ): GameMatchingState {
   const [matchedGames, setMatchedGames] = useState<GameMatchDto[]>([]);
+  const [feedbackContext, setFeedbackContext] = useState<MatchFeedbackContext | null>(null);
   const [isMatchingPending, startMatchTransition] = useTransition();
   const resultsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!isMatchingPending && matchedGames.length > 0 && resultsRef.current) {
+    if (!isMatchingPending && feedbackContext && resultsRef.current) {
       const top =
         resultsRef.current.getBoundingClientRect().top +
         window.scrollY -
@@ -33,11 +36,13 @@ export function useGameMatching(
         behavior: "smooth",
       });
     }
-  }, [isMatchingPending, matchedGames.length]);
+  }, [isMatchingPending, matchedGames.length, feedbackContext]);
 
   const findMatches = () => {
+    setFeedbackContext(null);
     const startedAt = performance.now();
     const properties = {
+      match_id: crypto.randomUUID(),
       game_names: selectedGames.map((game) => game.name),
       game_count: selectedGames.length,
       tags: activeTags.map((tag) => tag.slug),
@@ -47,10 +52,14 @@ export function useGameMatching(
       try {
         const result = await findGames(selectedGames, activeTags);
         setMatchedGames(result);
-        trackEvent("matching_completed", {
+        const context = {
           ...properties,
           result_count: result.length,
           strong_result_count: result.filter((game) => game.similarity >= 0.5).length,
+        };
+        setFeedbackContext(context);
+        trackEvent("matching_completed", {
+          ...context,
           duration_ms: Math.round(performance.now() - startedAt),
         });
       } catch (err) {
@@ -65,6 +74,7 @@ export function useGameMatching(
 
   return {
     matchedGames,
+    feedbackContext,
     isMatchingPending,
     resultsRef,
     findMatches,

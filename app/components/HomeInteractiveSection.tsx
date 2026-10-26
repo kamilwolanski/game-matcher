@@ -36,7 +36,7 @@ export function HomeInteractiveSection({ availableTags, isMobile }: Props) {
   const pickedReadyGames = pickedGames
     .filter((pg) => pg.status === "ready")
     .map((g) => g.data);
-  const { matchedGames, isMatchingPending, resultsRef, findMatches } =
+  const { matchedGames, feedbackContext, isMatchingPending, resultsRef, findMatches } =
     useGameMatching(pickedReadyGames, activeTags);
 
   const [modal, setModal] = useState<{
@@ -86,6 +86,7 @@ export function HomeInteractiveSection({ availableTags, isMobile }: Props) {
         />
       </section>
       <GameMatchResults
+        feedbackContext={feedbackContext}
         matchedGames={matchedGames}
         isMatchingPending={isMatchingPending}
         resultsRef={resultsRef}
